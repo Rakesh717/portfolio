@@ -170,6 +170,24 @@ export const quips: Record<string, string[]> = {
   night: ["zzz… dreaming of grass…", "Wake me if you send an email."],
 };
 
+/**
+ * What Yakku says on the guided tour, stop by stop, in order. On phones,
+ * stops wider than the screen are read a page at a time and these lines
+ * are spread across the pages (except Field Notes: one stop, halfway along).
+ */
+export const tour: Record<string, string[]> = {
+  basecamp: ["Namaste! I'm Yakku. I'll walk you up Rakesh's mountain.", "He builds AI native products, from Kathmandu. Let's climb!"],
+  trailhead: ["The trailhead board: who he is and how he works.", "TypeScript, React, Hono, Laravel, Postgres. And AI, every day."],
+  climb: ["Camp I, 2019. Backend APIs for enterprise clients in Italy.", "One team, split between Milan and Kathmandu. 10+ apps shipped."],
+  "camp-2": ["Camp II: Feedbucket, a feedback tool for 500+ web agencies.", "He built a dozen two-way integrations. Jira, Asana, Linear…"],
+  "camp-3": ["Camp III: an AI equity research platform.", "Thousands of SEC filings. Every AI answer cites its source."],
+  "camp-4": ["High Camp: CTO at Binary Digits since 2025.", "Six engineers, daily releases, 20+ projects shipped."],
+  hikers: ["The trail register. People he's worked with left notes.", "They shuffle on their own. Take your time."],
+  notes: ["Field notes: things he's written along the way.", "Tap any note to read the whole thing."],
+  summit: ["8,848 m. The summit!", "Want to build something together? His email's right here."],
+  night: ["That's the whole trek. Thanks for walking with me.", "zzz…"],
+};
+
 /** Random chatter when you poke the yak */
 export const pokes = [
   "Mehhh-velous!",

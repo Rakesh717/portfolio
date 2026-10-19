@@ -131,6 +131,14 @@ const ink = "#40302A";
     <span>say hi</span>
   </a>
 
+  <button class="hud-tour" id="hud-tour" data-state="idle" aria-pressed="false" aria-label="Take the guided tour" title="Guided tour (P)" aria-keyshortcuts="P">
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path class="tour-play" d="M4 2.5 L 15 9 L 4 15.5 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.2" stroke-linejoin="round"></path>
+      <path class="tour-pause" d="M5 3 V 15 M13 3 V 15" stroke={ink} stroke-width="3.4" stroke-linecap="round"></path>
+    </svg>
+    <span class="hud-tour-label" id="hud-tour-label">take the tour</span>
+  </button>
+
   <nav class="hud-map" aria-label="Trail map">
     <svg class="hud-map-line" id="hud-map-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
     <ol class="hud-map-stops">

@@ -7,7 +7,7 @@
  * snow) slides past in parallax, the sky moves from morning to night,
  * and the weather follows the biome.
  */
-import { pokes, quips, type Biome, type Stop as StopData } from "../data/content";
+import { pokes, quips, tour as tourLines, type Biome, type Stop as StopData } from "../data/content";
 import { createSound, type Surface } from "./sound";
 
 const root = document.documentElement;
@@ -907,15 +907,16 @@ function boot() {
     soundBtn.setAttribute("aria-pressed", String(sound.on));
     soundBtn.classList.toggle("is-on", sound.on);
   };
-  const isMuteKey = (e: KeyboardEvent) => {
+  const isShortcut = (e: KeyboardEvent, key: string) => {
     const t = e.target as HTMLElement;
     return (
-      (e.key === "m" || e.key === "M") &&
+      e.key.toLowerCase() === key &&
       !(e.metaKey || e.ctrlKey || e.altKey) &&
       !/INPUT|TEXTAREA|SELECT/.test(t.tagName) &&
       !t.isContentEditable
     );
   };
+  const isMuteKey = (e: KeyboardEvent) => isShortcut(e, "m");
   // remember the choice, but browsers only allow audio after a gesture
   const wake = (e: Event) => {
     // a press on the button itself is handled by its click, or it'd turn on then straight off
@@ -989,8 +990,10 @@ function boot() {
 
   /* ---------------- travel ---------------- */
 
-  let tween: { from: number; to: number; t0: number; dur: number } | null = null;
+  let tween: { from: number; to: number; t0: number; dur: number; ease?: (t: number) => number } | null = null;
   const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  // gentler peak (about 1.6x the average speed, vs 3x) so a long tween stays a walk, not a run
+  const easeSine = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2;
 
   function camFor(i: number) {
     return clamp(L[i].x0, 0, maxCam);
@@ -1020,6 +1023,7 @@ function boot() {
       const i = indexOf(el.dataset.go!);
       if (i < 0) return;
       e.preventDefault();
+      pauseTour();
       travelTo(i);
       history.replaceState(null, "", `#${el.dataset.go}`);
     })
@@ -1108,6 +1112,187 @@ function boot() {
     }
   });
 
+  /* ---------------- guided tour: Yakku walks you up and talks you through it ---------------- */
+
+  const tourBtn = $<HTMLButtonElement>("#hud-tour");
+  const tourLabel = $("#hud-tour-label");
+  type Tour = {
+    i: number; // stop
+    k: number; // page within the stop (phones read wide stops a screen at a time)
+    phase: "walk" | "read";
+    to: number; // camera position for this page
+    t: number; // ms spent reading so far
+    dwell: number; // ms to stay on this page
+    cues: { at: number; text: string; ms: number }[];
+  };
+  let tour: Tour | null = null;
+  let tourPaused = false;
+  let tourDone = false;
+  let tourP = -1;
+  // some stops need longer than their text suggests: the notes shuffle, the summit pulls back
+  const TOUR_MIN: Record<string, number> = { hikers: 9000, summit: 9500 };
+
+  // the notes hang on one long line: stop once, halfway along, rather than page through
+  const TOUR_CENTER = new Set(["notes"]);
+
+  function tourPages(i: number) {
+    const a = camFor(i);
+    const b = clamp(L[i].x0 + L[i].w - VW, a, maxCam);
+    if (TOUR_CENTER.has(L[i].d.id)) return [(a + b) / 2];
+    const n = b - a > VW * 0.15 ? Math.ceil((b - a) / VW) + 1 : 1;
+    return Array.from({ length: n }, (_, k) => (n === 1 ? a : lerp(a, b, k / (n - 1))));
+  }
+
+  /** words of the stop's copy currently on screen, to size the reading pause */
+  function wordsInView(el: HTMLElement) {
+    let n = 0;
+    const walker = document.createTreeWalker(el.querySelector(".content") ?? el, NodeFilter.SHOW_TEXT);
+    const range = document.createRange();
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node.textContent!.trim();
+      if (!text) continue;
+      range.selectNodeContents(node);
+      const r = range.getBoundingClientRect();
+      if (r.width && r.right > VW * 0.04 && r.left < VW * 0.96 && r.bottom > 0 && r.top < VH) n += text.split(/\s+/).length;
+    }
+    return n;
+  }
+
+  function tourWalk(t: Tour) {
+    const pages = tourPages(t.i);
+    t.k = Math.min(t.k, pages.length - 1);
+    t.to = pages[t.k];
+    t.phase = "walk";
+    const from = window.scrollY;
+    const d = Math.abs(t.to - from);
+    if (d < 3) return tourRead(t);
+    // forward is a stroll; heading back to the start is a quick hop
+    tween =
+      t.to > from
+        ? { from, to: t.to, t0: performance.now(), dur: clamp((d / (mobile ? 680 : 1050)) * 1000, 800, 9000), ease: easeSine }
+        : { from, to: t.to, t0: performance.now(), dur: clamp(d * 0.28, 500, 2600) };
+  }
+
+  function tourRead(t: Tour) {
+    const s = L[t.i];
+    const n = tourPages(t.i).length;
+    const all = tourLines[s.d.id] ?? [];
+    const lines = all.filter((_, j) => Math.min(n - 1, Math.floor((j * n) / all.length)) === t.k);
+    let at = 200; // let him settle before he talks
+    t.cues = lines.map((text) => {
+      const ms = clamp(1100 + text.length * 42, 2400, 5200);
+      const cue = { at, text, ms };
+      at += ms + 120;
+      return cue;
+    });
+    // skim pace (~450 wpm): the tour is a walkthrough, and they can pause to read closer
+    const read = clamp(1000 + wordsInView(s.el) * 130, 2800, 11000);
+    t.dwell = Math.max(read, at + 200, t.k === n - 1 ? TOUR_MIN[s.d.id] ?? 0 : 0);
+    t.phase = "read";
+    t.t = 0;
+  }
+
+  function tourTick(dt: number) {
+    if (!tour || tourPaused) return;
+    const t = tour;
+    if (t.phase === "walk") {
+      if (tween) return;
+      // something cut the walk short (a stray key, a tap): carry on walking
+      if (Math.abs(window.scrollY - t.to) > 3) return tourWalk(t);
+      tourRead(t);
+    }
+    // they scrolled off on their own: hand them the controls
+    if (Math.abs(window.scrollY - t.to) > 40) return pauseTour();
+    const before = t.t;
+    t.t += dt * 1000;
+    for (const c of t.cues) if (c.at >= before && c.at < t.t) speak(c.text, c.ms);
+    setTourProgress(t.t / t.dwell);
+    if (t.t < t.dwell) return;
+    if (t.k < tourPages(t.i).length - 1) t.k++;
+    else if (t.i < L.length - 1) {
+      t.i++;
+      t.k = 0;
+    } else return endTour(true);
+    setTourProgress(0);
+    tourWalk(t);
+  }
+
+  function startTour() {
+    const y = window.scrollY;
+    const steps = L.flatMap((_, i) => tourPages(i).map((x, k) => ({ i, k, x })));
+    // pick up from here: the page we're on, else the next one ahead; from the very end, start over
+    let st = steps.find((p) => Math.abs(p.x - y) < 40) ?? steps.find((p) => p.x > y);
+    if (!st || st === steps[steps.length - 1]) st = steps[0];
+    tour = { i: st.i, k: st.k, phase: "walk", to: st.x, t: 0, dwell: 1, cues: [] };
+    tourPaused = false;
+    tourDone = false;
+    cancelShot();
+    setTourProgress(0);
+    tourWalk(tour);
+    setTourUi();
+  }
+
+  /** user input pauses; the button's pause also stops him mid-stride */
+  function pauseTour(halt = false) {
+    if (!tour || tourPaused) return;
+    tourPaused = true;
+    if (halt) tween = null;
+    setTourUi();
+  }
+
+  function resumeTour() {
+    if (!tour) return startTour();
+    // still on the page we paused on: finish reading it; wandered off: carry on from there
+    if (tour.phase === "read" && Math.abs(window.scrollY - tour.to) <= 40) {
+      tourPaused = false;
+      setTourUi();
+    } else startTour();
+  }
+
+  function endTour(done = false) {
+    tour = null;
+    tourPaused = false;
+    tourDone = done;
+    setTourProgress(0);
+    setTourUi();
+  }
+
+  function setTourProgress(p: number) {
+    const v = Math.round(clamp(p, 0, 1) * 200) / 200;
+    if (v === tourP) return;
+    tourP = v;
+    tourBtn.style.setProperty("--p", String(v));
+  }
+
+  function setTourUi() {
+    const state = !tour ? "idle" : tourPaused ? "paused" : "playing";
+    const label = state === "playing" ? "pause tour" : state === "paused" ? "resume tour" : tourDone ? "tour again" : "take the tour";
+    tourBtn.dataset.state = state;
+    tourBtn.setAttribute("aria-pressed", String(state === "playing"));
+    tourBtn.setAttribute("aria-label", label[0].toUpperCase() + label.slice(1));
+    tourLabel.textContent = label;
+    root.classList.toggle("is-touring", state === "playing");
+  }
+
+  const toggleTour = () => {
+    if (tour && !tourPaused) pauseTour(true);
+    else resumeTour();
+  };
+  tourBtn.addEventListener("click", toggleTour);
+
+  // P plays/pauses, Esc stops; anything that moves the camera hands control back
+  const NAV_KEYS = new Set(["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Tab"]);
+  window.addEventListener("keydown", (e) => {
+    if (isShortcut(e, "p") && !e.repeat) {
+      e.preventDefault();
+      toggleTour();
+    } else if (e.key === "Escape" && tour) endTour();
+    else if (NAV_KEYS.has(e.key) && !(e.key === " " && (e.target as HTMLElement).closest("button, a"))) pauseTour();
+  });
+  window.addEventListener("wheel", () => pauseTour(), { passive: true });
+  window.addEventListener("touchmove", () => pauseTour(), { passive: true });
+  setTourUi();
+
   /* ---------------- main loop ---------------- */
 
   let cam = 0;
@@ -1191,7 +1376,7 @@ function boot() {
       kind: "reveal",
       t0: performance.now(),
       inDur: 1800,
-      hold: 6200,
+      hold: tour ? 3600 : 6200, // the tour keeps moving; TOUR_MIN.summit covers the whole shot
       outDur: 1600,
       s: mobile ? 0.45 : 0.5,
       fx: yx - VW * 0.35,
@@ -1312,13 +1497,17 @@ function boot() {
 
   function frame(now: number) {
     const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 0.016;
+    // the tour keeps wall-clock time, so reading pauses hold on slow devices too
+    // (capped, so returning to a backgrounded tab doesn't skip a stop)
+    const tourDt = lastT ? Math.min((now - lastT) / 1000, 0.25) : 0.016;
     lastT = now;
 
     if (tween) {
       const p = clamp((now - tween.t0) / tween.dur, 0, 1);
-      window.scrollTo(0, lerp(tween.from, tween.to, easeInOut(p)));
+      window.scrollTo(0, lerp(tween.from, tween.to, (tween.ease ?? easeInOut)(p)));
       if (p >= 1) tween = null;
     }
+    tourTick(tourDt);
 
     const target = clamp(window.scrollY, 0, maxCam);
     const prev = cam;
@@ -1447,7 +1636,7 @@ function boot() {
         L.forEach((s) => s.el.classList.toggle("here", s === here));
         here.el.classList.add("raised");
         const lines = quips[here.d.id];
-        if (lines && !grumpy) speak(pick(lines));
+        if (lines && !grumpy && !tour) speak(pick(lines));
         if (here.d.id === "summit" && !summitParty) {
           summitParty = true;
           confetti();
@@ -1488,7 +1677,7 @@ function boot() {
       fogK = smooth(clamp((1 - Math.abs(yakX - c) / hw) * 1.7, 0, 1)) * (1 - reveal);
       if (fogK > 0.6 && fogSaid === 0) {
         fogSaid = 1;
-        speak("Can't see a thing… keep scrolling!");
+        speak(tour ? "Can't see a thing… stay close!" : "Can't see a thing… keep scrolling!");
       } else if (fogSaid === 1 && fogK < 0.05 && yakX > c) {
         fogSaid = 2;
         speak("Whoa. SNOW.");
@@ -1579,7 +1768,15 @@ function boot() {
     prints.innerHTML = "";
     lastW = VW;
     lastH = VH;
-    const y = clamp(camFor(i) + off * VW, 0, maxCam);
+    let y = clamp(camFor(i) + off * VW, 0, maxCam);
+    if (tour) {
+      // keep the tour on its page; a walk in progress just re-aims
+      const pages = tourPages(tour.i);
+      tour.k = Math.min(tour.k, pages.length - 1);
+      tour.to = pages[tour.k];
+      if (tour.phase === "read") y = tour.to;
+      else tween = null;
+    }
     window.scrollTo(0, y);
     cam = y;
   }

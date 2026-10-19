@@ -1449,6 +1449,77 @@ h3 {
   opacity: 1;
   translate: -50% 0;
 }
+/* guided tour: sits just left of the trail map; the underline fills
+   while Yakku waits for you to finish reading a stop */
+.hud-tour {
+  --map-w: min(460px, 80vw);
+  position: fixed;
+  z-index: 30;
+  right: calc(50% + var(--map-w) / 2 + 12px);
+  bottom: 14px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem 0 0.7rem;
+  overflow: hidden;
+  font: 600 1.3rem/1 var(--font-hand);
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--color-cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 15px 12px 16px 13px;
+  box-shadow: 3px 4px 0 rgb(64 48 42 / 0.2);
+  cursor: pointer;
+  rotate: -1deg;
+  transition:
+    rotate 0.3s var(--bounce),
+    background-color 0.2s;
+}
+.hud-tour:hover {
+  rotate: 1.5deg;
+  background: var(--color-butter);
+}
+.hud-tour::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: #06d6a0;
+  transform: scaleX(var(--p, 0));
+  transform-origin: 0 50%;
+}
+.hud-tour .tour-pause,
+.hud-tour[data-state="playing"] .tour-play {
+  display: none;
+}
+.hud-tour[data-state="playing"] .tour-pause {
+  display: block;
+}
+.hud-tour[data-state="playing"] {
+  background: #c8ecdf;
+}
+/* nudge it until it's been tried, but only at the start of the trail */
+.hud-tour[data-state="idle"] svg {
+  animation: tourNudge 1.6s ease-in-out infinite;
+}
+@keyframes tourNudge {
+  50% {
+    translate: 2px 0;
+  }
+}
+
+@media (max-width: 1099px) {
+  .hud-tour {
+    padding: 0 0.8rem;
+  }
+  .hud-tour-label {
+    display: none;
+  }
+}
+
 .hud-map-yak {
   position: absolute;
   margin: 8px 16px;
@@ -2453,9 +2524,25 @@ mark.mk-teal {
     right: 66px;
     padding: 0.35rem 0.5rem;
   }
+  .hud-tour {
+    right: auto;
+    left: 12px;
+    bottom: 10px;
+    width: 46px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+  .hud-tour-label {
+    display: none;
+  }
   .hud-map {
     bottom: 10px;
     height: 42px;
+    left: auto;
+    right: 12px;
+    translate: none;
+    width: calc(100vw - 80px);
   }
 
   .s-base .content,
@@ -2733,6 +2820,13 @@ html:not(.trek-on) .deck {
   .hud-mail {
     padding: 0.45rem 0.9rem;
     font-size: 1.5rem;
+  }
+  .hud-tour {
+    --map-w: min(640px, 56vw);
+    bottom: 16px;
+    height: 58px;
+    padding: 0 1rem 0 0.85rem;
+    font-size: 1.45rem;
   }
   .hud-map {
     bottom: 16px;
