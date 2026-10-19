@@ -1634,7 +1634,8 @@ function boot() {
       if (stepAcc > stride) {
         stepAcc = 0;
         stepFoot++;
-        sound.step(surface);
+        // deep snow and thin air: he starts to struggle above about half height
+        sound.step(surface, surface === "snow" ? clamp((elev(yakX) / maxLevel - 0.45) / 0.5, 0, 1) : 0);
         if (surface === "snow" && elev(yakX) / maxLevel > 0.55) {
           const foot = stepFoot % 2 ? yakW * 0.24 : -yakW * 0.2;
           hoofprint(yakX + foot * face, slope);
@@ -1778,6 +1779,7 @@ function boot() {
       fog: fogK,
       birds: biome === "forest" || biome === "meadow",
       fire: here?.d.id === "hikers" ? 1 : 0,
+      pose,
     });
 
     requestAnimationFrame(frame);
