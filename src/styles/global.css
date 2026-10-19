@@ -267,7 +267,7 @@ h3 {
 }
 .y-page {
   transform-box: view-box;
-  transform-origin: 230px 166px;
+  transform-origin: 236px 192px; /* the spine of the open book */
   opacity: 0;
 }
 
@@ -374,10 +374,6 @@ h3 {
 .yak[data-pose="read"] .y-glasses {
   opacity: 1;
 }
-.yak[data-pose="read"] .y-book {
-  transform-origin: 230px 185px;
-  transform: translate(16px, -14px) scale(0.82);
-}
 .yak[data-pose="read"] .y-leg {
   transform: translateY(50px) scaleY(0.3);
 }
@@ -403,15 +399,16 @@ h3 {
   }
 }
 @keyframes yReadHead {
+  /* nose down toward the book on the ground, drifting as he reads */
   0%,
   100% {
-    transform: rotate(1deg);
+    transform: rotate(7deg);
   }
   45% {
-    transform: rotate(-2deg);
+    transform: rotate(4deg);
   }
   88% {
-    transform: rotate(3deg);
+    transform: rotate(9deg);
   }
 }
 @keyframes yReadEyes {

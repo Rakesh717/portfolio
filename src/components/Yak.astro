@@ -176,17 +176,15 @@ const nearLegs = [leg(94, fur, "y-leg-bn"), leg(184, fur, "y-leg-fn")];
         <path d="M182 92 C 192 98 198 114 194 132" fill="none" stroke={ink} stroke-width="16" stroke-linecap="round"></path>
         <path d="M182 92 C 192 98 198 114 194 132" fill="none" stroke="#2A9D8F" stroke-width="10" stroke-linecap="round"></path>
       </g>
+    </g>
 
-      <!-- book (read pose) -->
-      <g class="y-book">
-        <path d="M196 146 L 230 153 L 264 146 L 264 178 L 230 185 L 196 178 Z" fill="#E85D2F" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
-        <path d="M200 147 Q 216 144 230 152 L 230 180 Q 216 173 200 175 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
-        <path d="M230 152 Q 244 144 260 147 L 260 175 Q 244 173 230 180 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
-        <path d="M205 155 q11 -2 20 2 M205 162 q11 -2 20 2 M205 169 q8 -1 14 1 M235 157 q9 -4 20 -2 M235 164 q9 -4 20 -2 M235 171 q7 -3 14 -2" fill="none" stroke="#C9B79B" stroke-width="2" stroke-linecap="round"></path>
-        <rect x="191" y="164" width="15" height="13" rx="5" fill="#3E2A1E" stroke={ink} stroke-width="2.5"></rect>
-        <rect x="254" y="164" width="15" height="13" rx="5" fill="#3E2A1E" stroke={ink} stroke-width="2.5"></rect>
-        <path class="y-page" d="M230 152 Q 244 144 260 147 L 260 175 Q 244 173 230 180 Z" fill="#FFF6E3" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
-      </g>
+    <!-- book (read pose): lying open on the ground in front of him, so it stays put while he breathes -->
+    <g class="y-book">
+      <path d="M197 191 Q 217 189 236 195 Q 255 189 275 191 L 275 196 Q 255 194 236 200 Q 217 194 197 196 Z" fill="#E85D2F" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M200 187 Q 218 181 236 189 L 236 196 Q 218 189 200 192 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M236 189 Q 254 181 272 187 L 272 192 Q 254 189 236 196 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M206 187.5 q10 -3 22 1 M209 190.5 q8 -2 16 1 M244 188 q11 -4 22 -1.5 M247 191 q8 -2.5 16 -1" fill="none" stroke="#C9B79B" stroke-width="1.6" stroke-linecap="round"></path>
+      <path class="y-page" d="M236 189 Q 254 181 272 187 L 272 192 Q 254 189 236 196 Z" fill="#FFF6E3" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
     </g>
   </g>
 
