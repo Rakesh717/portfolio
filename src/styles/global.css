@@ -35,6 +35,9 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* stop Android Chrome's tablet font boosting from blowing up the layout */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 ::selection {
@@ -950,7 +953,7 @@ h3 {
   font: 700 12px var(--font-body);
   fill: var(--color-ink-soft);
 }
-@media (max-width: 767px) {
+@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   .trailmap-paper {
     padding: 1.1rem 1rem 0.6rem;
   }
@@ -1096,6 +1099,8 @@ h3 {
   bottom: calc(var(--vh) - var(--ground));
   display: flex;
   flex-direction: column;
+  /* if content ever outgrows the space, spill up into the sky — never down past the ground */
+  justify-content: flex-end;
 }
 .trek-on .content > * {
   transition:
@@ -1177,7 +1182,7 @@ h3 {
 }
 
 /* phones: content sits right above Yakku, so he talks sideways instead */
-@media (max-width: 767px) {
+@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   .quip {
     bottom: 38%;
     left: 92%;
@@ -2221,6 +2226,30 @@ mark.mk-teal {
   white-space: nowrap;
 }
 
+/* short landscape screens (tablets sideways, small laptops): tighten the
+   clothesline so the longest postcard still clears the ground and HUD */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .clothes {
+    --rope: clamp(56px, 10vh, 88px);
+  }
+  .postcard {
+    min-height: 0;
+    padding: 0.9rem 1rem 0.85rem;
+  }
+  .postcard h3 {
+    margin-top: 0.55rem;
+    font-size: clamp(1.05rem, min(1.5vw, 2.6vh), 1.3rem);
+  }
+  .postcard p {
+    margin-top: 0.4rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+  .postcard-foot {
+    padding-top: 0.6rem;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Stop: summit                                                       */
 /* ------------------------------------------------------------------ */
@@ -2313,7 +2342,7 @@ mark.mk-teal {
 /* Trek mode on phones                                                */
 /* ------------------------------------------------------------------ */
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   :root {
     --top: 74px;
   }
@@ -2465,6 +2494,41 @@ mark.mk-teal {
   }
 }
 
+/* portrait tablets: the phone strip is too wide for a tablet — keep the
+   compact engine but lay the notice board out like desktop, as one board
+   standing on its plateau instead of a three-screen wall */
+@media (orientation: portrait) and (min-width: 768px) and (max-width: 1023px) {
+  .trek-on .board {
+    width: min(100%, 64rem);
+  }
+  .board-cork {
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-rows: unset;
+    grid-template-areas:
+      "p1 st"
+      "p1 pk"
+      "p2 pk"
+      "p2 tg";
+    column-gap: 1.5rem;
+  }
+  .board-intro {
+    font-size: clamp(14px, 1.85vh, 16.5px);
+  }
+  .board-p2 {
+    align-self: end;
+  }
+  .postcards {
+    justify-content: flex-start;
+    gap: 1.6rem;
+  }
+  .postcard-wrap {
+    flex: 0 0 min(24rem, 78vw);
+  }
+  .postcard-wrap:nth-child(2) {
+    margin-top: 24px;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Static fallback — no JS or reduced motion: a calm vertical page    */
 /* ------------------------------------------------------------------ */
@@ -2544,7 +2608,7 @@ html:not(.trek-on) .s-summit .summit {
 html:not(.trek-on) .deck {
   max-width: 36rem;
 }
-@media (max-width: 767px) {
+@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   html:not(.trek-on) .board-cork {
     grid-template-columns: 1fr;
     grid-template-areas: "p1" "p2" "st" "pk" "tg";

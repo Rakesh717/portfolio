@@ -375,7 +375,9 @@ function boot() {
   function layout() {
     VW = window.innerWidth;
     VH = window.innerHeight;
-    mobile = VW < 768;
+    // phones — and portrait tablets: the compact layout reads better when the
+    // viewport is tall and narrow, so tablets under 1024px in portrait get it too
+    mobile = VW < 768 || (VH > VW && VW < 1024);
     ground = Math.round(VH * (mobile ? 0.88 : 0.9));
     gapW = Math.round(VW * (mobile ? 0.6 : 0.4));
     yakFrac = mobile ? 0.2 : 0.15;
@@ -387,7 +389,10 @@ function boot() {
     let x = 0;
     L = stopEls.map((el, i) => {
       const d = data.find((s) => s.id === el.dataset.stop)!;
-      const span = Number(mobile ? el.dataset.spanM : el.dataset.span) || 1;
+      const span =
+        Number(
+          mobile ? (VW >= 768 ? el.dataset.spanT : el.dataset.spanM) : el.dataset.span,
+        ) || 1;
       const w = Math.round(span * VW);
       if (i > 0) x += Math.round(gapW * (Number(el.dataset.gap) || 1));
       const laid = { el, d, x0: x, w, level: ((d.altitude - altMin) / (altMax - altMin)) * totalRise };
