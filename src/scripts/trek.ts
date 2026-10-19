@@ -200,12 +200,17 @@ function initCopy() {
     btn.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(btn.dataset.copy!);
+        // hold the width so the shorter label doesn't reflow the buttons beside it
+        btn.style.minWidth = `${btn.offsetWidth}px`;
         if (label) label.textContent = "Copied to clipboard ✓";
         say("Copied! I'll guard it with my life.");
       } catch {
         window.location.href = `mailto:${btn.dataset.copy}`;
       }
-      window.setTimeout(() => label && (label.textContent = original), 2200);
+      window.setTimeout(() => {
+        if (label) label.textContent = original;
+        btn.style.minWidth = "";
+      }, 2200);
     });
   });
 }
