@@ -233,7 +233,7 @@ h3 {
   transform-origin: 80px 44px;
 }
 .y-pennant {
-  transform-origin: 70px 6px;
+  transform-origin: 68.5px -4px;
   animation: yPennant 1.6s ease-in-out infinite;
 }
 .y-eye-open {

@@ -17,6 +17,19 @@ const fur = "#8A5A3B";
 const furDark = "#6B4429";
 const furLight = "#C9925E";
 
+// the Nepal flag on his pack pole, in the official construction's units (1280 × 1560)
+const star = (cx: number, cy: number, r1: number, r2: number, n: number, from = 0, to = 360) =>
+  Array.from({ length: n * 2 + 1 }, (_, i) => {
+    const a = ((from + ((to - from) * i) / (n * 2)) * Math.PI) / 180;
+    const r = i % 2 ? r1 : r2;
+    return `${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+  }).join(" L ");
+const npOuter = "M0 0 L 1280 801 L 472 801 L 1230 1560 L 0 1560 Z";
+const npInner = "M46 83 L 1118 755 L 360 755 L 1118 1514 L 46 1514 Z";
+const npMoon = "M100 503 A 214 214 0 0 0 528 503 A 214 132 0 0 1 100 503 Z";
+const npCrown = `M ${star(314, 610, 145, 108, 8, 180, 360)} Z`;
+const npSun = `M ${star(314, 1134, 230, 145, 12, -15, 345)} Z`;
+
 // shaggy fringe along the bottom of the coat
 function skirt() {
   const left = 40;
@@ -93,9 +106,17 @@ const nearLegs = [leg(94, fur, "y-leg-bn"), leg(184, fur, "y-leg-fn")];
       <path d="M86 74 C 82 94 86 112 92 128" fill="none" stroke="#5C3A22" stroke-width="4.5" stroke-linecap="round"></path>
       <g class="y-pack">
         <g class="y-flag">
-          <path d="M80 44 L 70 4" stroke={ink} stroke-width="3.5" stroke-linecap="round"></path>
+          <path d="M80 44 L 67.5 -6" stroke={ink} stroke-width="3.5" stroke-linecap="round"></path>
+          <!-- hoist runs along the pole, which leans 14° -->
           <g class="y-pennant">
-            <path d="M70 5 L 100 12 L 74 22 Z" fill="#EF476F" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+            <g transform="translate(69 -4) rotate(-14) scale(0.0175)">
+              <path d={npOuter} fill={ink} stroke={ink} stroke-width="150" stroke-linejoin="round"></path>
+              <path d={npOuter} fill="#003893"></path>
+              <path d={npInner} fill="#DC143C"></path>
+              <path d={npMoon} fill="#FFFDF6"></path>
+              <path d={npCrown} fill="#FFFDF6"></path>
+              <path d={npSun} fill="#FFFDF6"></path>
+            </g>
           </g>
         </g>
         <g transform="rotate(-8 97 58)">

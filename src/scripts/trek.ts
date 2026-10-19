@@ -715,12 +715,24 @@ function boot() {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("class", "summit-flags");
     svg.setAttribute("viewBox", `0 0 ${w} ${VH}`);
-    svg.innerHTML = mobile
-      ? flagString(px, py, -40, py - 70, 26, size) + flagString(px, py, w + 40, py - 110, 30, size)
-      : flagString(px, py, -40, ground * 0.66, 50, size) +
-      flagString(px, py, -40, ground * 0.2, 40, size) +
-      flagString(px, py, mobile ? w * 0.75 : w * 0.4, -40, 30, size) +
-      flagString(px, py, mobile ? w * 0.2 : px * 0.5, -40, 20, size);
+    // every string is pegged to the ground, some on each side of the pole. Desktop: two
+    // down the slope just climbed, one short and steep to the right that stops shy of
+    // the contact copy. Phones: one between Yakku's cairn and the pole, one down the far side.
+    const groundAt = (x: number) => ground + summit.level - elev(summit.x0 + x);
+    const copy = summit.el.querySelector<HTMLElement>(".summit");
+    const copyLeft = copy ? (copy.offsetParent as HTMLElement).offsetLeft + copy.offsetLeft : w * 0.45;
+    const yakRight = VW * yakFrac + yakW * 0.55;
+    const ends = mobile
+      ? [px - (px - yakRight) * 0.45, w + gapW * 0.5]
+      : [-gapW * 0.35, -gapW * 1.1, px + (copyLeft - px) * 0.72];
+    svg.innerHTML = ends
+      .map((x, i) => {
+        const y = groundAt(x) - 3;
+        const sag = Math.min(60, Math.abs(x - px) * 0.06) + i * 6;
+        const stake = `<path d="M${x.toFixed(1)} ${(y - 16).toFixed(1)} V ${(y + 4).toFixed(1)}" stroke="#40302A" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="${(x + 5).toFixed(1)}" cy="${(y + 3).toFixed(1)}" rx="8" ry="5" fill="#A79C90" stroke="#40302A" stroke-width="2"/>`;
+        return flagString(px, py, x, y - 14, sag, size) + stake;
+      })
+      .join("");
     summit.el.querySelector(".scene")!.prepend(svg);
   }
 
