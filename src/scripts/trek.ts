@@ -1084,6 +1084,11 @@ function boot() {
   let lastT = 0;
   let face = 1;
   let pose = "";
+  let isMoving = false; // hysteresis: entering and leaving "moving" at different speeds stops sit/stand flip-flop
+  let gaitRun = false; // same trick between walk and run
+  let smSpeed = 0; // low-passed travel speed: thresholds on the raw signal chatter with bursty scroll input
+  let walkAnims: CSSAnimation[] = [];
+  let walkAnimsPose = "";
   let restAt = performance.now();
   let arrived = "";
   let summitParty = false;
@@ -1361,8 +1366,10 @@ function boot() {
       for (const s of L) if (!s.el.classList.contains("seen") && s.x0 < v1 - VW * 0.2) s.el.classList.add("seen");
 
     // yak
-    const speed = Math.abs(vel);
-    const moving = speed > 18;
+    smSpeed += (Math.abs(vel) - smSpeed) * (1 - Math.exp(-9 * dt));
+    const speed = smSpeed;
+    isMoving = isMoving ? speed > 15 : speed > 60;
+    const moving = isMoving;
     const grumpy = now < grumpyUntil;
     if (vel > 25) face = 1;
     else if (vel < -25) face = -1;
@@ -1390,7 +1397,8 @@ function boot() {
     }
 
     if (moving) {
-      setPose(speed > 1500 ? "run" : "walk");
+      gaitRun = gaitRun ? speed > 1100 : speed > 1900;
+      setPose(gaitRun ? "run" : "walk");
       restAt = now;
       if (grumpy && speed > 200 && now - lastPoke > 600) {
         grumpyUntil = 0;
@@ -1422,6 +1430,21 @@ function boot() {
     if (here?.d.id !== arrived && moving && arrived) {
       arrived = "";
       L.forEach((s) => s.el.classList.remove("here"));
+    }
+
+    // leg cadence follows the real travel speed: no moonwalking while the camera eases out
+    if (pose === "walk" || pose === "run") {
+      if (pose !== walkAnimsPose) {
+        walkAnimsPose = pose;
+        walkAnims = yak
+          .getAnimations({ subtree: true })
+          .filter((a): a is CSSAnimation => a instanceof CSSAnimation && /^(yStep|yBob|ySkirt)$/.test(a.animationName));
+      }
+      const rate = clamp(speed / (pose === "run" ? 1500 : 300), 0.2, 2.6);
+      for (const a of walkAnims) a.playbackRate = rate;
+    } else if (walkAnimsPose) {
+      walkAnimsPose = "";
+      walkAnims = [];
     }
 
     // the cloud bank before High Camp
