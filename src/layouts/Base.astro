@@ -3,6 +3,7 @@ import "@fontsource-variable/fraunces/full.css";
 import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/caveat";
 import "../styles/global.css";
+import { links, site } from "../data/content";
 
 interface Props {
   title: string;
@@ -12,6 +13,18 @@ interface Props {
 }
 
 const { title, description, mode = "journal" } = Astro.props;
+// canonical + absolute URLs only work once `site` is set in astro.config.mjs
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const person = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  jobTitle: site.title,
+  worksFor: { "@type": "Organization", name: "Binary Digits" },
+  address: { "@type": "PostalAddress", addressLocality: "Kathmandu", addressCountry: "NP" },
+  sameAs: links.filter((l) => l.href.startsWith("http")).map((l) => l.href),
+  ...(canonical && { url: canonical }),
+};
 ---
 
 <!doctype html>
@@ -36,6 +49,16 @@ const { title, description, mode = "journal" } = Astro.props;
         </script>
       )
     }
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content={mode === "trek" ? "website" : "article"} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {mode === "trek" && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
     <title>{title}</title>
   </head>
   <body>
