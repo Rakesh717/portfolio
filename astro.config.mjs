@@ -6,5 +6,10 @@ export default defineConfig({
   devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      // allow viewing the dev server through `cloudflared` quick tunnels,
+      // whose subdomain changes on every restart
+      allowedHosts: [".trycloudflare.com"],
+    },
   },
 });

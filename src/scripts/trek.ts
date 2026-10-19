@@ -104,8 +104,92 @@ function initDeck() {
   deck.addEventListener("pointerup", end);
   deck.addEventListener("pointercancel", end);
 
-  document.querySelector("[data-deck-next]")?.addEventListener("click", () => next(1));
-  document.querySelector("[data-deck-prev]")?.addEventListener("click", prev);
+  // autoplay: the deck shuffles itself, but any user input takes over.
+  // manual advances (drag, tap, arrows) hold autoplay off for a while,
+  // and pointing at or focusing the deck pauses it until they let go.
+  const autoBtn = document.querySelector<HTMLButtonElement>("[data-deck-auto]");
+  const controlsEl = document.querySelector<HTMLElement>(".deck-controls");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const AUTOPLAY_MS = 5200;
+  const IDLE_MS = 11000;
+  let autoTimer = 0;
+  let autoPaused = reduceMotion;
+  let inView = false;
+  let holding = false;
+  let idleUntil = 0;
+
+  const active = () => !autoPaused && inView && !document.hidden;
+  const autoUi = () => {
+    if (!autoBtn) return;
+    autoBtn.textContent = autoPaused ? "▶" : "❚❚";
+    autoBtn.classList.toggle("is-paused", autoPaused);
+    autoBtn.setAttribute("aria-pressed", String(!autoPaused));
+    autoBtn.setAttribute("aria-label", autoPaused ? "Shuffle the notes automatically" : "Pause the note shuffling");
+  };
+  const armAuto = () => {
+    if (autoTimer) {
+      window.clearTimeout(autoTimer);
+      autoTimer = 0;
+    }
+    if (active()) autoTimer = window.setTimeout(shuffle, AUTOPLAY_MS);
+  };
+  const shuffle = () => {
+    autoTimer = 0;
+    // the tick keeps running while the deck is active, but only advances
+    // once the user isn't engaging: not pointing at or focusing the deck,
+    // and past the idle cooldown from their last manual advance
+    if (active() && !holding && performance.now() >= idleUntil && !busy) next(1);
+    armAuto();
+  };
+  const poke = () => {
+    idleUntil = performance.now() + IDLE_MS;
+    armAuto();
+  };
+
+  new IntersectionObserver(
+    (entries) => {
+      inView = entries[0]?.isIntersecting ?? false;
+      armAuto();
+    },
+    { threshold: 0.35 },
+  ).observe(deck);
+  document.addEventListener("visibilitychange", armAuto);
+  deck.addEventListener("pointerdown", poke);
+  deck.addEventListener("pointerenter", () => {
+    holding = true;
+    armAuto();
+  });
+  deck.addEventListener("pointerleave", () => {
+    holding = false;
+    armAuto();
+  });
+  controlsEl?.addEventListener("focusin", (e) => {
+    // only keyboard focus pauses autoplay; a mouse click's stray focus shouldn't
+    if ((e.target as HTMLElement)?.matches?.(":focus-visible")) {
+      holding = true;
+      armAuto();
+    }
+  });
+  controlsEl?.addEventListener("focusout", () => {
+    holding = false;
+    armAuto();
+  });
+  autoBtn?.addEventListener("click", () => {
+    autoPaused = !autoPaused;
+    if (!autoPaused) idleUntil = 0;
+    autoUi();
+    armAuto();
+  });
+  autoUi();
+
+  document.querySelector("[data-deck-next]")?.addEventListener("click", () => {
+    poke();
+    next(1);
+  });
+  document.querySelector("[data-deck-prev]")?.addEventListener("click", () => {
+    poke();
+    prev();
+  });
   render();
 }
 
@@ -1120,6 +1204,10 @@ function boot() {
       const t = (d.altitude - altMin) / (altMax - altMin);
       const p = trail.getPointAtLength(t * len);
       const left = i % 2 === 0;
+      // every label is two lines: name over altitude, both aligned to the
+      // same edge so the numbers line up beside each flag
+      const tx = left ? p.x - 10 : p.x + 28;
+      const anchor = left ? "end" : "start";
       const g = document.createElementNS(NS, "g");
       g.setAttribute("class", "tm-flag");
       g.setAttribute("tabindex", "0");
@@ -1127,7 +1215,8 @@ function boot() {
       g.setAttribute("aria-label", `Go to ${d.name}`);
       g.innerHTML = `<path d="M${p.x} ${p.y} V ${p.y - 34}" stroke="#40302A" stroke-width="2.5"/>
         <path d="M${p.x} ${p.y - 34} L ${p.x + 22} ${p.y - 28} L ${p.x} ${p.y - 20} Z" fill="${d.color}" stroke="#40302A" stroke-width="2" stroke-linejoin="round"/>
-        <text x="${left ? p.x - 10 : p.x + 28}" y="${p.y - (i === 0 ? 8 : 22)}" text-anchor="${left ? "end" : "start"}">${d.name} <tspan>${d.altitude.toLocaleString("en-US")} m</tspan></text>`;
+        <text x="${tx}" y="${p.y - 30}" text-anchor="${anchor}">${d.name}</text>
+        <text class="tm-alt" x="${tx}" y="${p.y - 14}" text-anchor="${anchor}">${d.altitude.toLocaleString("en-US")} m</text>`;
       const go = () => {
         cancelShot();
         travelTo(indexOf(d.id));
@@ -1377,7 +1466,9 @@ function boot() {
     }
 
     // HUD
-    const alt = Math.round(altitudeAt(yakX) / 10) * 10;
+    // on a stop's plateau show its exact altitude (8,848 m, not 8,850);
+    // while climbing between stops, round to keep the number steady
+    const alt = here ? here.d.altitude : Math.round(altitudeAt(yakX) / 10) * 10;
     if (alt !== lastAlt) {
       lastAlt = alt;
       hudAlt.textContent = alt.toLocaleString("en-US");

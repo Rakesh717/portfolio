@@ -946,6 +946,10 @@ h3 {
   stroke: var(--color-cream);
   stroke-width: 5px;
 }
+.tm-flag .tm-alt {
+  font: 700 12px var(--font-body);
+  fill: var(--color-ink-soft);
+}
 @media (max-width: 767px) {
   .trailmap-paper {
     padding: 1.1rem 1rem 0.6rem;
@@ -961,13 +965,9 @@ h3 {
     font-size: 30px;
     stroke-width: 7px;
   }
-  .tm-flag text tspan {
+  .tm-flag .tm-alt {
     display: none;
   }
-}
-.tm-flag text tspan {
-  font: 700 12px var(--font-body);
-  fill: var(--color-ink-soft);
 }
 
 .near-bucket {
@@ -2046,6 +2046,13 @@ mark.mk-teal {
   color: var(--ink);
   min-width: 4.5rem;
   text-align: center;
+}
+[data-deck-auto] {
+  font-family: var(--font-body);
+  letter-spacing: 0.08em;
+}
+[data-deck-auto].is-paused {
+  background: var(--color-butter);
 }
 
 /* ------------------------------------------------------------------ */

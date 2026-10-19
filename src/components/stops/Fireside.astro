@@ -34,7 +34,7 @@ const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
   <div class="register">
     <div class="register-head">
       <h2 class="section-title">Fellow hikers</h2>
-      <p class="hand">left these in the trail register — tap a note to read the next</p>
+      <p class="hand">left these in the trail register — they shuffle on their own; tap a note to take over</p>
     </div>
 
     <div class="deck" id="deck" data-deck>
@@ -55,6 +55,7 @@ const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
       <button class="ink-btn ink-btn-sm" data-deck-prev aria-label="Previous note">←</button>
       <span class="hand deck-count" data-deck-count aria-live="polite">1 of {testimonials.length}</span>
       <button class="ink-btn ink-btn-sm" data-deck-next aria-label="Next note">→</button>
+      <button class="ink-btn ink-btn-sm" data-deck-auto aria-pressed="false" aria-label="Pause the note shuffling">❚❚</button>
     </div>
   </div>
 </Stop>
