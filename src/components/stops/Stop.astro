@@ -12,9 +12,11 @@ interface Props {
   spanM?: number;
   class?: string;
   label: string;
+  /** width of the climb leading to this stop, as a multiple of the normal gap */
+  gap?: number;
 }
 
-const { id, span = 1, spanM = 1, class: className = "", label } = Astro.props;
+const { id, span = 1, spanM = 1, class: className = "", label, gap = 1 } = Astro.props;
 const stop = stops.find((s) => s.id === id);
 ---
 
@@ -24,6 +26,7 @@ const stop = stops.find((s) => s.id === id);
   data-stop={id}
   data-span={span}
   data-span-m={spanM}
+  data-gap={gap}
   aria-label={label}
 >
   <div class="scene" aria-hidden="true">

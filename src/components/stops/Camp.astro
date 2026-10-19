@@ -8,15 +8,16 @@ interface Props {
   numeral: string;
   tent: string;
   first?: boolean;
+  gap?: number;
 }
 
-const { id, job, numeral, tent, first = false } = Astro.props;
+const { id, job, numeral, tent, first = false, gap = 1 } = Astro.props;
 const current = job.period.includes("Present");
 const ink = "#40302A";
 const flag = stops.find((s) => s.id === id)?.color ?? "#EF476F";
 ---
 
-<Stop id={id} label={`${job.camp} — ${job.company}`} class:list={["s-camp", current && "is-current"]}>
+<Stop id={id} gap={gap} label={`${job.camp} — ${job.company}`} class:list={["s-camp", current && "is-current"]}>
   <Fragment slot="scene">
     {
       first && (

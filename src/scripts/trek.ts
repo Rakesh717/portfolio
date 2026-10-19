@@ -8,6 +8,7 @@
  * and the weather follows the biome.
  */
 import { pokes, quips, type Biome, type Stop as StopData } from "../data/content";
+import { createSound, type Surface } from "./sound";
 
 const root = document.documentElement;
 const trekOn = root.classList.contains("trek-on");
@@ -193,6 +194,12 @@ function boot() {
   const far = $("#layer-far");
   const mid = $("#layer-mid");
   const near = $("#layer-near");
+  const front = $("#layer-front");
+  const fog = $("#fog");
+  const prints = $("#prints") as unknown as SVGSVGElement;
+  const trailmap = $("#trailmap");
+  const trailmapSvg = $("#trailmap-svg") as unknown as SVGSVGElement;
+  const soundBtn = $("#hud-sound");
   const clouds = $("#layer-clouds");
   const tint = $("#night-tint");
   const canvas = $<HTMLCanvasElement>("#weather");
@@ -221,6 +228,9 @@ function boot() {
   let L: Laid[] = [];
   let chunks: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
   let buckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
+  let frontBuckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
+  let fogA = 0;
+  let fogB = 0;
   let dpr = 1;
 
   /* ---------------- geometry ---------------- */
@@ -291,15 +301,22 @@ function boot() {
     const altMax = Math.max(...data.map((d) => d.altitude));
 
     let x = 0;
-    L = stopEls.map((el) => {
+    L = stopEls.map((el, i) => {
       const d = data.find((s) => s.id === el.dataset.stop)!;
       const span = Number(mobile ? el.dataset.spanM : el.dataset.span) || 1;
       const w = Math.round(span * VW);
+      if (i > 0) x += Math.round(gapW * (Number(el.dataset.gap) || 1));
       const laid = { el, d, x0: x, w, level: ((d.altitude - altMin) / (altMax - altMin)) * totalRise };
-      x += w + gapW;
+      x += w;
       return laid;
     });
-    worldW = x - gapW;
+    worldW = x;
+    // the cloud bank fills the long climb before High Camp
+    const hc = L.findIndex((s) => s.d.id === "camp-4");
+    if (hc > 0) {
+      fogA = L[hc - 1].x0 + L[hc - 1].w;
+      fogB = L[hc].x0;
+    }
     maxCam = worldW - VW;
     maxLevel = Math.max(...L.map((s) => s.level));
 
@@ -362,7 +379,7 @@ function boot() {
     chunksEl.innerHTML = "";
     chunks = [];
     const scale = mobile ? 0.62 : clamp(VH / 900, 0.75, 1.15);
-    const bottom = VH * 1.35;
+    const bottom = VH * 3.5; // deep enough for the summit zoom-out
 
     L.forEach((s, i) => {
       const next = L[i + 1];
@@ -584,6 +601,43 @@ function boot() {
       buckets.push({ el, x0: b0, x1: b0 + bw, shown: true });
     }
 
+    // foreground: big, soft shapes that pass in front of the camera
+    const FRONT = 1.4;
+    const frw = Math.ceil(VW + maxCam * FRONT + 400);
+    front.style.width = `${frw}px`;
+    front.innerHTML = "";
+    frontBuckets = [];
+    const fs = mobile ? 0.6 : clamp(VH / 900, 0.8, 1.2);
+    for (let b0 = 0; b0 < frw; b0 += bw) {
+      let html = "";
+      for (let x = b0 + r() * 200; x < Math.min(b0 + bw, frw); x += (mobile ? 170 : 260) + r() * 380) {
+        const worldX = clamp((x - VW / 2) / FRONT + VW / 2, 0, worldW);
+        const b = biomeAt(worldX, r());
+        const lx = (x - b0).toFixed(0);
+        if (b === "forest" || b === "meadow") {
+          const h = (90 + r() * 70) * fs;
+          const c = b === "forest" ? "#2E6A4B" : "#5B7A3C";
+          html += `<svg class="fg" viewBox="0 0 140 100" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.35).toFixed(0)}px;width:${(h * 1.5).toFixed(0)}px;height:${h.toFixed(0)}px;color:${c}"><use href="#s-tuft"/></svg>`;
+          if (b === "forest" && r() < 0.35) {
+            const w = (240 + r() * 120) * fs;
+            html += `<svg class="fg fg-branch" viewBox="0 0 260 120" style="left:${lx}px;top:-8px;width:${w.toFixed(0)}px;color:#2A6448"><use href="#s-branch"/></svg>`;
+          }
+        } else if (b === "rock") {
+          const h = (50 + r() * 50) * fs;
+          html += `<svg class="fg" viewBox="0 0 90 56" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.3).toFixed(0)}px;width:${(h * 1.7).toFixed(0)}px;height:${h.toFixed(0)}px;color:#7D7064"><use href="#s-rock"/></svg>`;
+        } else {
+          const h = (50 + r() * 40) * fs;
+          html += `<svg class="fg" viewBox="0 0 220 70" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.3).toFixed(0)}px;width:${(h * 3.2).toFixed(0)}px;height:${h.toFixed(0)}px"><use href="#s-drift"/></svg>`;
+        }
+      }
+      const el = document.createElement("div");
+      el.className = "front-bucket";
+      el.style.cssText = `left:${b0}px;width:${bw}px`;
+      el.innerHTML = html;
+      front.appendChild(el);
+      frontBuckets.push({ el, x0: b0, x1: b0 + bw, shown: true });
+    }
+
     // stars
     let st = "";
     for (let i = 0; i < 70; i++) {
@@ -793,13 +847,66 @@ function boot() {
   }
   window.addEventListener("yak:say", (e) => speak((e as CustomEvent<string>).detail));
 
+  const sound = createSound();
+  const setSoundUi = () => {
+    soundBtn.setAttribute("aria-pressed", String(sound.on));
+    soundBtn.classList.toggle("is-on", sound.on);
+  };
+  soundBtn.addEventListener("click", () => {
+    if (sound.on) sound.disable();
+    else sound.enable();
+    localStorage.setItem("yak-sound", sound.on ? "on" : "off");
+    setSoundUi();
+    if (sound.on) speak("Listen… that's the mountain.");
+  });
+  // remember the choice, but browsers only allow audio after a gesture
+  if (localStorage.getItem("yak-sound") === "on") {
+    const wake = () => {
+      sound.enable();
+      setSoundUi();
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+    };
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+  }
+  document.addEventListener("visibilitychange", () => sound.suspend(document.hidden));
+
+  // poke him. poke him ten times and see what happens.
+  let pokeCount = 0;
+  let lastPoke = 0;
+  let grumpyUntil = 0;
+  const warnings: Record<number, string> = {
+    5: "Okay, that's plenty of boops.",
+    7: "I'm warning you.",
+    9: "One. More. Time.",
+  };
   yakBtn.addEventListener("click", () => {
+    const now = performance.now();
+    if (now < grumpyUntil) {
+      speak("…");
+      return;
+    }
+    pokeCount = now - lastPoke > 4000 ? 1 : pokeCount + 1;
+    lastPoke = now;
+    restAt = now;
+    if (pokeCount >= 10) {
+      pokeCount = 0;
+      grumpyUntil = now + 9000;
+      setPose("grumpy");
+      sound.bleat();
+      speak("That's it. I'm on strike.", 4200);
+      window.setTimeout(() => {
+        if (performance.now() >= grumpyUntil - 50) speak("…fine. Friends again?");
+      }, 9100);
+      return;
+    }
     yak.classList.remove("is-boing");
     void yak.getBoundingClientRect();
     yak.classList.add("is-boing");
     window.setTimeout(() => yak.classList.remove("is-boing"), 700);
-    restAt = performance.now();
-    speak(pick(pokes));
+    sound.bell();
+    speak(warnings[pokeCount] ?? pick(pokes));
   });
 
   /* ---------------- travel ---------------- */
@@ -840,7 +947,10 @@ function boot() {
     })
   );
 
-  const cancelTween = () => (tween = null);
+  const cancelTween = () => {
+    tween = null;
+    cancelShot();
+  };
   window.addEventListener("wheel", cancelTween, { passive: true });
   window.addEventListener("touchstart", cancelTween, { passive: true });
 
@@ -861,6 +971,9 @@ function boot() {
       }
       travelTo(i);
     } else cancelTween();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" && e.key !== "Enter" && e.key !== "Shift") cancelShot();
   });
 
   // trackpad sideways swipes and horizontal touch swipes walk the trail too
@@ -936,6 +1049,178 @@ function boot() {
     yak.dataset.pose = p;
   }
 
+  /* ---------------- camera shots: the opening drop + the summit look-back ---------------- */
+
+  type Shot = {
+    kind: "intro" | "reveal";
+    t0: number;
+    inDur: number;
+    hold: number;
+    outDur: number;
+    s: number;
+    fx: number;
+    fy: number;
+    dy: number;
+    cancelAt?: number;
+    cancelK?: number;
+    k: number;
+  };
+  let shot: Shot | null = null;
+
+  function cancelShot() {
+    if (!shot || shot.cancelAt !== undefined) return;
+    shot.cancelAt = performance.now();
+    shot.cancelK = shot.k;
+  }
+
+  function shotK(now: number) {
+    const sh = shot!;
+    let k: number;
+    if (sh.cancelAt !== undefined) {
+      const t = (now - sh.cancelAt) / 650;
+      k = t >= 1 ? -1 : sh.cancelK! * (1 - easeInOut(t));
+    } else {
+      const t = now - sh.t0;
+      if (t < sh.inDur) k = easeInOut(t / sh.inDur);
+      else if (t < sh.inDur + sh.hold) k = 1;
+      else {
+        const o = (t - sh.inDur - sh.hold) / sh.outDur;
+        k = o >= 1 ? -1 : 1 - easeInOut(o);
+      }
+    }
+    if (k < 0) {
+      shot = null;
+      return 0;
+    }
+    sh.k = k;
+    return k;
+  }
+
+  function startIntro() {
+    shot = { kind: "intro", t0: performance.now(), inDur: 0, hold: 700, outDur: 3000, s: 1.08, fx: 0, fy: 0, dy: VH * 1.1, k: 1 };
+  }
+
+  function startReveal() {
+    // pull back from the summit so the slope you just climbed comes into view
+    const sum = L[indexOf("summit")];
+    const yx = sum.x0 + VW * yakFrac;
+    shot = {
+      kind: "reveal",
+      t0: performance.now(),
+      inDur: 1800,
+      hold: 6200,
+      outDur: 1600,
+      s: mobile ? 0.45 : 0.5,
+      fx: yx - VW * 0.35,
+      fy: ground - sum.level - VH * 0.1,
+      dy: 0,
+      k: 0,
+    };
+    sound.whoosh();
+  }
+
+  /* ---------------- the trail map that unfolds at the top ---------------- */
+
+  const TRAIL = "M150 520 C 260 512 330 500 360 486 C 300 470 250 456 262 440 C 300 424 400 418 446 400 C 380 380 330 362 352 344 C 400 328 470 318 500 300 C 452 280 420 262 436 244 C 470 228 520 220 540 204 C 506 186 484 168 500 152 C 520 138 540 128 548 112 C 538 98 540 84 552 70";
+  let mapRaf = 0;
+  function showTrailmap() {
+    trailmap.classList.add("show");
+    trailmapSvg.setAttribute("viewBox", mobile ? "70 30 700 530" : "0 0 1000 560");
+    const flags = data.filter((d) => d.id !== "night");
+    const altMin = flags[0].altitude;
+    const altMax = flags[flags.length - 1].altitude;
+    let pines = "";
+    for (let x = 70; x < 940; x += 18 + ((x * 7) % 11)) {
+      const y = 548 - ((x * 13) % 9);
+      pines += `M${x - 7} ${y} L${x} ${y - 20} L${x + 7} ${y} Z `;
+    }
+    trailmapSvg.innerHTML = `
+      <defs><mask id="tm-mask"><path id="tm-reveal" d="${TRAIL}" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/></mask></defs>
+      <path d="M20 556 L 250 300 L 320 336 L 552 52 L 640 150 L 700 118 L 990 556 Z" fill="#DCE6F2" stroke="#40302A" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M552 52 L 488 132 L 512 124 L 530 146 L 556 120 L 584 142 L 606 120 L 640 150 Z" fill="#fff" stroke="#40302A" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M250 300 L 222 332 L 244 326 L 262 340 L 284 322 L 320 336 Z M700 118 L 676 146 L 694 140 L 712 152 L 728 134 Z" fill="#fff" stroke="#40302A" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="${pines}" fill="#4E9B78" stroke="#40302A" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M20 556 H 990" stroke="#40302A" stroke-width="3"/>
+      <path id="tm-trail" d="${TRAIL}" fill="none" stroke="#E85D2F" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" mask="url(#tm-mask)"/>
+      <g id="tm-flags"></g>
+      <image id="tm-yak" href="${getComputedStyle(mapYak, "::before").backgroundImage.slice(5, -2)}" width="34" height="34" x="-17" y="-30"/>`;
+    const trail = trailmapSvg.querySelector<SVGPathElement>("#tm-trail")!;
+    const revealPath = trailmapSvg.querySelector<SVGPathElement>("#tm-reveal")!;
+    const yakImg = trailmapSvg.querySelector<SVGImageElement>("#tm-yak")!;
+    const flagLayer = trailmapSvg.querySelector("#tm-flags")!;
+    const len = trail.getTotalLength();
+    revealPath.style.strokeDasharray = `${len}`;
+    revealPath.style.strokeDashoffset = `${len}`;
+
+    const marks = flags.map((d, i) => {
+      const t = (d.altitude - altMin) / (altMax - altMin);
+      const p = trail.getPointAtLength(t * len);
+      const left = i % 2 === 0;
+      const g = document.createElementNS(NS, "g");
+      g.setAttribute("class", "tm-flag");
+      g.setAttribute("tabindex", "0");
+      g.setAttribute("role", "button");
+      g.setAttribute("aria-label", `Go to ${d.name}`);
+      g.innerHTML = `<path d="M${p.x} ${p.y} V ${p.y - 34}" stroke="#40302A" stroke-width="2.5"/>
+        <path d="M${p.x} ${p.y - 34} L ${p.x + 22} ${p.y - 28} L ${p.x} ${p.y - 20} Z" fill="${d.color}" stroke="#40302A" stroke-width="2" stroke-linejoin="round"/>
+        <text x="${left ? p.x - 10 : p.x + 28}" y="${p.y - (i === 0 ? 8 : 22)}" text-anchor="${left ? "end" : "start"}">${d.name} <tspan>${d.altitude.toLocaleString("en-US")} m</tspan></text>`;
+      const go = () => {
+        cancelShot();
+        travelTo(indexOf(d.id));
+      };
+      g.addEventListener("click", go);
+      g.addEventListener("keydown", (e) => (e as KeyboardEvent).key === "Enter" && go());
+      flagLayer.appendChild(g);
+      return { t, g };
+    });
+
+    const t0 = performance.now();
+    const DRAW = 3200;
+    cancelAnimationFrame(mapRaf);
+    const step = (now: number) => {
+      const t = clamp((now - t0) / DRAW, 0, 1);
+      const eased = 1 - (1 - t) ** 2.2;
+      revealPath.style.strokeDashoffset = String(len * (1 - eased));
+      const p = trail.getPointAtLength(eased * len);
+      yakImg.setAttribute("transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+      for (const m of marks) if (!m.g.classList.contains("on") && eased >= m.t - 0.01) m.g.classList.add("on");
+      if (t < 1) mapRaf = requestAnimationFrame(step);
+      else confettiBurst();
+    };
+    mapRaf = requestAnimationFrame(step);
+  }
+  function confettiBurst() {
+    for (let i = 0; i < 50; i++) spawn("confetti", VW * (0.45 + Math.random() * 0.1), VH * 0.3);
+    sound.chime();
+  }
+  function hideTrailmap() {
+    trailmap.classList.remove("show");
+    cancelAnimationFrame(mapRaf);
+  }
+  $("#trailmap-close").addEventListener("click", () => cancelShot());
+  trailmap.addEventListener("click", (e) => {
+    if (e.target === trailmap) cancelShot();
+  });
+
+  /* ---------------- hoofprints in the snow ---------------- */
+
+  const NS = "http://www.w3.org/2000/svg";
+  let stepAcc = 0;
+  let stepFoot = 0;
+  function hoofprint(x: number, slope: number) {
+    const g = document.createElementNS(NS, "g");
+    const y = ground - elev(x) + (stepFoot % 2 ? 6 : 10);
+    const ang = (-Math.atan(slope) * 180) / Math.PI;
+    g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${ang.toFixed(1)})`);
+    g.innerHTML = '<ellipse cx="-3.4" rx="3.2" ry="2"/><ellipse cx="3.4" rx="3.2" ry="2"/>';
+    prints.appendChild(g);
+    if (prints.childElementCount > 700) prints.firstElementChild?.remove();
+  }
+
+  /* ---------------- main loop ---------------- */
+
+  let fogSaid = 0;
+
   function frame(now: number) {
     const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 0.016;
     lastT = now;
@@ -956,11 +1241,42 @@ function boot() {
     const e = elev(yakX);
     const slope = (elev(yakX + 6) - elev(yakX - 6)) / 12;
 
-    world.style.transform = `translate3d(${-cam}px, ${e}px, 0)`;
-    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0)`;
-    clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
-    mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
-    near.style.transform = `translate3d(${-cam * 0.6}px, 0, 0)`;
+    // camera: normally Yakku's feet sit at a fixed screen spot; shots blend away from that
+    const k = shot ? shotK(now) : 0;
+    const reveal = shot?.kind === "reveal" ? k : 0;
+    const dyk = shot?.kind === "intro" ? shot.dy * k : 0;
+    let sc = 1;
+    let fx = yakX;
+    let fy = ground - e;
+    let sx = VW * yakFrac;
+    let sy = ground;
+    if (shot && shot.kind === "reveal") {
+      sc = Math.exp(lerp(0, Math.log(shot.s), k));
+      fx = lerp(fx, shot.fx, k);
+      fy = lerp(fy, shot.fy, k);
+      sx = lerp(sx, VW / 2, k);
+      sy = lerp(sy, VH * 0.6, k);
+    } else if (shot) {
+      sc = lerp(1, shot.s, k);
+    }
+    const tx = sx - fx * sc;
+    const ty = sy - fy * sc + dyk;
+    world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${sc})`;
+
+    const farS = 1 - reveal * 0.18;
+    far.style.transformOrigin = `${VW / 2 + cam * 0.1}px ${ground}px`;
+    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3 + dyk * 0.35}px, 0) scale(${farS})`;
+    clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4 + dyk * 0.5}px, 0)`;
+    mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6 + dyk * 0.6}px, 0)`;
+    near.style.transform = `translate3d(${-cam * 0.6}px, ${dyk * 0.8}px, 0)`;
+    front.style.transform = `translate3d(${-cam * 1.4}px, ${dyk * 1.15}px, 0)`;
+    const layerFade = String(1 - reveal);
+    mid.style.opacity = layerFade;
+    near.style.opacity = layerFade;
+    front.style.opacity = layerFade;
+    if (shot?.kind === "reveal" && reveal > 0.9 && !trailmap.classList.contains("show")) showTrailmap();
+    if (trailmap.classList.contains("show") && (!shot || shot.kind !== "reveal" || shot.cancelAt !== undefined)) hideTrailmap();
+
     for (const b of buckets) {
       const show = b.x1 > cam * 0.6 - 200 && b.x0 < cam * 0.6 + VW + 200;
       if (show !== b.shown) {
@@ -968,48 +1284,85 @@ function boot() {
         b.el.style.display = show ? "" : "none";
       }
     }
+    for (const b of frontBuckets) {
+      const show = b.x1 > cam * 1.4 - 400 && b.x0 < cam * 1.4 + VW + 200;
+      if (show !== b.shown) {
+        b.shown = show;
+        b.el.style.display = show ? "" : "none";
+      }
+    }
 
-    // cull chunks that are off screen
+    // cull chunks that are off screen (the visible range grows when zoomed out)
+    const v0 = -tx / sc;
+    const v1 = (VW - tx) / sc;
     for (const c of chunks) {
-      const show = c.x1 > cam - 200 && c.x0 < cam + VW + 200;
+      const show = c.x1 > v0 - 200 && c.x0 < v1 + 200;
       if (show !== c.shown) {
         c.shown = show;
         c.el.style.display = show ? "" : "none";
       }
     }
 
-    // reveal stops as they come into view
-    for (const s of L) if (!s.el.classList.contains("seen") && s.x0 < cam + VW * 0.8) s.el.classList.add("seen");
+    // reveal stops as they come into view (but not mid-drop)
+    if (!(shot?.kind === "intro" && k > 0.35))
+      for (const s of L) if (!s.el.classList.contains("seen") && s.x0 < v1 - VW * 0.2) s.el.classList.add("seen");
 
     // yak
     const speed = Math.abs(vel);
     const moving = speed > 18;
+    const grumpy = now < grumpyUntil;
     if (vel > 25) face = 1;
     else if (vel < -25) face = -1;
-    actor.classList.toggle("face-left", face < 0);
+    actor.classList.toggle("face-left", grumpy && !moving ? true : face < 0);
     const yakH = yakW * (210 / 260);
     const tilt = (-Math.atan(slope) * 180) / Math.PI * 0.8 * (moving ? 1 : 0.6);
     actor.style.transform = `translate3d(${yakX - yakW / 2}px, ${ground - e - yakH * (197 / 210)}px, 0) rotate(${tilt.toFixed(2)}deg)`;
 
     const here = stopAt(yakX);
+    const surface: Surface = here?.d.biome === "snow" || (!here && biomeAt(yakX, 0.5) === "snow") ? "snow" : biomeAt(yakX, 0.5) === "rock" ? "rock" : "grass";
+
+    // footsteps: a sound on every step, and hoofprints once there's snow underfoot
+    if (moving) {
+      stepAcc += Math.abs(cam - prev);
+      const stride = yakW * 0.3;
+      if (stepAcc > stride) {
+        stepAcc = 0;
+        stepFoot++;
+        sound.step(surface);
+        if (surface === "snow" && elev(yakX) / maxLevel > 0.55) {
+          const foot = stepFoot % 2 ? yakW * 0.24 : -yakW * 0.2;
+          hoofprint(yakX + foot * face, slope);
+        }
+      }
+    }
+
     if (moving) {
       setPose(speed > 1500 ? "run" : "walk");
       restAt = now;
+      if (grumpy && speed > 200 && now - lastPoke > 600) {
+        grumpyUntil = 0;
+        speak("Fine. FINE. I'm walking.");
+      }
     } else {
       const still = now - restAt;
       let rest: string = here ? here.d.pose : "idle";
       if (rest === "wave" && still > 3200) rest = "idle";
       if (rest === "idle" && still > 9000) rest = "graze";
+      if (grumpy) rest = "grumpy";
       if (still > 220) setPose(rest);
-      if (here && still > 260 && arrived !== here.d.id) {
+      if (here && still > 260 && arrived !== here.d.id && !(shot?.kind === "intro")) {
         arrived = here.d.id;
         L.forEach((s) => s.el.classList.toggle("here", s === here));
         here.el.classList.add("raised");
         const lines = quips[here.d.id];
-        if (lines) speak(pick(lines));
+        if (lines && !grumpy) speak(pick(lines));
         if (here.d.id === "summit" && !summitParty) {
           summitParty = true;
           confetti();
+          sound.chime();
+          window.setTimeout(() => {
+            if (stopAt(cam + VW * yakFrac)?.d.id === "summit" && Math.abs(window.scrollY - cam) < 4) startReveal();
+          }, 1700);
         }
       }
     }
@@ -1018,24 +1371,41 @@ function boot() {
       L.forEach((s) => s.el.classList.remove("here"));
     }
 
+    // the cloud bank before High Camp
+    let fogK = 0;
+    if (fogB > fogA) {
+      const c = (fogA + fogB) / 2;
+      const hw = (fogB - fogA) / 2 + VW * 0.15;
+      fogK = smooth(clamp((1 - Math.abs(yakX - c) / hw) * 1.7, 0, 1)) * (1 - reveal);
+      if (fogK > 0.6 && fogSaid === 0) {
+        fogSaid = 1;
+        speak("Can't see a thing… keep scrolling!");
+      } else if (fogSaid === 1 && fogK < 0.05 && yakX > c) {
+        fogSaid = 2;
+        speak("Whoa. SNOW.");
+      }
+    }
+    fog.style.opacity = (fogK * 0.86).toFixed(3);
+
     // sky / time of day
     const su = stopUnits(yakX);
     if (Math.abs(su - lastS) > 0.002) {
       lastS = su;
-      let k = 0;
-      while (k < SKY.length - 2 && su > SKY[k + 1][0]) k++;
-      const [a0, at, ab] = SKY[k];
-      const [b0, bt, bb] = SKY[k + 1];
+      let kk = 0;
+      while (kk < SKY.length - 2 && su > SKY[kk + 1][0]) kk++;
+      const [a0, at, ab] = SKY[kk];
+      const [b0, bt, bb] = SKY[kk + 1];
       const t = clamp((su - a0) / (b0 - a0), 0, 1);
       sky.style.background = `linear-gradient(180deg, ${mix(at, bt, t)} 0%, ${mix(ab, bb, t)} 78%)`;
       const night = clamp((su - (L.length - 1.6)) / 0.6, 0, 1);
       stars.style.opacity = String(night);
       tint.style.opacity = String(night * 0.55);
       chunksEl.style.filter = night > 0.01 ? `brightness(${1 - night * 0.38}) saturate(${1 - night * 0.3})` : "";
+      front.style.filter = night > 0.01 ? `brightness(${1 - night * 0.5})` : "";
       root.classList.toggle("is-night", night > 0.5);
       const daySpan = L.length - 2.4;
-      const sy = su < daySpan ? 0.2 - 0.1 * Math.sin((Math.PI * su) / daySpan) : 0.2 + (su - daySpan) * 0.75;
-      sun.style.transform = `translate3d(${VW * (0.76 + 0.14 * (su / L.length))}px, ${VH * sy}px, 0)`;
+      const sy2 = su < daySpan ? 0.2 - 0.1 * Math.sin((Math.PI * su) / daySpan) : 0.2 + (su - daySpan) * 0.75;
+      sun.style.transform = `translate3d(${VW * (0.76 + 0.14 * (su / L.length))}px, ${VH * sy2}px, 0)`;
       sun.style.opacity = String(clamp(1 - (su - daySpan - 0.5) * 2, 0, 1));
       moon.style.opacity = String(night);
       clouds.style.opacity = String(1 - night * 0.85);
@@ -1048,7 +1418,7 @@ function boot() {
       lastAlt = alt;
       hudAlt.textContent = alt.toLocaleString("en-US");
     }
-    const place = here ? here.d.name : `on the trail`;
+    const place = here ? here.d.name : fogK > 0.5 ? "in the clouds" : "on the trail";
     if (place !== lastPlace) {
       lastPlace = place;
       hudPlace.textContent = place;
@@ -1057,7 +1427,15 @@ function boot() {
     mapYak.style.left = `${(yakX / worldW) * 100}%`;
     mapYak.style.top = `${((27 - (e / maxLevel) * 23) / 30) * 100}%`;
 
-    weather(dt, now, vel, here?.d.biome ?? biomeAt(yakX, 0.5), e / maxLevel, moving && speed > 80, face);
+    const biome = here?.d.biome ?? biomeAt(yakX, 0.5);
+    weather(dt, now, vel, biome, e / maxLevel, moving && speed > 80 && k < 0.05, face);
+    sound.update({
+      level: e / maxLevel,
+      gust,
+      fog: fogK,
+      birds: biome === "forest" || biome === "meadow",
+      fire: here?.d.id === "hikers" ? 1 : 0,
+    });
 
     requestAnimationFrame(frame);
   }
@@ -1070,6 +1448,7 @@ function boot() {
     const i = currentIndex();
     const off = L.length ? (window.scrollY - camFor(i)) / VW : 0;
     layout();
+    prints.innerHTML = "";
     lastW = VW;
     lastH = VH;
     const y = clamp(camFor(i) + off * VW, 0, maxCam);
@@ -1103,6 +1482,10 @@ function boot() {
   else {
     window.scrollTo(0, 0);
     cam = 0;
+    if (!sessionStorage.getItem("yak-intro") && !sp.has("nointro")) {
+      sessionStorage.setItem("yak-intro", "1");
+      startIntro();
+    }
   }
 
   void reduced;

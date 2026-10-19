@@ -22,7 +22,7 @@ const tents = ["#06D6A0", "#4CC9F0", "#FFD166", "#E85D2F"];
     <Trek>
       <Basecamp />
       <Trailhead />
-      {camps.map((job, i) => <Camp id={campIds[i]} job={job} numeral={numerals[i]} tent={tents[i]} first={i === 0} />)}
+      {camps.map((job, i) => <Camp id={campIds[i]} job={job} numeral={numerals[i]} tent={tents[i]} first={i === 0} gap={i === 3 ? 3 : 1} />)}
       <Fireside />
       <Notes />
       <Summit />
