@@ -15,6 +15,7 @@ interface Props {
 const { title, description, mode = "journal" } = Astro.props;
 // canonical + absolute URLs only work once `site` is set in astro.config.mjs
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const ogImage = Astro.site ? new URL("/og.png", Astro.site).href : undefined;
 const person = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -55,7 +56,12 @@ const person = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
-    <meta name="twitter:card" content="summary" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImage && <meta property="og:image:height" content="630" />}
+    {ogImage && <meta property="og:image:alt" content="Yakku the yak with a Nepal flag on his pack, in front of Everest, beside the name Rakesh Thapa" />}
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {mode === "trek" && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
