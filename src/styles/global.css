@@ -814,28 +814,73 @@ h3 {
 .trek-on .fog {
   position: absolute;
   inset: 0;
-  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
   pointer-events: none;
-  background: linear-gradient(180deg, rgb(244 247 250 / 0.75), rgb(250 251 252 / 0.95) 70%);
 }
-.fog i {
+/* A bank three viewports wide: billowy leading edge, a solid core the
+   width of the screen, billowy trailing edge. JS slides it across as
+   the yak walks in and out, so the cloud arrives and leaves as a wall
+   rather than a whole-screen fade. */
+.fog-bank {
   position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(closest-side, rgb(255 255 255 / 0.95), transparent) 10% 30% / 40% 34% no-repeat,
-    radial-gradient(closest-side, rgb(255 255 255 / 0.9), transparent) 60% 20% / 50% 40% no-repeat,
-    radial-gradient(closest-side, rgb(255 255 255 / 0.9), transparent) 30% 75% / 55% 40% no-repeat,
-    radial-gradient(closest-side, rgb(255 255 255 / 0.95), transparent) 85% 70% / 45% 38% no-repeat;
-  animation: fogDrift 9s ease-in-out infinite alternate;
+  top: -12%;
+  bottom: -12%;
+  left: 0;
+  width: calc(var(--vw, 100vw) * 3);
+  will-change: transform;
+  background: linear-gradient(180deg, rgb(238 243 248 / 0.82), rgb(250 251 252 / 0.97) 65%);
+  --fog-mask:
+    linear-gradient(90deg, transparent 4%, #000 29%, #000 71%, transparent 96%),
+    radial-gradient(closest-side, #000 40%, transparent) 17% 22% / 16% 38% no-repeat,
+    radial-gradient(closest-side, #000 40%, transparent) 21% 62% / 14% 34% no-repeat,
+    radial-gradient(closest-side, #000 40%, transparent) 13% 92% / 18% 40% no-repeat,
+    radial-gradient(closest-side, #000 40%, transparent) 81% 18% / 15% 36% no-repeat,
+    radial-gradient(closest-side, #000 40%, transparent) 85% 56% / 17% 40% no-repeat,
+    radial-gradient(closest-side, #000 40%, transparent) 79% 90% / 14% 34% no-repeat;
+  -webkit-mask: var(--fog-mask);
+  mask: var(--fog-mask);
 }
-.fog i:nth-child(2) {
-  animation-duration: 13s;
+/* wisp layers: one tile per viewport, repeated, and one tile wider than
+   the bank so JS can stream them past and wrap seamlessly */
+.fog-bank i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--vw, 100vw) * -1);
+  right: 0;
+  background-size: var(--vw, 100vw) 100%;
+  background-repeat: repeat-x;
+  animation: fogDrift 11s ease-in-out infinite alternate;
+}
+.fog-bank i:nth-child(1) {
+  background-image:
+    radial-gradient(ellipse 28% 20% at 18% 20%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(ellipse 32% 24% at 62% 48%, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(ellipse 26% 20% at 30% 85%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(ellipse 22% 16% at 88% 82%, rgb(255 255 255 / 0.85), transparent);
+}
+.fog-bank i:nth-child(2) {
+  opacity: 0.75;
+  background-image:
+    radial-gradient(ellipse 36% 14% at 40% 14%, rgb(232 238 245 / 0.9), transparent),
+    radial-gradient(ellipse 30% 18% at 8% 58%, rgb(240 244 249 / 0.85), transparent),
+    radial-gradient(ellipse 34% 16% at 75% 72%, rgb(236 241 247 / 0.9), transparent);
+  animation-duration: 15s;
   animation-direction: alternate-reverse;
-  opacity: 0.8;
+}
+.fog-bank i:nth-child(3) {
+  /* low, dense foreground scud that rushes past */
+  opacity: 0.9;
+  background-image:
+    radial-gradient(ellipse 30% 22% at 20% 96%, rgb(255 255 255 / 0.95), transparent),
+    radial-gradient(ellipse 24% 18% at 70% 100%, rgb(255 255 255 / 0.95), transparent),
+    radial-gradient(ellipse 14% 30% at 96% 40%, rgb(255 255 255 / 0.7), transparent);
+  animation-duration: 7s;
 }
 @keyframes fogDrift {
   to {
-    transform: translate(8%, -3%);
+    transform: translate(0, -3%);
   }
 }
 
@@ -1181,23 +1226,51 @@ h3 {
   scale: 1;
 }
 
-/* phones: content sits right above Yakku, so he talks sideways instead */
+/* phones: content sits right above Yakku, so he talks sideways instead.
+   The bubble wraps to a short, balanced block beside his head, with the
+   tail aimed at his mouth; when he turns round it hops up beside his hump
+   (not above it, where it would cover the card). */
 @media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   .quip {
-    bottom: 38%;
-    left: 92%;
-    font-size: 1.15rem;
-    border-radius: 14px 16px 16px 14px;
-    transform-origin: 0 50%;
+    bottom: 50%;
+    left: 90%;
+    max-width: min(11.5em, var(--quip-max, 230px));
+    padding: 0.35rem 0.65rem 0.4rem;
+    font-size: clamp(1rem, 3.9vw, 1.15rem);
+    line-height: 1.08;
+    text-wrap: balance;
+    border-radius: 14px 16px 16px 5px;
+    transform-origin: 0 100%;
+    transition:
+      opacity 0.2s ease,
+      scale 0.35s var(--bounce),
+      left 0.3s var(--bounce),
+      bottom 0.3s var(--bounce);
   }
+  /* tail points left, at his mouth */
   .quip::after {
-    left: -9px;
-    bottom: 40%;
-    border-right: 0;
-    border-top: 2.5px solid var(--ink);
-    border-left: 2.5px solid var(--ink);
-    border-bottom: 2.5px solid var(--ink);
+    left: -7px;
+    bottom: 5px;
+    width: 12px;
+    height: 12px;
     border-top: 0;
+    border-right: 0;
+    border-left: 2.5px solid var(--ink);
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 3px;
+  }
+  .face-left .quip {
+    bottom: 66%;
+    left: 80%;
+  }
+  /* tail points down, over his back */
+  .face-left .quip::after {
+    left: 8px;
+    bottom: -8px;
+    border-left: 0;
+    border-right: 2.5px solid var(--ink);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 3px;
   }
 }
 

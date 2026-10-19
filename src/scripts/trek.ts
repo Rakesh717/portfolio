@@ -280,6 +280,8 @@ function boot() {
   const near = $("#layer-near");
   const front = $("#layer-front");
   const fog = $("#fog");
+  const fogBank = $("#fog-bank");
+  const fogWisps = [...fogBank.querySelectorAll<HTMLElement>("i")];
   const prints = $("#prints") as unknown as SVGSVGElement;
   const trailmap = $("#trailmap");
   const trailmapSvg = $("#trailmap-svg") as unknown as SVGSVGElement;
@@ -1306,6 +1308,7 @@ function boot() {
   /* ---------------- main loop ---------------- */
 
   let fogSaid = 0;
+  let fogShown = false;
 
   function frame(now: number) {
     const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 0.016;
@@ -1477,9 +1480,11 @@ function boot() {
 
     // the cloud bank before High Camp
     let fogK = 0;
+    let fogP = 0;
     if (fogB > fogA) {
       const c = (fogA + fogB) / 2;
       const hw = (fogB - fogA) / 2 + VW * 0.15;
+      fogP = clamp((yakX - c) / hw, -1, 1);
       fogK = smooth(clamp((1 - Math.abs(yakX - c) / hw) * 1.7, 0, 1)) * (1 - reveal);
       if (fogK > 0.6 && fogSaid === 0) {
         fogSaid = 1;
@@ -1489,7 +1494,24 @@ function boot() {
         speak("Whoa. SNOW.");
       }
     }
-    fog.style.opacity = (fogK * 0.86).toFixed(3);
+    // slide the bank in from the right as the yak climbs into it and out to
+    // the left as it walks clear; the core covers the screen while |p| < 0.3
+    const fogOn = fogK > 0.001;
+    if (fogOn) {
+      const slide = Math.sign(fogP) * smooth(clamp((Math.abs(fogP) - 0.3) / 0.7, 0, 1));
+      fogBank.style.transform = `translate3d(${(-VW * (1 + 2 * slide)).toFixed(1)}px, 0, 0)`;
+      // wisps stream past faster than the bank, nearer layers faster still;
+      // they're one tile (VW) wider than the bank so the wrap is seamless
+      fogWisps.forEach((w, i) => {
+        const off = (cam * (0.25 + i * 0.35)) % VW;
+        w.style.translate = `${(VW - off).toFixed(1)}px 0`;
+      });
+      fog.style.opacity = (0.94 * (1 - reveal)).toFixed(3);
+    }
+    if (fogOn !== fogShown) {
+      fogShown = fogOn;
+      fog.style.visibility = fogOn ? "visible" : "hidden";
+    }
 
     // sky / time of day
     const su = stopUnits(yakX);
