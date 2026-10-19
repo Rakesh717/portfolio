@@ -757,12 +757,12 @@ h3 {
   position: absolute;
   top: 0;
   left: 0;
-  width: clamp(76px, 8vw, 124px);
+  width: clamp(76px, 8vw, 152px);
   margin: -60px 0 0 -60px;
   will-change: transform;
 }
 .trek-on .moon {
-  width: clamp(54px, 5vw, 80px);
+  width: clamp(54px, 5vw, 100px);
   opacity: 0;
 }
 .sun-rays {
@@ -1611,15 +1611,15 @@ h3 {
 .base {
   margin: auto 0;
   padding-bottom: 6vh;
-  max-width: 56rem;
+  max-width: 62rem;
 }
 .base-hello {
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-size: clamp(1.6rem, 2.4vw, 2.6rem);
   rotate: -3deg;
   margin-bottom: 0.4rem;
 }
 .base-name {
-  font-size: clamp(3.6rem, min(11vw, 18vh), 10.5rem);
+  font-size: clamp(3.6rem, min(11.5vw, 20vh), 14.5rem);
   line-height: 0.84;
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -1656,8 +1656,8 @@ h3 {
 }
 .base-lede {
   margin-top: 1.4rem;
-  max-width: 33rem;
-  font-size: clamp(1.1rem, 1.55vw, 1.45rem);
+  max-width: 36rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.7rem);
   line-height: 1.45;
 }
 mark {
@@ -1673,6 +1673,7 @@ mark.mk-teal {
   align-items: center;
   gap: 0.4rem;
   margin-top: 1.6rem;
+  font-size: clamp(1.4rem, 1.6vw, 1.8rem);
   color: var(--ink);
 }
 
@@ -2229,7 +2230,7 @@ mark.mk-teal {
 }
 .summit-title {
   margin-top: 0.6rem;
-  font-size: clamp(2.6rem, min(5.6vw, 9vh), 5.2rem);
+  font-size: clamp(2.6rem, min(5.8vw, 10vh), 6.4rem);
   line-height: 0.95;
   font-weight: 750;
   text-shadow: 0 2px 0 rgb(255 243 222 / 0.5);
@@ -2550,6 +2551,65 @@ html:not(.trek-on) .deck {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Large screens: let the trek breathe and the type grow               */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 1536px) {
+  :root {
+    --top: 110px;
+  }
+
+  .hud-alt {
+    padding: 0.45rem 1rem 0.45rem 0.65rem;
+  }
+  .hud-num {
+    font-size: 1.1rem;
+  }
+  .hud-num b {
+    font-size: 1.3rem;
+  }
+  .hud-place {
+    font-size: 1.5rem;
+  }
+  .hud-sound {
+    right: 150px;
+    padding: 0.45rem 0.9rem 0.45rem 0.65rem;
+    font-size: 1.4rem;
+  }
+  .hud-mail {
+    padding: 0.45rem 0.9rem;
+    font-size: 1.5rem;
+  }
+  .hud-map {
+    bottom: 16px;
+    width: min(640px, 56vw);
+    height: 58px;
+  }
+  .hud-map-line,
+  .hud-map-stops {
+    inset: 9px 18px;
+    width: calc(100% - 36px);
+    height: calc(100% - 18px);
+  }
+
+  .logbook {
+    width: min(100%, 40rem);
+  }
+  .log-company {
+    font-size: clamp(1.9rem, min(3vw, 5vh), 3.2rem);
+  }
+  .log-role {
+    font-size: 1.05rem;
+  }
+  .log-body {
+    font-size: clamp(14.5px, 1.9vh, 18px);
+  }
+  .register {
+    width: min(100%, 42rem);
   }
 }
 

@@ -295,7 +295,7 @@ function boot() {
     ground = Math.round(VH * (mobile ? 0.88 : 0.9));
     gapW = Math.round(VW * (mobile ? 0.6 : 0.4));
     yakFrac = mobile ? 0.2 : 0.15;
-    yakW = mobile ? 112 : clamp(VW * 0.13, 150, 210);
+    yakW = mobile ? 112 : clamp(VW * 0.13, 150, 280);
     const totalRise = VH * (mobile ? 0.8 : 0.95);
     const altMin = data[0].altitude;
     const altMax = Math.max(...data.map((d) => d.altitude));
@@ -378,7 +378,7 @@ function boot() {
   function buildChunks() {
     chunksEl.innerHTML = "";
     chunks = [];
-    const scale = mobile ? 0.62 : clamp(VH / 900, 0.75, 1.15);
+    const scale = mobile ? 0.62 : clamp(VH / 900, 0.75, 1.3);
     const bottom = VH * 3.5; // deep enough for the summit zoom-out
 
     L.forEach((s, i) => {
@@ -553,9 +553,10 @@ function boot() {
 
     // clouds
     const cw = Math.ceil(VW + maxCam * 0.18 + 400);
+    const skyScale = clamp(VW / 1500, 1, 1.7);
     let cl = "";
     for (let x = 40; x < cw; x += 320 + r() * 520) {
-      const w = (mobile ? 90 : 120) + r() * 110;
+      const w = ((mobile ? 90 : 120) + r() * 110) * skyScale;
       cl += `<svg class="cloud" viewBox="0 0 160 70" style="left:${x.toFixed(0)}px;top:${(VH * (0.06 + r() * 0.26)).toFixed(0)}px;width:${w.toFixed(0)}px;animation-duration:${(10 + r() * 10).toFixed(1)}s;animation-delay:${(-r() * 10).toFixed(1)}s"><use href="#s-cloud"/></svg>`;
     }
     clouds.style.width = `${cw}px`;
@@ -564,7 +565,7 @@ function boot() {
     // near tree line: a breezy forest that thins out as the trail climbs
     const NEAR = 0.6;
     const nw = Math.ceil(VW + maxCam * NEAR + 300);
-    const scale = mobile ? 0.6 : clamp(VH / 900, 0.75, 1.1);
+    const scale = mobile ? 0.6 : clamp(VH / 900, 0.75, 1.25);
     near.style.width = `${nw}px`;
     near.innerHTML = "";
     buckets = [];
