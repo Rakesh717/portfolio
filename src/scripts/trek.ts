@@ -905,24 +905,47 @@ function boot() {
     soundBtn.setAttribute("aria-pressed", String(sound.on));
     soundBtn.classList.toggle("is-on", sound.on);
   };
-  soundBtn.addEventListener("click", () => {
+  const isMuteKey = (e: KeyboardEvent) => {
+    const t = e.target as HTMLElement;
+    return (
+      (e.key === "m" || e.key === "M") &&
+      !(e.metaKey || e.ctrlKey || e.altKey) &&
+      !/INPUT|TEXTAREA|SELECT/.test(t.tagName) &&
+      !t.isContentEditable
+    );
+  };
+  // remember the choice, but browsers only allow audio after a gesture
+  const wake = (e: Event) => {
+    // a press on the button itself is handled by its click, or it'd turn on then straight off
+    if (e.target instanceof Node && soundBtn.contains(e.target)) return;
+    if (e instanceof KeyboardEvent && isMuteKey(e)) return;
+    stopWaking();
+    sound.enable();
+    setSoundUi();
+  };
+  const stopWaking = () => {
+    window.removeEventListener("pointerdown", wake);
+    window.removeEventListener("keydown", wake);
+  };
+  if (localStorage.getItem("yak-sound") === "on") {
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+  }
+  const toggleSound = () => {
+    stopWaking();
     if (sound.on) sound.disable();
     else sound.enable();
     localStorage.setItem("yak-sound", sound.on ? "on" : "off");
     setSoundUi();
     if (sound.on) speak("Listen… that's the mountain.");
+  };
+  soundBtn.addEventListener("click", toggleSound);
+  // M mutes or unmutes from anywhere
+  window.addEventListener("keydown", (e) => {
+    if (!isMuteKey(e) || e.repeat) return;
+    e.preventDefault();
+    toggleSound();
   });
-  // remember the choice, but browsers only allow audio after a gesture
-  if (localStorage.getItem("yak-sound") === "on") {
-    const wake = () => {
-      sound.enable();
-      setSoundUi();
-      window.removeEventListener("pointerdown", wake);
-      window.removeEventListener("keydown", wake);
-    };
-    window.addEventListener("pointerdown", wake);
-    window.addEventListener("keydown", wake);
-  }
   document.addEventListener("visibilitychange", () => sound.suspend(document.hidden));
 
   // poke him. poke him ten times and see what happens.

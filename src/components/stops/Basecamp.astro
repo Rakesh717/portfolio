@@ -15,19 +15,76 @@ const name = ["Rakesh", "Thapa"];
           <circle cx="160" cy="-10" r="9" fill="#FFFDF6" stroke={ink} stroke-width="2"></circle>
           <circle cx="172" cy="-30" r="11" fill="#FFFDF6" stroke={ink} stroke-width="2"></circle>
         </g>
+        <!-- stone chimney -->
         <rect x="140" y="12" width="16" height="30" rx="2" fill="#A79C90" stroke={ink} stroke-width="3"></rect>
-        <rect x="20" y="72" width="160" height="108" fill="#F6E7C8" stroke={ink} stroke-width="3"></rect>
-        <path d="M20 100 h40 M90 92 h50 M150 120 h30 M20 150 h24 M150 160 h30" stroke={ink} stroke-opacity=".25" stroke-width="2.5"></path>
-        <path d="M4 78 L 40 32 L 160 32 L 196 78 Z" fill="#2A9D8F" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
-        <path d="M14 66 H 186" stroke={ink} stroke-width="2.5" stroke-opacity=".4"></path>
-        <rect x="34" y="104" width="32" height="28" rx="2" fill="#4CC9F0" stroke={ink} stroke-width="3"></rect>
-        <path d="M50 104 v28 M34 118 h32" stroke={ink} stroke-width="2.5"></path>
-        <rect x="134" y="104" width="32" height="28" rx="2" fill="#FFD166" stroke={ink} stroke-width="3"></rect>
-        <path d="M150 104 v28 M134 118 h32" stroke={ink} stroke-width="2.5"></path>
-        <rect x="84" y="116" width="32" height="64" rx="3" fill="#7C4F2E" stroke={ink} stroke-width="3"></rect>
-        <circle cx="109" cy="150" r="2.5" fill="#FFC53D"></circle>
-        <rect x="62" y="82" width="76" height="20" rx="3" fill="#E85D2F" stroke={ink} stroke-width="2.5"></rect>
-        <text x="100" y="97" text-anchor="middle" font-family="Bricolage Grotesque Variable, sans-serif" font-size="12" font-weight="800" letter-spacing="1.5" fill="#FFFDF6">TEA HOUSE</text>
+        <path d="M140 22 h16 M140 32 h16 M148 12 v10 M145 22 v10 M151 32 v10" stroke={ink} stroke-opacity=".35" stroke-width="1.5"></path>
+
+        <!-- whitewashed stone walls -->
+        <rect x="20" y="72" width="160" height="108" fill="#FBF3E2" stroke={ink} stroke-width="3"></rect>
+        <path d="M20 88 q8 -3 16 0 M150 84 q10 -3 20 0 M24 142 q9 -3 18 0 M156 140 q9 -3 18 0 M52 152 q8 -3 16 0 M132 154 q8 -3 16 0" fill="none" stroke={ink} stroke-opacity=".22" stroke-width="2"></path>
+        <rect x="20" y="164" width="160" height="16" fill="#CFC4B6" stroke={ink} stroke-width="3"></rect>
+        <path d="M40 164 v16 M62 164 v16 M138 164 v16 M160 164 v16" stroke={ink} stroke-opacity=".35" stroke-width="2"></path>
+
+        <!-- corrugated tin roof weighed down with rocks -->
+        <path d="M6 72 L 36 30 L 164 30 L 194 72 Z" fill="#2A9D8F" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M52 30 L 29.5 72 M68 30 L 53 72 M84 30 L 76.5 72 M100 30 V 72 M116 30 L 123.5 72 M132 30 L 147 72 M148 30 L 170.5 72" stroke={ink} stroke-opacity=".28" stroke-width="2"></path>
+        <path d="M34 30 H 166" stroke={ink} stroke-width="4" stroke-linecap="round"></path>
+        <ellipse cx="60" cy="46" rx="6" ry="4" fill="#A79C90" stroke={ink} stroke-width="2"></ellipse>
+        <ellipse cx="128" cy="56" rx="7" ry="4.5" fill="#A79C90" stroke={ink} stroke-width="2"></ellipse>
+        <ellipse cx="96" cy="40" rx="5" ry="3.5" fill="#A79C90" stroke={ink} stroke-width="2"></ellipse>
+
+        <!-- prayer flags from the roof pole to the chimney -->
+        <path d="M40 30 V -6" stroke={ink} stroke-width="2.5" stroke-linecap="round"></path>
+        <circle cx="40" cy="-7" r="2.5" fill="#FFC53D" stroke={ink} stroke-width="1.5"></circle>
+        <path d="M40 -4 Q 94 30 148 12" fill="none" stroke={ink} stroke-width="1.5"></path>
+        <g stroke={ink} stroke-width="1.5" stroke-linejoin="round">
+          <path d="M47 2.3 h8 l-1 9 h-7 Z" fill="#3A86FF"></path>
+          <path d="M58 7.5 h8 l-1 9 h-7 Z" fill="#FFFDF6"></path>
+          <path d="M68 11.7 h8 l-1 9 h-7 Z" fill="#E85D2F"></path>
+          <path d="M79 14.9 h8 l-1 9 h-7 Z" fill="#2A9D8F"></path>
+          <path d="M90 17 h8 l-1 9 h-7 Z" fill="#FFC53D"></path>
+          <path d="M101 18.1 h8 l-1 9 h-7 Z" fill="#3A86FF"></path>
+          <path d="M112 18.1 h8 l-1 9 h-7 Z" fill="#FFFDF6"></path>
+          <path d="M122 17.1 h8 l-1 9 h-7 Z" fill="#E85D2F"></path>
+          <path d="M133 15.1 h8 l-1 9 h-7 Z" fill="#2A9D8F"></path>
+        </g>
+
+        <!-- Sherpa-style windows: black trapezoid surrounds, painted lintels -->
+        <path d="M32 102 h36 l5 32 h-46 Z" fill={ink}></path>
+        <rect x="28" y="96" width="44" height="6" fill="#E85D2F" stroke={ink} stroke-width="2"></rect>
+        <path d="M31 99 h38" stroke="#FFC53D" stroke-width="1.5" stroke-dasharray="3 2"></path>
+        <rect x="36" y="105" width="28" height="24" rx="1" fill="#4CC9F0" stroke="#FFFDF6" stroke-width="2"></rect>
+        <path d="M50 105 v24 M36 117 h28" stroke="#FFFDF6" stroke-width="2"></path>
+
+        <path d="M132 102 h36 l5 32 h-46 Z" fill={ink}></path>
+        <rect x="128" y="96" width="44" height="6" fill="#E85D2F" stroke={ink} stroke-width="2"></rect>
+        <path d="M131 99 h38" stroke="#FFC53D" stroke-width="1.5" stroke-dasharray="3 2"></path>
+        <rect x="136" y="105" width="28" height="24" rx="1" fill="#FFD166" stroke="#FFFDF6" stroke-width="2"></rect>
+        <path d="M150 105 v24 M136 117 h28" stroke="#FFFDF6" stroke-width="2"></path>
+
+        <!-- carved wooden door with a painted lintel and curtain -->
+        <path d="M82 114 h36 l4 50 h-44 Z" fill={ink}></path>
+        <rect x="78" y="108" width="44" height="6" fill="#E85D2F" stroke={ink} stroke-width="2"></rect>
+        <path d="M81 111 h38" stroke="#FFC53D" stroke-width="1.5" stroke-dasharray="3 2"></path>
+        <rect x="86" y="117" width="28" height="47" fill="#7C4F2E" stroke={ink} stroke-width="2"></rect>
+        <path d="M86 117 h28 v12 q-7 5 -14 0 q-7 5 -14 0 Z" fill="#3A86FF" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M93 129 v3 M100 129 v3 M107 129 v3" stroke="#FFFDF6" stroke-width="1.5"></path>
+        <circle cx="108" cy="148" r="2.5" fill="#FFC53D" stroke={ink} stroke-width="1"></circle>
+        <rect x="76" y="164" width="48" height="6" rx="1" fill="#A79C90" stroke={ink} stroke-width="2"></rect>
+
+        <!-- signboard -->
+        <rect x="58" y="78" width="84" height="16" rx="2" fill="#FFC53D" stroke={ink} stroke-width="2.5"></rect>
+        <text x="100" y="90.5" text-anchor="middle" font-family="Bricolage Grotesque Variable, sans-serif" font-size="10.5" font-weight="800" letter-spacing="1.5" fill={ink}>TEA HOUSE</text>
+
+        <!-- firewood stack -->
+        <g stroke={ink} stroke-width="1.5">
+          <circle cx="26" cy="159" r="4.5" fill="#B5784A"></circle>
+          <circle cx="35" cy="159" r="4.5" fill="#C98D5B"></circle>
+          <circle cx="30.5" cy="151" r="4.5" fill="#C98D5B"></circle>
+          <circle cx="44" cy="159" r="4.5" fill="#B5784A"></circle>
+          <circle cx="39.5" cy="151" r="4.5" fill="#B5784A"></circle>
+        </g>
+        <path d="M26 159 h.1 M35 159 h.1 M30.5 151 h.1 M44 159 h.1 M39.5 151 h.1" stroke={ink} stroke-width="2" stroke-linecap="round"></path>
       </svg>
     </div>
     <div class="plant chorten" style="--x:92%;--xm:88%;--w:min(6vw,104px);--wm:56px">

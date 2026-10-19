@@ -24,6 +24,19 @@ export function createSound() {
   let on = false;
   let nextBird = 0;
   let lastStep = 0;
+  let sleepTimer = 0;
+
+  // glide master volume from wherever it is right now, so re-toggling mid-fade never jumps
+  function fadeTo(value: number, tau: number) {
+    const g = master.gain;
+    const t = ctx!.currentTime;
+    if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(t);
+    else {
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(g.value, t);
+    }
+    g.setTargetAtTime(value, t, tau);
+  }
 
   function init() {
     ctx = new AudioContext();
@@ -121,18 +134,19 @@ export function createSound() {
     },
     enable() {
       if (!ctx) init();
+      window.clearTimeout(sleepTimer);
       void ctx!.resume();
       on = true;
-      master.gain.cancelScheduledValues(ctx!.currentTime);
-      master.gain.setTargetAtTime(0.9, ctx!.currentTime, 0.3);
+      fadeTo(0.9, 0.3);
     },
     disable() {
       on = false;
       if (!ctx) return;
-      master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+      fadeTo(0, 0.12);
+      // only suspend once the fade-out has finished; a quick re-toggle cancels it
+      window.clearTimeout(sleepTimer);
       const c = ctx;
-      window.setTimeout(() => !on && c.suspend(), 600);
+      sleepTimer = window.setTimeout(() => !on && c.suspend(), 600);
     },
     suspend(hidden: boolean) {
       if (!ctx || !on) return;
