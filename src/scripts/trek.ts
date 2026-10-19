@@ -1625,6 +1625,8 @@ function boot() {
     actor.style.transform = `translate3d(${yakX - yakW / 2}px, ${ground - e - yakH * (197 / 210)}px, 0) rotate(${tilt.toFixed(2)}deg)`;
 
     const here = stopAt(yakX);
+    // flags go up the moment he walks into camp; the quip still waits for him to stop
+    if (here && !here.el.classList.contains("raised") && !(shot?.kind === "intro")) here.el.classList.add("raised");
     const surface: Surface = here?.d.biome === "snow" || (!here && biomeAt(yakX, 0.5) === "snow") ? "snow" : biomeAt(yakX, 0.5) === "rock" ? "rock" : "grass";
 
     // footsteps: a sound on every step, and hoofprints once there's snow underfoot
