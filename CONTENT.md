@@ -12,7 +12,7 @@ When copy changes, update those files so the site renders it.
 - **Name:** Rakesh Thapa
 - **Title:** AI Native Product Engineer
 - **Location:** Kathmandu, Nepal
-- **Email:** hello@rakeshthapa.dev
+- **Email:** rakeshthapac@proton.me
 - **Stack:** TypeScript, React, Hono, Laravel, Postgres, Tailwind CSS
 - **Current role:** CTO at Binary Digits
 
@@ -78,7 +78,7 @@ Started my career building backend APIs and back office tools for enterprise cli
 - GitHub: https://github.com/rakesh717
 - LinkedIn: https://www.linkedin.com/in/rakesh717
 - X: https://x.com/rakeshthapa717
-- Email: hello@rakeshthapa.dev
+- Email: rakeshthapac@proton.me
 
 ## Blog posts
 

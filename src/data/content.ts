@@ -7,7 +7,7 @@ export const site = {
   name: "Rakesh Thapa",
   title: "AI Native Product Engineer",
   location: "Kathmandu, Nepal",
-  email: "hello@rakeshthapa.dev",
+  email: "rakeshthapac@proton.me",
   role: "CTO at Binary Digits",
   description:
     "AI Native Product Engineer building thoughtful, reliable products. Nepal based product engineer with seven years of experience, from backend APIs to polished interfaces.",
@@ -17,7 +17,7 @@ export const links = [
   { label: "GitHub", href: "https://github.com/rakesh717", icon: "github" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/rakesh717", icon: "linkedin" },
   { label: "X", href: "https://x.com/rakeshthapa717", icon: "x" },
-  { label: "Email", href: "mailto:hello@rakeshthapa.dev", icon: "mail" },
+  { label: "Email", href: "mailto:rakeshthapac@proton.me", icon: "mail" },
 ] as const;
 
 export const hero = {
