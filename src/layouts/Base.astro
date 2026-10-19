@@ -1,0 +1,42 @@
+---
+import "@fontsource-variable/fraunces/full.css";
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/caveat";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** "trek" = the side-scrolling home page, "journal" = reading pages */
+  mode?: "trek" | "journal";
+}
+
+const { title, description, mode = "journal" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class={`mode-${mode}`}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#FFF3DE" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {
+      mode === "trek" && (
+        <script is:inline>
+          if (
+            !location.search.includes("static=1") &&
+            !matchMedia("(prefers-reduced-motion: reduce)").matches
+          )
+            document.documentElement.classList.add("trek-on");
+        </script>
+      )
+    }
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

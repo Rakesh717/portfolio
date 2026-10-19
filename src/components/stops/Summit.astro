@@ -1,0 +1,37 @@
+---
+import Stop from "./Stop.astro";
+import { contact, site } from "../../data/content";
+
+const ink = "#40302A";
+---
+
+<Stop id="summit" label="Summit — contact" class="s-summit">
+  <Fragment slot="scene">
+    <div class="plant summit-pole" style="--x:25%;--xm:64%;--w:14px" data-flag-anchor>
+      <span class="summit-pole-stick"></span>
+    </div>
+    <div class="plant cairn-big" style="--x:22%;--xm:24%;--w:min(7vw,100px);--wm:64px">
+      <svg viewBox="0 0 44 70"><use href="#s-cairn"></use></svg>
+    </div>
+  </Fragment>
+
+  <div class="summit">
+    <p class="hand summit-kicker">8,848 m — you made it all the way up.</p>
+    <h2 class="summit-title">Let's build something <span class="summit-em">thoughtful.</span></h2>
+    <p class="summit-sub">{contact.subcopy}</p>
+    <div class="summit-actions">
+      <a class="ink-btn ink-btn-primary" href={`mailto:${site.email}`}>
+        <svg width="20" height="15" viewBox="0 0 18 14" aria-hidden="true">
+          <rect x="1" y="1" width="16" height="12" rx="3" fill="#FFFDF6" stroke={ink} stroke-width="2"></rect>
+          <path d="M2 3 L 9 8.5 L 16 3" fill="none" stroke={ink} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        {contact.email}
+      </a>
+      <button class="ink-btn" data-copy={site.email}>
+        <span data-copy-label>Copy {site.email}</span>
+      </button>
+      <a class="ink-btn" href={contact.linkedinHref} target="_blank" rel="noopener">{contact.linkedin}</a>
+    </div>
+    <p class="hand summit-sign">— Rakesh (&amp; Yakku)</p>
+  </div>
+</Stop>

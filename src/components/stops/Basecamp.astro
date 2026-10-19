@@ -1,0 +1,76 @@
+---
+import Stop from "./Stop.astro";
+import { site } from "../../data/content";
+
+const ink = "#40302A";
+const name = ["Rakesh", "Thapa"];
+---
+
+<Stop id="basecamp" label="Basecamp — introduction" class="s-base">
+  <Fragment slot="scene">
+    <div class="plant teahouse" style="--x:1%;--xm:-34%;--w:min(15vw,230px);--wm:150px">
+      <svg viewBox="0 0 200 180">
+        <g class="smoke">
+          <circle cx="150" cy="6" r="7" fill="#FFFDF6" stroke={ink} stroke-width="2"></circle>
+          <circle cx="160" cy="-10" r="9" fill="#FFFDF6" stroke={ink} stroke-width="2"></circle>
+          <circle cx="172" cy="-30" r="11" fill="#FFFDF6" stroke={ink} stroke-width="2"></circle>
+        </g>
+        <rect x="140" y="12" width="16" height="30" rx="2" fill="#A79C90" stroke={ink} stroke-width="3"></rect>
+        <rect x="20" y="72" width="160" height="108" fill="#F6E7C8" stroke={ink} stroke-width="3"></rect>
+        <path d="M20 100 h40 M90 92 h50 M150 120 h30 M20 150 h24 M150 160 h30" stroke={ink} stroke-opacity=".25" stroke-width="2.5"></path>
+        <path d="M4 78 L 40 32 L 160 32 L 196 78 Z" fill="#2A9D8F" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M14 66 H 186" stroke={ink} stroke-width="2.5" stroke-opacity=".4"></path>
+        <rect x="34" y="104" width="32" height="28" rx="2" fill="#4CC9F0" stroke={ink} stroke-width="3"></rect>
+        <path d="M50 104 v28 M34 118 h32" stroke={ink} stroke-width="2.5"></path>
+        <rect x="134" y="104" width="32" height="28" rx="2" fill="#FFD166" stroke={ink} stroke-width="3"></rect>
+        <path d="M150 104 v28 M134 118 h32" stroke={ink} stroke-width="2.5"></path>
+        <rect x="84" y="116" width="32" height="64" rx="3" fill="#7C4F2E" stroke={ink} stroke-width="3"></rect>
+        <circle cx="109" cy="150" r="2.5" fill="#FFC53D"></circle>
+        <rect x="62" y="82" width="76" height="20" rx="3" fill="#E85D2F" stroke={ink} stroke-width="2.5"></rect>
+        <text x="100" y="97" text-anchor="middle" font-family="Bricolage Grotesque Variable, sans-serif" font-size="12" font-weight="800" letter-spacing="1.5" fill="#FFFDF6">TEA HOUSE</text>
+      </svg>
+    </div>
+    <div class="plant chorten" style="--x:92%;--xm:88%;--w:min(5.5vw,84px);--wm:56px">
+      <svg viewBox="0 0 80 140">
+        <path d="M40 4 L 46 22 H 34 Z" fill="#FFC53D" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+        <path d="M34 22 h12 l2 8 h-16 Z M33 30 h14 l2 8 h-18 Z M32 38 h16 l2 8 h-20 Z" fill="#FFC53D" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+        <rect x="27" y="46" width="26" height="16" fill="#FFFDF6" stroke={ink} stroke-width="2.5"></rect>
+        <path d="M32 54 q3 -3 6 0 M42 54 q3 -3 6 0" fill="none" stroke={ink} stroke-width="2"></path>
+        <path d="M14 92 C 14 70 26 62 40 62 C 54 62 66 70 66 92 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5"></path>
+        <rect x="10" y="92" width="60" height="16" fill="#FFFDF6" stroke={ink} stroke-width="2.5"></rect>
+        <rect x="4" y="108" width="72" height="32" fill="#FFFDF6" stroke={ink} stroke-width="2.5"></rect>
+        <path d="M4 120 h72" stroke="#E85D2F" stroke-width="3"></path>
+      </svg>
+    </div>
+    <div class="plant signpost" style="--x:78%;--xm:50%">
+      <span class="plank plank-r">Summit · 8,848 m</span>
+      <span class="plank plank-l">Kathmandu</span>
+      <span class="post"></span>
+    </div>
+  </Fragment>
+
+  <div class="base">
+    <p class="hand base-hello">Namaste, I'm</p>
+    <h1 class="base-name" aria-label={site.name}>
+      {
+        name.map((word) => (
+          <span class="base-word" aria-hidden="true">
+            {[...word].map((ch, i) => (
+              <span class="wob" style={`--i:${i}`}>{ch}</span>
+            ))}
+          </span>
+        ))
+      }
+    </h1>
+    <p class="base-lede">
+      AI native product engineer building <mark>thoughtful</mark>, <mark class="mk-teal">reliable</mark> products — from Kathmandu, Nepal.
+    </p>
+    <p class="hand base-hint">
+      scroll, swipe or press → and Yakku starts walking
+      <svg width="74" height="30" viewBox="0 0 74 30" aria-hidden="true">
+        <path d="M2 18 C 18 4 38 28 66 12" fill="none" stroke={ink} stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M56 6 L 67 11 L 60 21" fill="none" stroke={ink} stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </p>
+  </div>
+</Stop>

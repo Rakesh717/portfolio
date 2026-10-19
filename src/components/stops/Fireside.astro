@@ -1,0 +1,60 @@
+---
+import Stop from "./Stop.astro";
+import { testimonials } from "../../data/content";
+
+const ink = "#40302A";
+const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
+---
+
+<Stop id="hikers" label="Fireside — words from fellow hikers" class="s-fire">
+  <Fragment slot="scene">
+    <div class="plant campfire" style="--x:28%;--xm:46%;--w:min(10vw,150px);--wm:96px">
+      <span class="fire-glow"></span>
+      <svg viewBox="0 0 150 130">
+        <g class="flames">
+          <path class="flame f1" d="M75 112 C 40 108 38 74 58 52 C 60 70 68 72 70 60 C 72 40 84 24 88 6 C 102 32 118 52 112 80 C 108 100 96 112 75 112 Z" fill="#E85D2F" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+          <path class="flame f2" d="M76 112 C 56 110 54 88 66 74 C 68 84 74 86 76 76 C 78 64 86 56 88 46 C 98 62 104 78 100 92 C 96 106 88 112 76 112 Z" fill="#FFC53D" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+          <path class="flame f3" d="M77 112 C 68 110 66 100 72 92 C 74 98 78 98 79 92 C 81 98 86 102 85 106 C 84 110 81 112 77 112 Z" fill="#FFFDF6"></path>
+        </g>
+        <rect x="14" y="104" width="122" height="16" rx="8" transform="rotate(-10 75 112)" fill="#7C4F2E" stroke={ink} stroke-width="3"></rect>
+        <rect x="14" y="104" width="122" height="16" rx="8" transform="rotate(10 75 112)" fill="#8A5A3B" stroke={ink} stroke-width="3"></rect>
+        <circle cx="18" cy="122" r="6" fill="#A79C90" stroke={ink} stroke-width="2.5"></circle>
+        <circle cx="132" cy="122" r="6" fill="#A79C90" stroke={ink} stroke-width="2.5"></circle>
+      </svg>
+    </div>
+    <div class="plant log-seat" style="--x:42%;--xm:-20%;--w:min(9vw,130px);--wm:90px">
+      <svg viewBox="0 0 130 40">
+        <rect x="3" y="6" width="124" height="32" rx="16" fill="#8A5A3B" stroke={ink} stroke-width="3"></rect>
+        <ellipse cx="111" cy="22" rx="10" ry="14" fill="#C9925E" stroke={ink} stroke-width="3"></ellipse>
+        <path d="M111 15 a5 7 0 1 0 0.1 0" fill="none" stroke={ink} stroke-width="2" stroke-opacity=".5"></path>
+      </svg>
+    </div>
+  </Fragment>
+
+  <div class="register">
+    <div class="register-head">
+      <h2 class="section-title">Fellow hikers</h2>
+      <p class="hand">left these in the trail register — tap a note to read the next</p>
+    </div>
+
+    <div class="deck" id="deck" data-deck>
+      {
+        testimonials.map((t, i) => (
+          <figure class="note paper" data-note style={`--r:${tilts[i % tilts.length]}deg;--i:${i}`}>
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>
+              <span class="note-name">{t.name}</span>
+              <span class="note-role">{t.role}</span>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+
+    <div class="deck-controls">
+      <button class="ink-btn ink-btn-sm" data-deck-prev aria-label="Previous note">←</button>
+      <span class="hand deck-count" data-deck-count aria-live="polite">1 of {testimonials.length}</span>
+      <button class="ink-btn ink-btn-sm" data-deck-next aria-label="Next note">→</button>
+    </div>
+  </div>
+</Stop>

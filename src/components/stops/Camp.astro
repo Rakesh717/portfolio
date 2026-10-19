@@ -1,0 +1,83 @@
+---
+import Stop from "./Stop.astro";
+import { stops, type Camp as Job } from "../../data/content";
+
+interface Props {
+  id: string;
+  job: Job;
+  numeral: string;
+  tent: string;
+  first?: boolean;
+}
+
+const { id, job, numeral, tent, first = false } = Astro.props;
+const current = job.period.includes("Present");
+const ink = "#40302A";
+const flag = stops.find((s) => s.id === id)?.color ?? "#EF476F";
+---
+
+<Stop id={id} label={`${job.camp} — ${job.company}`} class:list={["s-camp", current && "is-current"]}>
+  <Fragment slot="scene">
+    {
+      first && (
+        <div class="plant signpost signpost-climb" style="--x:23%;--xm:62%">
+          <span class="plank plank-r">The Climb</span>
+          <span class="plank plank-sub">7 yrs · 4 camps</span>
+          <span class="post" />
+        </div>
+      )
+    }
+    <div class="plant tent" style={`--x:36%;--xm:44%;--w:min(13vw,190px);--wm:120px`}>
+      <svg viewBox="0 0 170 120">
+        <path d="M2 118 L 18 100 M168 118 L 152 100" stroke={ink} stroke-width="2" stroke-dasharray="3 4"></path>
+        <path d="M14 116 L 85 8 L 156 116 Z" fill={tent} stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M85 8 L 64 116 H 106 Z" fill={ink} opacity=".75"></path>
+        <path class="tent-glow" d="M85 30 L 70 116 H 100 Z" fill="#FFD166"></path>
+        <path d="M85 8 L 106 116 L 120 116 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round" opacity=".9"></path>
+        <path d="M85 8 L 85 2" stroke={ink} stroke-width="3" stroke-linecap="round"></path>
+        <path d="M40 80 L 52 64 M128 80 L 116 64" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity=".5"></path>
+      </svg>
+    </div>
+    <div class="plant camp-pole" style={`--x:94%;--xm:90%;--w:clamp(30px,3vw,44px);--wm:30px;color:${flag}`}>
+      <svg viewBox="0 0 60 230">
+        <path d="M10 230 V 6" stroke={ink} stroke-width="4" stroke-linecap="round"></path>
+        <circle cx="10" cy="6" r="4" fill="#FFC53D" stroke={ink} stroke-width="2"></circle>
+        <g class="camp-flag">
+          <path d="M12 14 L 56 22 L 12 42 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+          <text x="24" y="33" font-family="Fraunces Variable, serif" font-size="12" font-weight="800" fill={ink}>{numeral}</text>
+        </g>
+      </svg>
+    </div>
+  </Fragment>
+
+  <article class="logbook">
+    <div class="paper log-page">
+      <header class="log-head">
+        <span class="stamp">{job.camp} · {job.altitude}</span>
+        <span class="hand log-period">{job.period}</span>
+      </header>
+      <h3 class="log-company">{job.company}</h3>
+      <p class="log-role">{job.role}</p>
+      <p class="log-body">{job.description}</p>
+      <a class="log-link" href={job.url} target="_blank" rel="noopener">
+        {job.url.replace("https://", "")}
+        <svg width="11" height="11" viewBox="0 0 10 10" aria-hidden="true">
+          <path d="M2 8 L8 2 M3.5 2 H8 V6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </a>
+      {
+        current && (
+          <span class="hand here-note" aria-hidden="true">
+            he's here now!
+            <svg width="46" height="34" viewBox="0 0 46 34">
+              <path d="M44 4 C 30 2 14 10 8 28" fill="none" stroke="#C7491F" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M2 20 L 8 29 L 16 22" fill="none" stroke="#C7491F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        )
+      }
+    </div>
+    <span class="log-leg log-leg-l" aria-hidden="true"></span>
+    <span class="log-leg log-leg-r" aria-hidden="true"></span>
+  </article>
+</Stop>

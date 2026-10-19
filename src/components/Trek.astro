@@ -1,0 +1,136 @@
+---
+import Yak from "./Yak.astro";
+import { stops, site } from "../data/content";
+
+const config = JSON.stringify({ stops });
+const ink = "#40302A";
+---
+
+<!-- reusable scenery -->
+<svg width="0" height="0" class="absolute" aria-hidden="true">
+  <defs>
+    <symbol id="s-pine" viewBox="0 0 80 150">
+      <rect x="35" y="112" width="10" height="38" rx="3" fill="#7C4F2E" stroke={ink} stroke-width="2.5"></rect>
+      <path d="M5 120 Q 22 128 40 121 Q 58 128 75 120 L 40 62 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M11 92 Q 25 99 40 93 Q 55 99 69 92 L 40 38 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M18 64 Q 29 70 40 65 Q 51 70 62 64 L 40 10 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M46 78 l8 12 M48 104 l10 13 M45 50 l6 9" stroke="#FFFDF6" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"></path>
+    </symbol>
+    <symbol id="s-pine-snow" viewBox="0 0 80 150">
+      <use href="#s-pine"></use>
+      <path d="M40 10 L 51 36 Q 46 33 42 37 Q 37 32 29 36 Z M40 38 L 55 66 Q 49 62 44 67 Q 38 61 25 66 Z M40 62 L 58 92 Q 51 88 45 93 Q 37 87 22 92 Z" fill="#FFFFFF" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
+    </symbol>
+    <symbol id="s-rhodo" viewBox="0 0 120 120">
+      <path d="M60 120 C 60 96 54 84 44 72 M60 100 C 66 88 76 80 84 70" fill="none" stroke={ink} stroke-width="9" stroke-linecap="round"></path>
+      <path d="M60 120 C 60 96 54 84 44 72 M60 100 C 66 88 76 80 84 70" fill="none" stroke="#7C4F2E" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M18 70 C 4 58 14 34 34 36 C 38 16 66 10 78 26 C 98 18 116 38 106 56 C 116 72 98 88 82 80 C 72 92 48 92 40 80 C 26 86 12 80 18 70 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <g stroke={ink} stroke-width="2">
+        <circle cx="34" cy="52" r="6.5" fill="#EF476F"></circle><circle cx="58" cy="34" r="6.5" fill="#F47A95"></circle>
+        <circle cx="82" cy="44" r="6.5" fill="#EF476F"></circle><circle cx="96" cy="62" r="6" fill="#F47A95"></circle>
+        <circle cx="62" cy="64" r="6.5" fill="#EF476F"></circle><circle cx="40" cy="74" r="5.5" fill="#F47A95"></circle>
+        <circle cx="76" cy="76" r="5.5" fill="#EF476F"></circle>
+      </g>
+    </symbol>
+    <symbol id="s-rock" viewBox="0 0 90 56">
+      <path d="M3 54 L 12 26 L 30 9 L 56 12 L 76 28 L 87 54 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      <path d="M30 9 L 36 30 L 56 12 M36 30 L 22 54" fill="none" stroke={ink} stroke-opacity=".35" stroke-width="2"></path>
+    </symbol>
+    <symbol id="s-rock-snow" viewBox="0 0 90 56">
+      <use href="#s-rock"></use>
+      <path d="M12 26 L 30 9 L 56 12 L 76 28 Q 64 26 58 32 Q 48 24 40 30 Q 28 24 12 26 Z" fill="#FFFFFF" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
+    </symbol>
+    <symbol id="s-cairn" viewBox="0 0 44 70">
+      <g stroke={ink} stroke-width="2.5">
+        <ellipse cx="22" cy="60" rx="20" ry="9" fill="#A79C90"></ellipse>
+        <ellipse cx="22" cy="45" rx="15" ry="7.5" fill="#BDB3A6"></ellipse>
+        <ellipse cx="22" cy="32" rx="11" ry="6" fill="#A79C90"></ellipse>
+        <ellipse cx="22" cy="21" rx="7" ry="4.5" fill="#BDB3A6"></ellipse>
+        <ellipse cx="22" cy="12" rx="4.5" ry="3.5" fill="#A79C90"></ellipse>
+      </g>
+    </symbol>
+    <symbol id="s-grass" viewBox="0 0 36 26">
+      <path d="M6 26 C 6 16 3 10 1 6 M14 26 C 14 14 16 6 19 1 M22 26 C 22 18 26 12 31 9 M29 26 C 29 21 32 18 35 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+    </symbol>
+    <symbol id="s-cloud" viewBox="0 0 160 70">
+      <path d="M22 62 C 4 62 2 40 20 38 C 18 18 46 10 58 26 C 66 4 104 2 110 28 C 126 18 152 28 146 48 C 160 54 154 66 140 62 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="trek" class="trek" aria-hidden="false">
+  <div class="sky" id="sky"></div>
+  <div class="stars" id="stars"></div>
+  <div class="sun" id="sun">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <g class="sun-rays" stroke="#FFC53D" stroke-width="5" stroke-linecap="round">
+        <path d="M60 8v12M60 100v12M8 60h12M100 60h12M23 23l9 9M88 88l9 9M97 23l-9 9M32 88l-9 9"></path>
+      </g>
+      <circle cx="60" cy="60" r="26" fill="#FFC53D" stroke={ink} stroke-width="3"></circle>
+    </svg>
+  </div>
+  <div class="moon" id="moon">
+    <svg viewBox="0 0 80 80" aria-hidden="true">
+      <path d="M52 8 C 30 12 18 34 26 54 C 32 68 50 76 66 70 C 44 84 10 70 8 42 C 6 20 28 4 52 8 Z" fill="#FFF3CF" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+    </svg>
+  </div>
+  <div class="layer layer-far" id="layer-far"></div>
+  <div class="layer layer-clouds" id="layer-clouds"></div>
+  <div class="layer layer-mid" id="layer-mid"></div>
+  <div class="layer layer-near" id="layer-near"></div>
+  <div class="night-tint" id="night-tint"></div>
+
+  <div class="world" id="world">
+    <div class="chunks" id="chunks"></div>
+    <slot />
+    <div class="yak-actor" id="yak-actor">
+      <button class="yak-btn" id="yak-btn" aria-label="Poke Yakku">
+        <span class="yak-flip"><Yak id="yakku" pose="wave" /></span>
+      </button>
+      <p class="quip" id="quip" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <canvas class="weather" id="weather" aria-hidden="true"></canvas>
+</div>
+
+<!-- heads-up display: altitude + trail map (this is the navigation) -->
+<div class="hud">
+  <div class="hud-alt" aria-live="off">
+    <svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true">
+      <path d="M2 22 L 11 6 L 16 13 L 20 8 L 28 22 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.2" stroke-linejoin="round"></path>
+      <path d="M8.5 10.5 L 11 6 L 13.5 10 L 11.5 9 Z" fill={ink}></path>
+    </svg>
+    <span class="hud-num"><b id="hud-alt">1,400</b>&thinsp;m</span>
+    <span class="hud-place" id="hud-place">Basecamp</span>
+  </div>
+
+  <a class="hud-mail" href={`mailto:${site.email}`}>
+    <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
+      <rect x="1.5" y="1.5" width="19" height="13" rx="2.5" fill="#FFFDF6" stroke={ink} stroke-width="2.2"></rect>
+      <path d="M2.5 3 L 11 9.5 L 19.5 3" fill="none" stroke={ink} stroke-width="2.2" stroke-linejoin="round"></path>
+    </svg>
+    <span>say hi</span>
+  </a>
+
+  <nav class="hud-map" aria-label="Trail map">
+    <svg class="hud-map-line" id="hud-map-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <ol class="hud-map-stops">
+      {
+        stops.map((s) => (
+          <li style={`--c:${s.color}`}>
+            <a href={`#${s.id}`} data-go={s.id}>
+              <span class="sr-only">{s.name}</span>
+              <span class="hud-map-tip" aria-hidden="true">{s.name}<small>{s.altitude.toLocaleString("en-US")} m</small></span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <span class="hud-map-yak" id="hud-map-yak" aria-hidden="true"></span>
+  </nav>
+
+</div>
+
+<div class="trek-spacer" id="trek-spacer" aria-hidden="true"></div>
+
+<script type="application/json" id="trek-config" set:html={config} />

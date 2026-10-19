@@ -1,0 +1,35 @@
+---
+/**
+ * One stop on the trek. In trek mode the engine lays stops out
+ * side by side on plateaus; without JS they simply stack.
+ * span / spanM = width in viewports (desktop / mobile).
+ */
+import { stops } from "../../data/content";
+
+interface Props {
+  id: string;
+  span?: number;
+  spanM?: number;
+  class?: string;
+  label: string;
+}
+
+const { id, span = 1, spanM = 1, class: className = "", label } = Astro.props;
+const stop = stops.find((s) => s.id === id);
+---
+
+<section
+  id={id}
+  class:list={["stop", `biome-${stop?.biome ?? "forest"}`, className]}
+  data-stop={id}
+  data-span={span}
+  data-span-m={spanM}
+  aria-label={label}
+>
+  <div class="scene" aria-hidden="true">
+    <slot name="scene" />
+  </div>
+  <div class="content">
+    <slot />
+  </div>
+</section>

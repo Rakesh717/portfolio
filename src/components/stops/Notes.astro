@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import Stop from "./Stop.astro";
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+const stampColors = ["#4CC9F0", "#FFD166", "#06D6A0"];
+const tilts = [-2.5, 1.8, -1.2];
+const ink = "#40302A";
+---
+
+<Stop id="notes" label="Field notes — writing" spanM={3} class="s-notes">
+  <div class="clothes">
+    <svg class="rope" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 6 Q 500 70 1000 6" fill="none" stroke={ink} stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+    </svg>
+    <div class="clothes-head">
+      <h2 class="section-title">Field notes</h2>
+      <a class="hand clothes-all" href="/blog">pegged out to dry — see all →</a>
+    </div>
+    <ul class="postcards">
+      {
+        posts.map((post, i) => (
+          <li class="postcard-wrap" style={`--r:${tilts[i]}deg;--i:${i}`}>
+            <span class="peg" aria-hidden="true" />
+            <a class="postcard paper" href={`/blog/${post.id}`}>
+              <span class="postcard-stamp" style={`--c:${stampColors[i % 3]}`} aria-hidden="true">
+                <svg viewBox="0 0 40 30" width="34" height="26">
+                  <path d="M2 28 L 14 10 L 21 19 L 27 12 L 38 28 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="postmark" aria-hidden="true">{df.format(post.data.pubDate)}</span>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.description}</p>
+              <span class="postcard-foot">
+                <span class="postcard-tags">{post.data.tags.map((t) => `#${t}`).join("  ")}</span>
+                <span class="postcard-read">read →</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Stop>

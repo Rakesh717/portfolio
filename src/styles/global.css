@@ -1,0 +1,2351 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fff3de;
+  --color-cream: #fffdf6;
+  --color-ink: #40302a;
+  --color-ink-soft: #6f5c50;
+  --color-rust: #e85d2f;
+  --color-rust-deep: #c7491f;
+  --color-teal: #2a9d8f;
+  --color-teal-deep: #1e756b;
+  --color-butter: #ffd166;
+  --color-wood: #b97a4b;
+  --color-wood-dark: #8a5a3b;
+
+  --font-display: "Fraunces Variable", "Fraunces", Georgia, serif;
+  --font-body: "Bricolage Grotesque Variable", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat Variable", "Caveat", cursive;
+}
+
+:root {
+  --ink: #40302a;
+  --shadow: 5px 6px 0 rgb(64 48 42 / 0.16);
+  --top: 92px;
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                               */
+/* ------------------------------------------------------------------ */
+
+body {
+  background: var(--color-paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-butter);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  color: var(--color-ink-soft);
+}
+
+.section-title {
+  font-size: clamp(2.2rem, min(4.2vw, 6.5vh), 3.6rem);
+  line-height: 0.95;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tactile primitives: paper, wood, stamps, ink buttons               */
+/* ------------------------------------------------------------------ */
+
+.paper {
+  background: var(--color-cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 4px 7px 5px 8px;
+  box-shadow: var(--shadow);
+  rotate: var(--r, 0deg);
+}
+
+.pinned {
+  position: relative;
+}
+.pinned::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff8aa5 0 25%, #ef476f 30%);
+  border: 2.5px solid var(--ink);
+  box-shadow: 2px 3px 0 rgb(64 48 42 / 0.25);
+}
+
+.stamp {
+  display: inline-block;
+  padding: 0.28rem 0.55rem;
+  color: var(--color-rust-deep);
+  border: 2px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 3px;
+  font: 800 0.7rem/1 var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  rotate: -3deg;
+}
+
+.wood {
+  background-color: var(--color-wood);
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgb(64 48 42 / 0.08) 22px 24px, transparent 24px 61px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 60%);
+}
+
+.ink-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1.25rem;
+  font: 650 1rem/1.1 var(--font-body);
+  color: var(--ink);
+  background: var(--color-cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 12px 15px 12px 16px;
+  box-shadow: 0 5px 0 var(--ink);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.2s ease;
+}
+.ink-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--ink);
+  background: #fff1d2;
+}
+.ink-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+.ink-btn-primary {
+  background: var(--color-rust);
+  color: var(--color-cream);
+}
+.ink-btn-primary:hover {
+  background: var(--color-rust-deep);
+}
+.ink-btn-sm {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Yakku rig                                                          */
+/* ------------------------------------------------------------------ */
+
+.yak {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.yak g,
+.yak ellipse {
+  transform-box: view-box;
+}
+
+.y-leg {
+  transition: transform 0.35s var(--bounce);
+}
+.y-leg-bf {
+  transform-origin: 72px 126px;
+}
+.y-leg-ff {
+  transform-origin: 166px 126px;
+}
+.y-leg-bn {
+  transform-origin: 94px 126px;
+}
+.y-leg-fn {
+  transform-origin: 184px 126px;
+}
+
+.y-all {
+  transform-origin: 122px 198px;
+}
+.y-torso {
+  transform-origin: 122px 196px;
+  transition: transform 0.4s var(--bounce);
+  animation: yBreathe 3.4s ease-in-out infinite;
+}
+.y-head {
+  transform-origin: 188px 102px;
+  transition: transform 0.4s var(--bounce);
+  animation: yNod 5s ease-in-out infinite;
+}
+.y-tail {
+  transform-origin: 48px 96px;
+  animation: yTail 2.6s ease-in-out infinite;
+}
+.y-skirt {
+  transform-origin: 120px 108px;
+}
+.y-scarf {
+  transform-origin: 192px 128px;
+  animation: yScarf 1.8s ease-in-out infinite;
+}
+.y-ear {
+  transform-origin: 200px 100px;
+  transition: transform 0.3s var(--bounce);
+}
+.y-flag {
+  transform-origin: 80px 44px;
+}
+.y-pennant {
+  transform-origin: 70px 6px;
+  animation: yPennant 1.6s ease-in-out infinite;
+}
+.y-eye-open {
+  transform-origin: 222px 107px;
+  animation: yBlink 4.6s infinite;
+}
+.y-shadow {
+  transform-origin: 122px 200px;
+}
+.y-eye-happy,
+.y-eye-shut,
+.y-mouth-open {
+  display: none;
+}
+.y-book,
+.y-zzz {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.y-book {
+  transform: translate(-6px, -30px);
+}
+
+/* walking + running */
+.yak[data-pose="walk"] .y-leg-fn,
+.yak[data-pose="walk"] .y-leg-bf,
+.yak[data-pose="run"] .y-leg-fn,
+.yak[data-pose="run"] .y-leg-bf {
+  animation: yStep 0.56s ease-in-out infinite;
+}
+.yak[data-pose="walk"] .y-leg-ff,
+.yak[data-pose="walk"] .y-leg-bn,
+.yak[data-pose="run"] .y-leg-ff,
+.yak[data-pose="run"] .y-leg-bn {
+  animation: yStep 0.56s ease-in-out -0.28s infinite;
+}
+.yak[data-pose="walk"] .y-torso,
+.yak[data-pose="run"] .y-torso {
+  animation: yBob 0.28s ease-in-out infinite alternate;
+}
+.yak[data-pose="walk"] .y-skirt,
+.yak[data-pose="run"] .y-skirt {
+  animation: ySkirt 0.56s ease-in-out infinite;
+}
+.yak[data-pose="walk"] .y-tail {
+  animation-duration: 0.9s;
+}
+.yak[data-pose="run"] .y-leg {
+  animation-duration: 0.3s !important;
+}
+.yak[data-pose="run"] .y-torso {
+  animation-duration: 0.15s;
+}
+.yak[data-pose="run"] .y-skirt,
+.yak[data-pose="run"] .y-scarf {
+  animation-duration: 0.3s;
+}
+.yak[data-pose="run"] .y-all {
+  transform: rotate(4deg);
+}
+.yak[data-pose="run"] .y-ear {
+  transform: rotate(-30deg);
+}
+.yak[data-pose="run"] .y-eye-open {
+  animation: none;
+  transform: scaleY(0.7);
+}
+
+/* wave */
+.yak[data-pose="wave"] .y-leg-fn {
+  animation: yWave 0.7s ease-in-out infinite alternate;
+}
+.yak[data-pose="wave"] .y-head {
+  animation: none;
+  transform: rotate(-7deg);
+}
+.yak[data-pose="wave"] .y-eye-open,
+.yak[data-pose="celebrate"] .y-eye-open {
+  display: none;
+}
+.yak[data-pose="wave"] .y-eye-happy,
+.yak[data-pose="wave"] .y-mouth-open,
+.yak[data-pose="celebrate"] .y-eye-happy,
+.yak[data-pose="celebrate"] .y-mouth-open {
+  display: block;
+}
+.yak[data-pose="wave"] .y-mouth-smile,
+.yak[data-pose="celebrate"] .y-mouth-smile {
+  display: none;
+}
+.yak[data-pose="wave"] .y-tail {
+  animation-duration: 0.8s;
+}
+
+/* sitting family: sit · read · sleep */
+.yak[data-pose="sit"] .y-leg,
+.yak[data-pose="read"] .y-leg,
+.yak[data-pose="sleep"] .y-leg {
+  transform: translateY(44px) scaleY(0.42);
+}
+.yak[data-pose="sit"] .y-torso,
+.yak[data-pose="read"] .y-torso,
+.yak[data-pose="sleep"] .y-torso {
+  transform: translateY(28px);
+  animation: ySit 3.4s ease-in-out infinite;
+}
+.yak[data-pose="sit"] .y-ear {
+  transform: rotate(-24deg);
+}
+.yak[data-pose="sit"] .y-head {
+  animation: yListen 3s ease-in-out infinite;
+}
+.yak[data-pose="read"] .y-book {
+  opacity: 1;
+}
+.yak[data-pose="read"] .y-head {
+  animation: none;
+  transform: rotate(9deg);
+}
+.yak[data-pose="read"] .y-eye-open {
+  animation: none;
+  transform: translateY(2px) scaleY(0.6);
+}
+.yak[data-pose="sleep"] .y-head {
+  animation: none;
+  transform: rotate(14deg) translateY(4px);
+}
+.yak[data-pose="sleep"] .y-eye-open {
+  display: none;
+}
+.yak[data-pose="sleep"] .y-eye-shut {
+  display: block;
+}
+.yak[data-pose="sleep"] .y-zzz {
+  opacity: 1;
+}
+.yak[data-pose="sleep"] .y-zzz text {
+  animation: yZzz 2.4s ease-in-out infinite;
+}
+.yak[data-pose="sleep"] .y-zzz text:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.yak[data-pose="sleep"] .y-zzz text:nth-child(3) {
+  animation-delay: 0.8s;
+}
+.yak[data-pose="sleep"] .y-torso {
+  animation-duration: 5.5s;
+}
+.yak[data-pose="sleep"] .y-tail,
+.yak[data-pose="sleep"] .y-pennant {
+  animation-duration: 6s;
+}
+
+/* graze */
+.yak[data-pose="graze"] .y-head {
+  animation: none;
+  transform: rotate(26deg) translate(2px, 14px);
+}
+.yak[data-pose="graze"] .y-mouth-open {
+  display: block;
+  animation: yChomp 0.5s steps(2) infinite;
+}
+.yak[data-pose="graze"] .y-eye-open {
+  display: none;
+}
+.yak[data-pose="graze"] .y-eye-shut {
+  display: block;
+}
+
+/* celebrate */
+.yak[data-pose="celebrate"] .y-all {
+  animation: yHop 0.62s ease-in-out infinite;
+}
+.yak[data-pose="celebrate"] .y-shadow {
+  animation: yShadow 0.62s ease-in-out infinite;
+}
+.yak[data-pose="celebrate"] .y-leg-fn {
+  transform: rotate(-62deg);
+}
+.yak[data-pose="celebrate"] .y-pennant {
+  animation-duration: 0.4s;
+}
+.yak[data-pose="celebrate"] .y-flag {
+  transform: rotate(-12deg) scale(1.15);
+}
+
+.yak.is-boing .y-all {
+  animation: yBoing 0.68s var(--bounce);
+}
+
+@keyframes yBreathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.01, 1.02);
+  }
+}
+@keyframes ySit {
+  0%,
+  100% {
+    transform: translateY(28px) scale(1, 1);
+  }
+  50% {
+    transform: translateY(28px) scale(1.01, 1.02);
+  }
+}
+@keyframes yNod {
+  0%,
+  100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes yTail {
+  0%,
+  100% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+@keyframes yScarf {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(8deg) scaleX(1.06);
+  }
+}
+@keyframes yPennant {
+  0%,
+  100% {
+    transform: skewY(-6deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(8deg) scaleX(0.9);
+  }
+}
+@keyframes yBlink {
+  0%,
+  92%,
+  97%,
+  100% {
+    transform: scaleY(1);
+  }
+  94.5% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes yStep {
+  0%,
+  100% {
+    transform: rotate(22deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+@keyframes yBob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-4px) rotate(-0.6deg);
+  }
+}
+@keyframes ySkirt {
+  0%,
+  100% {
+    transform: skewX(3deg);
+  }
+  50% {
+    transform: skewX(-3deg);
+  }
+}
+@keyframes yWave {
+  from {
+    transform: rotate(-58deg);
+  }
+  to {
+    transform: rotate(-92deg);
+  }
+}
+@keyframes yListen {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+@keyframes yChomp {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes yHop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+  45% {
+    transform: translateY(-26px) scale(0.97, 1.04);
+  }
+}
+@keyframes yShadow {
+  45% {
+    transform: scale(0.7);
+    opacity: 0.08;
+  }
+}
+@keyframes yBoing {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1.12, 0.84);
+  }
+  55% {
+    transform: translateY(-30px) scale(0.92, 1.1) rotate(-6deg);
+  }
+  80% {
+    transform: scale(1.05, 0.95);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@keyframes yZzz {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Trek mode — the side-scrolling world                               */
+/* ------------------------------------------------------------------ */
+
+.trek-on .trek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100lvh;
+  overflow: clip;
+  background: #bfe3f0;
+}
+
+.trek-on .sky,
+.trek-on .stars,
+.trek-on .night-tint {
+  position: absolute;
+  inset: 0;
+}
+.trek-on .sky {
+  background: linear-gradient(180deg, #bfe3f0 0%, #fff3de 78%);
+}
+.trek-on .stars {
+  opacity: 0;
+}
+.stars i {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff3cf;
+  animation: twinkle 3s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  to {
+    opacity: 0.25;
+  }
+}
+
+.trek-on .sun,
+.trek-on .moon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(76px, 8vw, 124px);
+  margin: -60px 0 0 -60px;
+  will-change: transform;
+}
+.trek-on .moon {
+  width: clamp(54px, 5vw, 80px);
+  opacity: 0;
+}
+.sun-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 50s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.trek-on .layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  will-change: transform;
+}
+.trek-on .layer svg {
+  display: block;
+}
+.trek-on .night-tint {
+  background: #1b1840;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.near-bucket {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.cloud {
+  position: absolute;
+  animation: drift 14s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  to {
+    transform: translateX(60px);
+  }
+}
+
+.trek-on .world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.chunk {
+  position: absolute;
+}
+.chunk > svg {
+  position: absolute;
+  overflow: visible;
+}
+.chunk .ground {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.chunk .tree,
+.layer-near .tree {
+  position: absolute;
+  transform-origin: 50% 100%;
+  animation: sway 4s ease-in-out infinite alternate;
+  transition: rotate 1.8s cubic-bezier(0.3, 0.7, 0.3, 1);
+  overflow: visible;
+}
+.chunk .tree.still {
+  animation: none;
+  transition: none;
+}
+.gust .chunk .tree:not(.still),
+.gust .layer-near .tree:not(.still) {
+  rotate: 4deg;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-1.4deg) skewX(1deg);
+  }
+  to {
+    transform: rotate(1.8deg) skewX(-1.4deg);
+  }
+}
+
+.lf {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: flutter 1.7s ease-in-out infinite alternate;
+}
+.gust .lf {
+  animation-duration: 0.45s;
+}
+@keyframes flutter {
+  from {
+    transform: skewX(-9deg);
+  }
+  to {
+    transform: skewX(11deg) scaleY(0.9);
+  }
+}
+
+.trek-on .weather {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: var(--vh, 100vh);
+  pointer-events: none;
+}
+
+.trek-on .trek-spacer {
+  width: 1px;
+}
+
+/* stops */
+.trek-on .stop {
+  position: absolute;
+  height: var(--vh);
+}
+.trek-on .scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.trek-on .plant {
+  position: absolute;
+  left: var(--x);
+  bottom: calc(var(--vh) - var(--ground) - 5px);
+  width: var(--w, auto);
+  transform-origin: 50% 100%;
+  transition: transform 0.8s var(--bounce);
+}
+.trek-on .plant > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.trek-on .stop:not(.seen) .plant {
+  transform: scaleY(0);
+}
+.trek-on .content {
+  position: absolute;
+  left: var(--lane);
+  right: 4vw;
+  top: var(--top);
+  bottom: calc(var(--vh) - var(--ground));
+  display: flex;
+  flex-direction: column;
+}
+.trek-on .content > * {
+  transition:
+    opacity 0.5s ease,
+    transform 0.8s var(--bounce);
+}
+.trek-on .stop:not(.seen) .content > * {
+  opacity: 0;
+  transform: translateY(-36px) rotate(-1.5deg);
+}
+
+/* yak on the trail */
+.trek-on .yak-actor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--yak-w);
+  transform-origin: 50% 94%;
+  z-index: 5;
+  will-change: transform;
+}
+.yak-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.yak-btn:focus-visible {
+  outline-offset: -4px;
+  border-radius: 40%;
+}
+.yak-flip {
+  display: block;
+  transition: transform 0.28s var(--bounce);
+}
+.face-left .yak-flip {
+  transform: scaleX(-1);
+}
+
+.quip {
+  position: absolute;
+  bottom: 96%;
+  left: 10%;
+  width: max-content;
+  max-width: min(260px, var(--quip-max, 230px));
+  padding: 0.4rem 0.75rem 0.45rem;
+  font: 600 1.3rem/1.05 var(--font-hand);
+  color: var(--ink);
+  background: var(--color-cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 16px 18px 16px 6px;
+  box-shadow: 4px 5px 0 rgb(64 48 42 / 0.16);
+  opacity: 0;
+  scale: 0.6;
+  transform-origin: 0 100%;
+  transition:
+    opacity 0.2s ease,
+    scale 0.35s var(--bounce);
+  pointer-events: none;
+}
+.quip::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  background: var(--color-cream);
+  border-right: 2.5px solid var(--ink);
+  border-bottom: 2.5px solid var(--ink);
+  rotate: 45deg;
+  border-bottom-right-radius: 3px;
+}
+.quip.show {
+  opacity: 1;
+  scale: 1;
+}
+
+/* phones: content sits right above Yakku, so he talks sideways instead */
+@media (max-width: 767px) {
+  .quip {
+    bottom: 38%;
+    left: 92%;
+    font-size: 1.15rem;
+    border-radius: 14px 16px 16px 14px;
+    transform-origin: 0 50%;
+  }
+  .quip::after {
+    left: -9px;
+    bottom: 40%;
+    border-right: 0;
+    border-top: 2.5px solid var(--ink);
+    border-left: 2.5px solid var(--ink);
+    border-bottom: 2.5px solid var(--ink);
+    border-top: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* HUD                                                                */
+/* ------------------------------------------------------------------ */
+
+.hud {
+  display: none;
+}
+.trek-on .hud {
+  display: block;
+}
+
+.hud-alt,
+.hud-mail,
+.hud-map {
+  position: fixed;
+  z-index: 30;
+  background: var(--color-cream);
+  border: 2.5px solid var(--ink);
+  box-shadow: 3px 4px 0 rgb(64 48 42 / 0.2);
+}
+
+.hud-alt {
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.8rem 0.35rem 0.55rem;
+  border-radius: 12px 14px 12px 15px;
+}
+.hud-num {
+  font: 500 1rem/1 var(--font-body);
+  font-variant-numeric: tabular-nums;
+  min-width: 4.6em;
+}
+.hud-num b {
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.hud-place {
+  padding-left: 0.6rem;
+  border-left: 2px dashed rgb(64 48 42 / 0.3);
+  font: 600 1.3rem/1 var(--font-hand);
+  white-space: nowrap;
+}
+
+.hud-mail {
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  font: 600 1.35rem/1 var(--font-hand);
+  color: var(--ink);
+  border-radius: 14px 12px 15px 12px;
+  rotate: 2deg;
+  transition:
+    rotate 0.3s var(--bounce),
+    background-color 0.2s;
+}
+.hud-mail:hover {
+  rotate: -3deg;
+  background: var(--color-butter);
+}
+
+.hud-map {
+  left: 50%;
+  bottom: 14px;
+  width: min(460px, 80vw);
+  height: 50px;
+  translate: -50% 0;
+  border-radius: 14px 16px 14px 17px;
+}
+.hud-map-line,
+.hud-map-stops {
+  position: absolute;
+  inset: 8px 16px;
+  width: calc(100% - 32px);
+  height: calc(100% - 16px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hud-map-stops li {
+  position: absolute;
+  translate: -50% -50%;
+}
+.hud-map-stops a {
+  display: block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 2.5px solid var(--ink);
+  transition: scale 0.25s var(--bounce);
+}
+.hud-map-stops a:hover,
+.hud-map-stops a:focus-visible,
+.hud-map-stops li.is-here a {
+  scale: 1.45;
+}
+.hud-map-tip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  translate: -50% 4px;
+  padding: 0.3rem 0.55rem;
+  font: 700 0.8rem/1.1 var(--font-body);
+  color: var(--ink);
+  white-space: nowrap;
+  text-align: center;
+  background: var(--color-cream);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    translate 0.25s var(--bounce);
+  scale: 0.7;
+}
+.hud-map-tip small {
+  display: block;
+  font-weight: 500;
+  opacity: 0.7;
+}
+.hud-map-stops a:hover .hud-map-tip,
+.hud-map-stops a:focus-visible .hud-map-tip {
+  opacity: 1;
+  translate: -50% 0;
+}
+.hud-map-yak {
+  position: absolute;
+  margin: 8px 16px;
+  width: 0;
+  height: 0;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+.hud-map-yak::before {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: -24px;
+  width: 22px;
+  height: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M10 14 C 6 8 9 3 15 3 M30 14 C 34 8 31 3 25 3' fill='none' stroke='%2340302A' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M10 14 C 6 8 9 3 15 3 M30 14 C 34 8 31 3 25 3' fill='none' stroke='%23F6E7C8' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='20' cy='22' r='14' fill='%238A5A3B' stroke='%2340302A' stroke-width='2.5'/%3E%3Cpath d='M7 20 C 8 12 14 9 20 9 C 26 9 32 12 33 20 C 30 24 28 19 25 22 C 22 25 18 25 15 22 C 12 19 10 24 7 20Z' fill='%23D9A868' stroke='%2340302A' stroke-width='2'/%3E%3Cellipse cx='20' cy='30' rx='7' ry='5' fill='%23F1D7B0' stroke='%2340302A' stroke-width='2'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+}
+
+/* ------------------------------------------------------------------ */
+/* Scenery pieces                                                     */
+/* ------------------------------------------------------------------ */
+
+.signpost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.plank {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding: 0.4rem 0.9rem;
+  margin-bottom: 6px;
+  font: 800 0.82rem/1 var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff6e3;
+  text-shadow: 0 1.5px 0 rgb(64 48 42 / 0.5);
+  background: var(--color-wood);
+  background-image: repeating-linear-gradient(0deg, transparent 0 6px, rgb(64 48 42 / 0.1) 6px 7px);
+  border: 2.5px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 3px 4px 0 rgb(64 48 42 / 0.2);
+}
+.plank-r {
+  rotate: -4deg;
+  translate: 18px 0;
+}
+.plank-r::after {
+  content: " →";
+}
+.plank-l {
+  rotate: 3deg;
+  translate: -16px 0;
+  background-color: var(--color-wood-dark);
+}
+.plank-l::before {
+  content: "← ";
+}
+.plank-sub {
+  rotate: 2deg;
+  font: 600 1.2rem/1 var(--font-hand);
+  letter-spacing: 0;
+  text-transform: none;
+  background-color: var(--color-wood-dark);
+}
+.signpost .post {
+  display: block;
+  width: 14px;
+  height: clamp(60px, 9vh, 110px);
+  margin-top: -6px;
+  background: var(--color-wood-dark);
+  border: 2.5px solid var(--ink);
+  border-radius: 3px 3px 0 0;
+}
+
+.smoke circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: smoke 3.6s ease-in infinite;
+  opacity: 0;
+}
+.smoke circle:nth-child(2) {
+  animation-delay: 1.2s;
+}
+.smoke circle:nth-child(3) {
+  animation-delay: 2.4s;
+}
+@keyframes smoke {
+  0% {
+    opacity: 0;
+    transform: translate(-10px, 30px) scale(0.5);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(16px, -20px) scale(1.3);
+  }
+}
+
+.tent-glow {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.is-night .tent-glow {
+  opacity: 0.9;
+}
+.camp-pole {
+  width: clamp(30px, 3vw, 44px);
+}
+.camp-flag {
+  transform: translateY(176px);
+  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.stop.raised .camp-flag {
+  transform: translateY(0);
+}
+.camp-flag path {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: campFlag 1.4s ease-in-out infinite alternate;
+}
+@keyframes campFlag {
+  to {
+    transform: skewY(7deg) scaleX(0.9);
+  }
+}
+
+.campfire {
+  position: relative;
+}
+.fire-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  width: 260%;
+  aspect-ratio: 1;
+  translate: -50% 40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 197 61 / 0.45), rgb(255 197 61 / 0) 62%);
+  animation: glow 1.4s ease-in-out infinite alternate;
+}
+@keyframes glow {
+  to {
+    opacity: 0.6;
+    scale: 0.92;
+  }
+}
+.flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.f1 {
+  animation: flick 0.9s ease-in-out infinite alternate;
+}
+.f2 {
+  animation: flick 0.7s ease-in-out -0.3s infinite alternate-reverse;
+}
+.f3 {
+  animation: flick 0.5s ease-in-out infinite alternate;
+}
+@keyframes flick {
+  0% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  50% {
+    transform: scale(0.94, 1.08) skewX(-4deg);
+  }
+  100% {
+    transform: scale(1.04, 0.94) skewX(3deg);
+  }
+}
+
+.summit-pole {
+  height: calc(var(--ground) * 0.72);
+}
+.summit-pole-stick {
+  position: absolute;
+  inset: 8px 3px 0;
+  background: var(--ink);
+  border-radius: 4px 4px 0 0;
+}
+.summit-pole-stick::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: var(--color-butter);
+  border: 2.5px solid var(--ink);
+}
+.summit-flags {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tent-night {
+  position: relative;
+}
+.tent-light,
+.lantern-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% 45%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 209 102 / 0.5), rgb(255 209 102 / 0) 60%);
+  pointer-events: none;
+  animation: glow 2.2s ease-in-out infinite alternate;
+}
+.lantern {
+  position: relative;
+  width: clamp(28px, 2.6vw, 40px);
+}
+.lantern-glow {
+  width: 360%;
+  bottom: 70%;
+  left: 75%;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: Basecamp                                                     */
+/* ------------------------------------------------------------------ */
+
+.base {
+  margin: auto 0;
+  padding-bottom: 6vh;
+  max-width: 56rem;
+}
+.base-hello {
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  rotate: -3deg;
+  margin-bottom: 0.4rem;
+}
+.base-name {
+  font-size: clamp(3.6rem, min(11vw, 18vh), 10.5rem);
+  line-height: 0.84;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+.base-word {
+  display: block;
+}
+.base-word:nth-child(2) {
+  padding-left: 0.6em;
+  color: var(--color-rust);
+}
+.wob {
+  display: inline-block;
+  transition: transform 0.35s var(--bounce);
+  cursor: default;
+}
+.wob:hover {
+  transform: translateY(-0.12em) rotate(-7deg);
+}
+.trek-on .stop:not(.seen) .wob {
+  transform: translateY(-0.6em) rotate(-12deg);
+  opacity: 0;
+}
+.trek-on .seen .wob {
+  transition:
+    transform 0.6s var(--bounce) calc(var(--i) * 45ms + 0.15s),
+    opacity 0.3s ease calc(var(--i) * 45ms + 0.15s);
+}
+.base-lede,
+.summit-sub {
+  text-shadow:
+    0 0 6px var(--color-paper),
+    0 0 14px var(--color-paper);
+}
+.base-lede {
+  margin-top: 1.4rem;
+  max-width: 33rem;
+  font-size: clamp(1.1rem, 1.55vw, 1.45rem);
+  line-height: 1.45;
+}
+mark {
+  color: inherit;
+  background: linear-gradient(100deg, transparent 2%, var(--color-butter) 4% 96%, transparent 98%) 0 85% / 100% 42% no-repeat;
+  padding: 0 0.1em;
+}
+mark.mk-teal {
+  background-image: linear-gradient(100deg, transparent 2%, #7fdcc6 4% 96%, transparent 98%);
+}
+.base-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.6rem;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: Trailhead notice board                                       */
+/* ------------------------------------------------------------------ */
+
+.board {
+  --legs: clamp(48px, 8vh, 80px);
+  position: relative;
+  width: min(100%, 64rem);
+  margin-top: auto;
+  padding-bottom: var(--legs);
+}
+.board-roof {
+  position: relative;
+  z-index: 2;
+  height: 26px;
+  margin: 0 -22px -6px;
+  background: var(--color-teal);
+  background-image: repeating-linear-gradient(90deg, transparent 0 26px, rgb(64 48 42 / 0.22) 26px 28px);
+  border: 2.5px solid var(--ink);
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 4px 0 rgb(64 48 42 / 0.15);
+}
+.board-cork {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  grid-template-areas:
+    "p1 st"
+    "p1 pk"
+    "p2 pk"
+    "p2 tg";
+  gap: 1.1rem 1.5rem;
+  padding: 1.5rem 1.4rem 1.3rem;
+  background-color: #d8a472;
+  background-image:
+    radial-gradient(rgb(64 48 42 / 0.16) 1px, transparent 1.5px),
+    radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1.5px);
+  background-size:
+    9px 9px,
+    13px 13px;
+  background-position:
+    0 0,
+    4px 6px;
+  border: 10px solid var(--color-wood-dark);
+  outline: 2.5px solid var(--ink);
+  box-shadow: inset 0 0 0 2.5px var(--ink);
+}
+.board-leg {
+  position: absolute;
+  bottom: -6px;
+  width: 16px;
+  height: calc(var(--legs) + 12px);
+  background: var(--color-wood-dark);
+  border: 2.5px solid var(--ink);
+}
+.board-leg-l {
+  left: 7%;
+}
+.board-leg-r {
+  right: 7%;
+}
+.board-leg-m {
+  display: none;
+  left: 50%;
+}
+
+.board-intro {
+  padding: 1.1rem 1.2rem 1.1rem;
+  font-size: clamp(14px, 1.85vh, 16.5px);
+  line-height: 1.55;
+}
+.board-intro p + p {
+  margin-top: 0.7em;
+}
+.board-p1 {
+  grid-area: p1;
+  align-self: start;
+}
+.board-p2 {
+  grid-area: p2;
+  align-self: end;
+}
+.board-title {
+  font-size: 1.45rem;
+  line-height: 1.05;
+  margin-bottom: 0.6rem;
+}
+.sticky {
+  grid-area: st;
+  justify-self: start;
+  position: relative;
+  max-width: 17rem;
+  padding: 0.75rem 1rem 0.9rem;
+  background: var(--color-butter);
+  border: 2.5px solid var(--ink);
+  border-radius: 2px 2px 2px 14px;
+  box-shadow: var(--shadow);
+  rotate: var(--r, 0deg);
+  font: 600 1.45rem/1.05 var(--font-hand);
+}
+.sticky-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font: 800 0.66rem/1 var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.sticky::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 70px;
+  height: 22px;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: rgb(255 253 246 / 0.65);
+  border: 1.5px solid rgb(64 48 42 / 0.25);
+}
+.packing {
+  grid-area: pk;
+  padding: 0.9rem 1rem 0.9rem;
+  background-image: repeating-linear-gradient(transparent 0 27px, rgb(76 201 240 / 0.3) 27px 28px);
+  background-position: 0 9px;
+}
+.packing h3 {
+  font-size: 1.15rem;
+  margin-bottom: 0.4rem;
+}
+.packing ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.6rem;
+}
+.packing li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: 600 1.3rem/28px var(--font-hand);
+}
+.tags {
+  grid-area: tg;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.55rem;
+  align-self: end;
+}
+.tag {
+  position: relative;
+  display: inline-block;
+  padding: 0.4rem 0.75rem 0.4rem 1.45rem;
+  font: 700 0.92rem/1 var(--font-body);
+  color: var(--ink);
+  background: var(--c);
+  border: 2.5px solid var(--ink);
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: 2px 3px 0 rgb(64 48 42 / 0.25);
+  rotate: calc((var(--i) - 1.5) * 2.5deg);
+  transform-origin: 6px 50%;
+  transition: rotate 0.4s var(--bounce);
+}
+.tag::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #d8a472;
+  border: 2px solid var(--ink);
+}
+.tag:hover,
+.tag:focus-visible {
+  rotate: -8deg;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: camps (experience)                                           */
+/* ------------------------------------------------------------------ */
+
+.logbook {
+  --legs: clamp(44px, 7vh, 70px);
+  position: relative;
+  width: min(100%, 35rem);
+  margin: auto 3vw 0 auto;
+  padding-bottom: var(--legs);
+}
+.log-page {
+  position: relative;
+  z-index: 1;
+  padding: 1.3rem 1.5rem 1.3rem;
+  border-radius: 3px 3px 6px 6px;
+  background-image:
+    radial-gradient(circle at 18px 50%, var(--color-paper) 0 4px, transparent 4.5px),
+    repeating-linear-gradient(transparent 0 29px, rgb(76 201 240 / 0.22) 29px 30px);
+  background-size:
+    100% 46px,
+    auto;
+}
+.log-page::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 92px;
+  height: 26px;
+  translate: -50% 0;
+  background: #a7a198;
+  border: 2.5px solid var(--ink);
+  border-radius: 6px 6px 3px 3px;
+}
+.log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.log-period {
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+.log-company {
+  margin-top: 0.7rem;
+  font-size: clamp(1.9rem, min(3vw, 5vh), 2.7rem);
+  line-height: 1;
+}
+.log-role {
+  margin-top: 0.25rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: var(--color-teal-deep);
+}
+.log-body {
+  margin-top: 0.75rem;
+  font-size: clamp(14.5px, 1.9vh, 16.5px);
+  line-height: 1.58;
+}
+.log-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+  font-weight: 700;
+  color: var(--color-rust-deep);
+  text-decoration: underline wavy;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+.log-link:hover {
+  color: var(--ink);
+}
+.here-note {
+  position: absolute;
+  top: -2.6rem;
+  left: -5.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  color: var(--color-rust-deep);
+  font-size: 1.6rem;
+  rotate: -8deg;
+}
+.here-note svg {
+  translate: 0 24px;
+}
+.log-leg {
+  position: absolute;
+  bottom: -6px;
+  width: 12px;
+  height: calc(var(--legs) + 14px);
+  background: var(--color-wood-dark);
+  border: 2.5px solid var(--ink);
+}
+.log-leg-l {
+  left: 16%;
+  rotate: 4deg;
+}
+.log-leg-r {
+  right: 16%;
+  rotate: -4deg;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: fireside (testimonials)                                      */
+/* ------------------------------------------------------------------ */
+
+.register {
+  width: min(100%, 38rem);
+  margin: auto 3vw 4vh auto;
+}
+.register-head .hand,
+.summit-kicker,
+.base-hint {
+  text-shadow: 0 0 8px var(--color-paper);
+}
+.register-head .hand {
+  margin-top: 0.3rem;
+  color: var(--ink);
+}
+.deck {
+  position: relative;
+  height: clamp(200px, 27vh, 250px);
+  margin-top: 2.2rem;
+  touch-action: pan-y;
+}
+.note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.3rem 1.5rem 1.1rem;
+  cursor: grab;
+  user-select: none;
+  background-image: repeating-linear-gradient(transparent 0 33px, rgb(239 71 111 / 0.18) 33px 34px);
+  background-position: 0 14px;
+  transform: translate(calc(var(--pos, 0) * 10px + var(--dx, 0px)), calc(var(--pos, 0) * -7px));
+  opacity: clamp(0, calc(3.5 - var(--pos, 0)), 1);
+  transition:
+    transform 0.4s var(--bounce),
+    opacity 0.3s ease,
+    rotate 0.4s var(--bounce);
+}
+.note.is-dragging {
+  cursor: grabbing;
+  transition: none;
+}
+.note.is-tossed {
+  transform: translate(calc(var(--toss) * 120%), -30px) rotate(calc(var(--toss) * 22deg));
+  opacity: 0;
+  transition:
+    transform 0.32s ease-in,
+    opacity 0.3s ease;
+}
+.note blockquote {
+  font: 600 clamp(1.45rem, min(2vw, 3.4vh), 1.85rem) / 1.2 var(--font-hand);
+}
+.note figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.6rem;
+  padding-top: 0.7rem;
+  border-top: 2px dashed rgb(64 48 42 / 0.25);
+}
+.note-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.note-role {
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+}
+.deck-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+.deck-count {
+  color: var(--ink);
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: field notes (clothesline)                                    */
+/* ------------------------------------------------------------------ */
+
+.clothes {
+  --rope: clamp(84px, 15vh, 130px);
+  position: relative;
+  height: 100%;
+  margin-right: 1vw;
+}
+.clothes::before,
+.clothes::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--rope) - 10px);
+  bottom: -6px;
+  width: 14px;
+  background: var(--color-wood-dark);
+  border: 2.5px solid var(--ink);
+  border-radius: 4px 4px 0 0;
+}
+.clothes::before {
+  left: 0;
+}
+.clothes::after {
+  right: 0;
+}
+.rope {
+  position: absolute;
+  top: var(--rope);
+  left: 7px;
+  width: calc(100% - 14px);
+  height: 60px;
+  overflow: visible;
+}
+.clothes-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.2rem;
+  padding-left: 1.6rem;
+}
+.clothes-all {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.clothes-all:hover {
+  color: var(--color-rust-deep);
+}
+.postcards {
+  position: absolute;
+  top: var(--rope);
+  left: 2.2rem;
+  right: 2.2rem;
+  display: flex;
+  justify-content: space-around;
+  gap: 1.6rem;
+}
+.postcard-wrap {
+  position: relative;
+  flex: 0 1 21rem;
+  margin-top: 24px;
+  transform-origin: 50% 0;
+  rotate: var(--r);
+  animation: swing 4.5s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -1.3s);
+  transition: rotate 1.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.postcard-wrap:nth-child(2) {
+  margin-top: 38px;
+}
+.gust .postcard-wrap {
+  rotate: calc(var(--r) + 5deg);
+}
+@keyframes swing {
+  from {
+    transform: rotate(-1.5deg);
+  }
+  to {
+    transform: rotate(1.5deg);
+  }
+}
+.peg {
+  position: absolute;
+  z-index: 2;
+  top: -16px;
+  left: 50%;
+  width: 12px;
+  height: 32px;
+  margin-left: -6px;
+  background: #e2b07c;
+  border: 2.5px solid var(--ink);
+  border-radius: 3px;
+}
+.postcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(220px, 34vh, 290px);
+  padding: 1.1rem 1.2rem 1rem;
+  color: var(--ink);
+  transition:
+    transform 0.3s var(--bounce),
+    box-shadow 0.3s;
+}
+.postcard:hover,
+.postcard:focus-visible {
+  transform: translateY(-6px) rotate(-1.5deg);
+  box-shadow: 8px 12px 0 rgb(64 48 42 / 0.18);
+}
+.postcard-stamp {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 54px;
+  background: var(--c);
+  border: 2px solid var(--ink);
+  outline: 3px dotted var(--color-cream);
+  outline-offset: -6px;
+}
+.postmark {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.5rem 0.4rem;
+  font: 800 0.66rem/1 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(64 48 42 / 0.55);
+  border: 2px solid rgb(64 48 42 / 0.35);
+  border-radius: 50%;
+  rotate: -10deg;
+}
+.postcard h3 {
+  margin-top: 0.9rem;
+  padding-right: 2.4rem;
+  font-size: clamp(1.2rem, min(1.7vw, 3vh), 1.5rem);
+  line-height: 1.1;
+}
+.postcard p {
+  margin-top: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+.postcard-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.postcard-tags {
+  color: var(--color-teal-deep);
+}
+.postcard-read {
+  color: var(--color-rust-deep);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: summit                                                       */
+/* ------------------------------------------------------------------ */
+
+.summit {
+  position: relative;
+  max-width: 41rem;
+  margin: auto 3vw 9vh auto;
+}
+.summit-kicker {
+  color: var(--ink);
+  font-size: 1.7rem;
+  rotate: -2deg;
+}
+.summit-title {
+  margin-top: 0.6rem;
+  font-size: clamp(2.6rem, min(5.6vw, 9vh), 5.2rem);
+  line-height: 0.95;
+  font-weight: 750;
+  text-shadow: 0 2px 0 rgb(255 243 222 / 0.5);
+}
+.summit-em {
+  font-style: italic;
+  color: #fff6e3;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 4px 5px 0 var(--ink);
+}
+.summit-sub {
+  margin-top: 1.1rem;
+  max-width: 28rem;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+.summit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.6rem;
+}
+.summit-sign {
+  margin-top: 1.3rem;
+  color: var(--ink);
+  font-size: 1.7rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stop: night camp (footer)                                          */
+/* ------------------------------------------------------------------ */
+
+.night {
+  max-width: 32rem;
+  margin: auto 4vw 10vh auto;
+  color: #fff3de;
+}
+.night-kicker {
+  color: #ffd166;
+  font-size: 1.7rem;
+}
+.night-title {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-size: clamp(2rem, min(3.6vw, 6vh), 3.2rem);
+  font-weight: 650;
+  line-height: 1;
+}
+.night-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin: 1.3rem 0 1.4rem;
+}
+.night-links a {
+  font-weight: 700;
+  color: #fff3de;
+  text-decoration: underline wavy rgb(255 209 102 / 0.7);
+  text-underline-offset: 5px;
+}
+.night-links a:hover {
+  color: #ffd166;
+}
+.night-fine {
+  margin-top: 1.4rem;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+/* ------------------------------------------------------------------ */
+/* Trek mode on phones                                                */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  :root {
+    --top: 74px;
+  }
+  .trek-on .plant {
+    left: var(--xm, var(--x));
+    width: var(--wm, var(--w, auto));
+  }
+  .trek-on .content {
+    left: 18px;
+    right: 18px;
+  }
+  .hud-alt {
+    top: 12px;
+    left: 12px;
+  }
+  .hud-place {
+    font-size: 1.15rem;
+  }
+  .hud-mail {
+    top: 12px;
+    right: 12px;
+  }
+  .hud-mail span {
+    display: none;
+  }
+  .hud-map {
+    bottom: 10px;
+    height: 42px;
+  }
+
+  .s-base .content,
+  .s-summit .content,
+  .s-night .content {
+    padding-bottom: calc(var(--yak-w) * 0.95);
+  }
+  .base {
+    padding-bottom: 0;
+  }
+  .base-word:nth-child(2) {
+    padding-left: 0.3em;
+  }
+  .base-name {
+    font-size: min(21vw, 12vh);
+  }
+  .signpost-climb {
+    display: none;
+  }
+  .clothes-head {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .summit-pole {
+    height: calc(var(--ground) * 0.17);
+  }
+
+  .board {
+    --legs: calc(var(--yak-w) * 0.95);
+    width: 100%;
+  }
+  .board-roof {
+    margin: 0 -8px -6px;
+  }
+  .board-cork {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "p1 p2 pk"
+      "p1 st tg";
+    column-gap: 70px;
+    padding: 1rem 0.9rem;
+  }
+  .board-leg-m {
+    display: block;
+  }
+  .board-intro {
+    font-size: 14.5px;
+  }
+  .board-p2 {
+    align-self: start;
+  }
+  .sticky {
+    align-self: start;
+  }
+
+  .logbook {
+    --legs: calc(var(--yak-w) * 1.02);
+    margin: auto 0 0;
+    width: 100%;
+  }
+  .log-page {
+    padding: 1.1rem 1.1rem 1rem;
+  }
+  .log-body {
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .here-note {
+    top: -2.4rem;
+    left: auto;
+    right: 0.2rem;
+  }
+  .here-note svg {
+    display: none;
+  }
+
+  .register {
+    margin: auto 0 calc(var(--yak-w) * 1.2);
+  }
+  .deck {
+    height: clamp(220px, 36vh, 290px);
+  }
+
+  .clothes {
+    --rope: 96px;
+    margin: 0;
+  }
+  .postcards {
+    left: 2rem;
+    right: 2rem;
+    gap: 0;
+    justify-content: space-between;
+  }
+  .postcard-wrap {
+    flex: 0 0 calc((100% - 2 * 4rem) / 3);
+  }
+  .postcard-wrap,
+  .postcard-wrap:nth-child(2) {
+    margin-top: 24px;
+  }
+
+  .summit {
+    margin: auto 0 0;
+  }
+  .night {
+    margin: auto 0 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Static fallback — no JS or reduced motion: a calm vertical page    */
+/* ------------------------------------------------------------------ */
+
+html:not(.trek-on) .trek {
+  background: linear-gradient(180deg, #cfe9f2 0, #fff3de 520px);
+}
+html:not(.trek-on) .sky,
+html:not(.trek-on) .stars,
+html:not(.trek-on) .sun,
+html:not(.trek-on) .moon,
+html:not(.trek-on) .layer,
+html:not(.trek-on) .night-tint,
+html:not(.trek-on) .weather,
+html:not(.trek-on) .yak-actor,
+html:not(.trek-on) .scene,
+html:not(.trek-on) .board-leg,
+html:not(.trek-on) .log-leg,
+html:not(.trek-on) .rope,
+html:not(.trek-on) .peg,
+html:not(.trek-on) .here-note svg,
+html:not(.trek-on) .base-hint {
+  display: none;
+}
+html:not(.trek-on) .stop {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem;
+}
+html:not(.trek-on) .stop + .stop {
+  border-top: 2.5px dashed rgb(64 48 42 / 0.18);
+}
+html:not(.trek-on) .content > * {
+  margin: 0;
+  width: auto;
+  max-width: none;
+}
+html:not(.trek-on) .board,
+html:not(.trek-on) .logbook {
+  padding-bottom: 0;
+}
+html:not(.trek-on) .logbook {
+  max-width: 40rem;
+}
+html:not(.trek-on) .clothes::before,
+html:not(.trek-on) .clothes::after {
+  display: none;
+}
+html:not(.trek-on) .postcards {
+  position: static;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+html:not(.trek-on) .postcard-wrap {
+  animation: none;
+  flex: 1 1 16rem;
+  margin-top: 0;
+}
+html:not(.trek-on) .clothes {
+  height: auto;
+}
+html:not(.trek-on) .clothes-head {
+  padding-left: 0;
+}
+html:not(.trek-on) .s-summit,
+html:not(.trek-on) .s-night {
+  max-width: none;
+}
+html:not(.trek-on) .s-night {
+  background: #26244a;
+}
+html:not(.trek-on) .s-night .night,
+html:not(.trek-on) .s-summit .summit {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+html:not(.trek-on) .deck {
+  max-width: 36rem;
+}
+@media (max-width: 767px) {
+  html:not(.trek-on) .board-cork {
+    grid-template-columns: 1fr;
+    grid-template-areas: "p1" "p2" "st" "pk" "tg";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Journal pages (blog)                                               */
+/* ------------------------------------------------------------------ */
+
+.journal {
+  min-height: 100vh;
+  padding: 1.5rem 1.25rem 5rem;
+  background:
+    radial-gradient(circle at 12% 0%, #cfe9f2 0, transparent 40%),
+    linear-gradient(180deg, #e3f1ec 0, var(--color-paper) 360px);
+}
+.journal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 46rem;
+  margin: 0 auto;
+}
+.journal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font: 600 1.4rem/1 var(--font-hand);
+  color: var(--ink);
+}
+.journal-back .yak {
+  width: 74px;
+  transform: scaleX(-1);
+}
+.journal-back:hover .yak {
+  animation: yHop 0.6s ease-in-out;
+}
+.journal-page {
+  position: relative;
+  max-width: 46rem;
+  margin: 1.5rem auto 0;
+  padding: clamp(1.6rem, 5vw, 3.2rem);
+  background-image: repeating-linear-gradient(transparent 0 31px, rgb(76 201 240 / 0.18) 31px 32px);
+  background-position: 0 18px;
+}
+.journal-page::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 120px;
+  height: 28px;
+  translate: -50% 0;
+  rotate: -2deg;
+  background: rgb(255 209 102 / 0.8);
+  border: 1.5px solid rgb(64 48 42 / 0.2);
+}
+.journal-title {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1;
+}
+.journal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-top: 1.2rem;
+}
+.journal-meta .tagline {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-teal-deep);
+}
+
+.prose-trail {
+  margin-top: 2rem;
+  font-size: 1.12rem;
+  line-height: 1.75;
+}
+.prose-trail p {
+  margin: 1.1em 0;
+}
+.prose-trail h2 {
+  margin: 2em 0 0.4em;
+  font-size: 1.9rem;
+}
+.prose-trail ul {
+  margin: 1.3em 0;
+  display: grid;
+  gap: 0.7em;
+}
+.prose-trail li {
+  position: relative;
+  padding-left: 1.8rem;
+}
+.prose-trail li::before {
+  content: "";
+  position: absolute;
+  left: 0.2rem;
+  top: 0.55em;
+  width: 12px;
+  height: 12px;
+  background: var(--color-butter);
+  border: 2px solid var(--ink);
+  border-radius: 60% 40% 55% 45%;
+}
+.prose-trail strong {
+  font-weight: 800;
+  background: linear-gradient(transparent 62%, var(--color-butter) 62%);
+}
+.prose-trail a {
+  font-weight: 700;
+  color: var(--color-rust-deep);
+  text-decoration: underline wavy;
+  text-underline-offset: 4px;
+}
+.journal-sign {
+  margin-top: 2.2rem;
+  padding-top: 1.2rem;
+  border-top: 2px dashed rgb(64 48 42 / 0.2);
+  font-size: 1.7rem;
+}
+.journal-cta {
+  max-width: 46rem;
+  margin: 3rem auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+.journal-cta p {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 650;
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.journal-list {
+  max-width: 46rem;
+  margin: 2.5rem auto 0;
+  display: grid;
+  gap: 2.4rem;
+}
+.journal-list .postcard {
+  min-height: 0;
+  padding: 1.5rem 1.6rem 1.3rem;
+  rotate: var(--r);
+}
+.journal-list .postcard h2 {
+  margin-top: 0.9rem;
+  padding-right: 3rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.08;
+}
+.journal-list .postcard p {
+  font-size: 1.02rem;
+}
+.journal-head {
+  max-width: 46rem;
+  margin: 2.5rem auto 0;
+}
+.journal-head h1 {
+  font-size: clamp(3rem, 9vw, 5rem);
+  line-height: 0.95;
+}

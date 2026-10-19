@@ -1,0 +1,64 @@
+---
+import Stop from "./Stop.astro";
+import { hero, links, site, stack } from "../../data/content";
+
+const ink = "#40302A";
+const tagColors = ["#FFD166", "#4CC9F0", "#06D6A0", "#F47A95"];
+---
+
+<Stop id="trailhead" label="Trailhead — about Rakesh" spanM={3} class="s-trailhead">
+  <div class="board">
+    <div class="board-roof" aria-hidden="true"></div>
+    <div class="board-cork">
+      <article class="paper board-intro board-p1 pinned" style="--r:-1deg">
+        <h2 class="board-title">Before you start the climb</h2>
+        <p>{hero.intro[0]}</p>
+      </article>
+      <article class="paper board-intro board-p2 pinned" style="--r:1.2deg">
+        <p>{hero.intro[1]}</p>
+      </article>
+
+      <aside class="sticky" style="--r:2.5deg">
+        <span class="sticky-label">Currently</span>
+        <p>{site.role}, leading a team of six.</p>
+      </aside>
+
+      <aside class="paper packing pinned" style="--r:-1.5deg">
+        <h3>Packing list</h3>
+        <ul>
+          {
+            stack.map((s) => (
+              <li>
+                <svg width="20" height="18" viewBox="0 0 20 18" aria-hidden="true">
+                  <rect x="1.5" y="3" width="13" height="13" rx="2" fill="#FFFDF6" stroke={ink} stroke-width="2" />
+                  <path d="M4.5 9 L 8 13 L 18 1.5" fill="none" stroke="#E85D2F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                {s}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+
+      <ul class="tags" aria-label="Find Rakesh online">
+        {
+          links.map((l, i) => (
+            <li style={`--c:${tagColors[i % tagColors.length]};--i:${i}`}>
+              <a
+                class="tag"
+                href={l.href}
+                target={l.href.startsWith("http") ? "_blank" : undefined}
+                rel={l.href.startsWith("http") ? "noopener" : undefined}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <span class="board-leg board-leg-l" aria-hidden="true"></span>
+    <span class="board-leg board-leg-m" aria-hidden="true"></span>
+    <span class="board-leg board-leg-r" aria-hidden="true"></span>
+  </div>
+</Stop>

@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+import Trek from "../components/Trek.astro";
+import Basecamp from "../components/stops/Basecamp.astro";
+import Trailhead from "../components/stops/Trailhead.astro";
+import Camp from "../components/stops/Camp.astro";
+import Fireside from "../components/stops/Fireside.astro";
+import Notes from "../components/stops/Notes.astro";
+import Summit from "../components/stops/Summit.astro";
+import Night from "../components/stops/Night.astro";
+import { experience, site } from "../data/content";
+
+// oldest job first: the trail climbs through time
+const camps = [...experience].reverse();
+const campIds = ["climb", "camp-2", "camp-3", "camp-4"];
+const numerals = ["I", "II", "III", "IV"];
+const tents = ["#06D6A0", "#4CC9F0", "#FFD166", "#E85D2F"];
+---
+
+<Base title={`${site.name} — ${site.title}`} description={site.description} mode="trek">
+  <main>
+    <Trek>
+      <Basecamp />
+      <Trailhead />
+      {camps.map((job, i) => <Camp id={campIds[i]} job={job} numeral={numerals[i]} tent={tents[i]} first={i === 0} />)}
+      <Fireside />
+      <Notes />
+      <Summit />
+      <Night />
+    </Trek>
+  </main>
+  <script>
+    import "../scripts/trek";
+  </script>
+</Base>

@@ -1,0 +1,17 @@
+---
+import Yak from "./Yak.astro";
+import { site } from "../data/content";
+
+interface Props {
+  back: { href: string; label: string };
+}
+const { back } = Astro.props;
+---
+
+<header class="journal-top">
+  <a class="journal-back" href={back.href}>
+    <Yak pose="read" />
+    <span>← {back.label}</span>
+  </a>
+  <a class="ink-btn ink-btn-sm" href={`mailto:${site.email}`}>say hi</a>
+</header>

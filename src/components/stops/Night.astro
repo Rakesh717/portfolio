@@ -1,0 +1,46 @@
+---
+import Stop from "./Stop.astro";
+import { links, site } from "../../data/content";
+
+const ink = "#40302A";
+const year = new Date().getFullYear();
+---
+
+<Stop id="night" label="Night camp — footer" class="s-night">
+  <Fragment slot="scene">
+    <div class="plant tent tent-night" style="--x:30%;--xm:50%;--w:min(14vw,210px);--wm:130px">
+      <svg viewBox="0 0 170 120">
+        <path d="M14 116 L 85 8 L 156 116 Z" fill="#E85D2F" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M85 8 L 64 116 H 106 Z" fill="#FFD166" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+        <path d="M85 8 L 106 116 L 120 116 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      </svg>
+      <span class="tent-light"></span>
+    </div>
+    <div class="plant lantern" style="--x:44%;--xm:80%;--w:clamp(28px,2.6vw,40px);--wm:28px">
+      <svg viewBox="0 0 40 120">
+        <path d="M6 120 V 10 H 30" fill="none" stroke={ink} stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M30 10 v8" stroke={ink} stroke-width="2"></path>
+        <rect x="22" y="18" width="16" height="22" rx="4" fill="#FFD166" stroke={ink} stroke-width="2.5"></rect>
+      </svg>
+      <span class="lantern-glow"></span>
+    </div>
+  </Fragment>
+
+  <footer class="night">
+    <p class="hand night-kicker">trail closed for the night</p>
+    <p class="night-title">Yakku is asleep. Rakesh probably isn't.</p>
+    <ul class="night-links">
+      {
+        links.map((l) => (
+          <li>
+            <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noopener" : undefined}>
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <button class="ink-btn ink-btn-sm" data-go="basecamp">↩ Walk back down to basecamp</button>
+    <p class="night-fine">© {year} {site.name} · Built with Astro, Tailwind and one very fluffy trail guide.</p>
+  </footer>
+</Stop>

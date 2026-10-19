@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import JournalTop from "../../components/JournalTop.astro";
+import { site } from "../../data/content";
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+const stampColors = ["#4CC9F0", "#FFD166", "#06D6A0"];
+const tilts = [-1, 0.8, -0.6];
+const ink = "#40302A";
+---
+
+<Base
+  title={`Field Notes — ${site.name}`}
+  description="Notes from the trail: essays on integrations, engineering leadership and building AI products people can verify."
+>
+  <main class="journal">
+    <JournalTop back={{ href: "/#notes", label: "back on the trail" }} />
+
+    <div class="journal-head">
+      <p class="hand">Yakku's reading pile</p>
+      <h1>Field notes</h1>
+    </div>
+
+    <ul class="journal-list">
+      {
+        posts.map((post, i) => (
+          <li>
+            <a class="postcard paper" href={`/blog/${post.id}`} style={`--r:${tilts[i % 3]}deg`}>
+              <span class="postcard-stamp" style={`--c:${stampColors[i % 3]}`} aria-hidden="true">
+                <svg viewBox="0 0 40 30" width="34" height="26">
+                  <path d="M2 28 L 14 10 L 21 19 L 27 12 L 38 28 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="postmark">{df.format(post.data.pubDate)}</span>
+              <h2>{post.data.title}</h2>
+              <p>{post.data.description}</p>
+              <span class="postcard-foot">
+                <span class="postcard-tags">{post.data.tags.map((t) => `#${t}`).join("  ")}</span>
+                <span class="postcard-read">read →</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Base>

@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import JournalTop from "../../components/JournalTop.astro";
+import { contact, site } from "../../data/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" });
+---
+
+<Base title={`${post.data.title} — ${site.name}`} description={post.data.description}>
+  <main class="journal">
+    <JournalTop back={{ href: "/blog", label: "all field notes" }} />
+
+    <article class="paper journal-page">
+      <h1 class="journal-title">{post.data.title}</h1>
+      <div class="journal-meta">
+        <span class="stamp">{df.format(post.data.pubDate)}</span>
+        <span class="tagline">{post.data.tags.map((t) => `#${t}`).join("  ")}</span>
+      </div>
+      <div class="prose-trail">
+        <Content />
+      </div>
+      <p class="hand journal-sign">— Rakesh, from basecamp in {site.location}</p>
+    </article>
+
+    <aside class="journal-cta">
+      <p>{contact.heading}</p>
+      <div class="summit-actions" style="margin-top:0">
+        <a class="ink-btn ink-btn-primary" href={`mailto:${site.email}`}>{contact.email}</a>
+        <a class="ink-btn" href="/#summit">Climb to the summit</a>
+      </div>
+    </aside>
+  </main>
+</Base>

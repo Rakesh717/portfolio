@@ -1,0 +1,166 @@
+---
+/**
+ * Yakku — side-view trail guide, facing right.
+ * Every part is its own group so CSS can pose it via [data-pose].
+ * Poses: idle · walk · run · wave · sit · read · graze · celebrate · sleep
+ */
+interface Props {
+  pose?: string;
+  id?: string;
+  class?: string;
+}
+
+const { pose = "idle", id, class: className = "" } = Astro.props;
+
+const ink = "#40302A";
+const fur = "#8A5A3B";
+const furDark = "#6B4429";
+const furLight = "#C9925E";
+
+// shaggy fringe along the bottom of the coat
+function skirt() {
+  const left = 40;
+  const right = 200;
+  const strands = 11;
+  const step = (right - left) / strands;
+  let d = `M46 108 L194 108 C 198 124 200 136 ${right} 148`;
+  for (let i = 0; i < strands; i++) {
+    const x0 = right - i * step;
+    const x1 = x0 - step;
+    const tip = 160 + ((i * 37) % 7);
+    d += ` Q ${x0 - step * 0.2} ${tip} ${x0 - step * 0.5} ${tip - 1} Q ${x1 + step * 0.15} ${tip - 2} ${x1} 148`;
+  }
+  d += ` C 40 136 42 122 46 108 Z`;
+  return d;
+}
+
+// fringe of bangs over the eyes
+function bangs() {
+  let d = "M188 100 C 184 80 198 66 218 68 C 234 70 245 80 243 96";
+  const xs = [243, 234, 225, 216, 206, 197, 188];
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i];
+    const b = xs[i + 1];
+    const tip = i % 2 ? 103 : 101;
+    d += ` Q ${a - 2} ${tip} ${(a + b) / 2} ${tip} Q ${b + 2} ${tip} ${b} 95`;
+  }
+  return d + " Z";
+}
+
+const leg = (cx: number, color: string, cls: string) => ({ cx, color, cls });
+const farLegs = [leg(72, furDark, "y-leg-bf"), leg(166, furDark, "y-leg-ff")];
+const nearLegs = [leg(94, fur, "y-leg-bn"), leg(184, fur, "y-leg-fn")];
+---
+
+<svg
+  class:list={["yak", className]}
+  id={id}
+  viewBox="0 0 260 210"
+  data-pose={pose}
+  aria-hidden="true"
+>
+  <ellipse class="y-shadow" cx="122" cy="200" rx="86" ry="7" fill={ink} opacity="0.14"></ellipse>
+
+  <g class="y-all">
+    {
+      [...farLegs, ...nearLegs].map((l) => (
+        <g class:list={["y-leg", l.cls]}>
+          <rect x={l.cx - 9} y="112" width="18" height="78" rx="9" fill={l.color} stroke={ink} stroke-width="3" />
+          <rect x={l.cx - 10.5} y="182" width="21" height="15" rx="6" fill="#3E2A1E" stroke={ink} stroke-width="3" />
+        </g>
+      ))
+    }
+
+    <g class="y-torso">
+      <!-- tail -->
+      <g class="y-tail">
+        <path d="M48 96 C 30 98 20 112 24 128" fill="none" stroke={ink} stroke-width="10" stroke-linecap="round"></path>
+        <path d="M48 96 C 30 98 20 112 24 128" fill="none" stroke={furDark} stroke-width="4.5" stroke-linecap="round"></path>
+        <path d="M24 122 C 14 126 12 142 22 148 C 30 152 36 140 32 128 Z" fill={furDark} stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+      </g>
+
+      <!-- coat -->
+      <g class="y-skirt">
+        <path d={skirt()} fill={fur} stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M70 138 q-2 10 2 16 M104 140 q-2 10 1 16 M138 140 q-1 10 2 15 M170 138 q-1 9 2 14" fill="none" stroke={furDark} stroke-width="2.5" stroke-linecap="round"></path>
+      </g>
+      <path d="M44 126 C 38 96 52 70 86 62 C 104 58 116 50 130 44 C 156 34 182 46 190 72 C 196 90 197 110 195 126 Z" fill={fur}></path>
+      <path d="M44 126 C 38 96 52 70 86 62 C 104 58 116 50 130 44 C 156 34 182 46 190 72 C 196 90 197 110 195 126" fill="none" stroke={ink} stroke-width="3" stroke-linecap="round"></path>
+      <path d="M134 56 C 150 50 168 54 176 66 M58 96 q-3 10 1 20 M150 72 q5 12 2 26 M168 82 q4 10 1 22 M120 74 q4 9 1 18" fill="none" stroke={furLight} stroke-width="3" stroke-linecap="round" opacity="0.7"></path>
+
+      <!-- strap + backpack -->
+      <path d="M86 74 C 82 94 86 112 92 128" fill="none" stroke={ink} stroke-width="9" stroke-linecap="round"></path>
+      <path d="M86 74 C 82 94 86 112 92 128" fill="none" stroke="#5C3A22" stroke-width="4.5" stroke-linecap="round"></path>
+      <g class="y-pack">
+        <g class="y-flag">
+          <path d="M80 44 L 70 4" stroke={ink} stroke-width="3.5" stroke-linecap="round"></path>
+          <g class="y-pennant">
+            <path d="M70 5 L 100 12 L 74 22 Z" fill="#EF476F" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+          </g>
+        </g>
+        <g transform="rotate(-8 97 58)">
+          <rect x="72" y="42" width="50" height="36" rx="10" fill="#E85D2F" stroke={ink} stroke-width="3"></rect>
+          <path d="M72 54 C 84 60 110 60 122 54" fill="none" stroke={ink} stroke-width="2.5"></path>
+          <rect x="91" y="60" width="13" height="10" rx="3" fill="#FFD166" stroke={ink} stroke-width="2.5"></rect>
+          <rect x="68" y="28" width="58" height="17" rx="8.5" fill="#2A9D8F" stroke={ink} stroke-width="3"></rect>
+          <path d="M86 29 v15 M108 29 v15" stroke={ink} stroke-width="2.5"></path>
+        </g>
+      </g>
+
+      <!-- head -->
+      <g class="y-head">
+        <path d="M200 80 C 190 64 192 48 206 40" fill="none" stroke={ink} stroke-width="12" stroke-linecap="round"></path>
+        <path d="M200 80 C 190 64 192 48 206 40" fill="none" stroke="#F6E7C8" stroke-width="6" stroke-linecap="round"></path>
+
+        <path d="M186 100 C 186 80 202 70 220 72 C 238 74 249 90 249 108 C 249 128 237 140 221 140 C 201 140 186 124 186 100 Z" fill={fur} stroke={ink} stroke-width="3"></path>
+
+        <g class="y-ear">
+          <ellipse cx="192" cy="106" rx="13" ry="6.5" transform="rotate(-28 192 106)" fill={fur} stroke={ink} stroke-width="3"></ellipse>
+          <ellipse cx="190" cy="107" rx="6" ry="2.5" transform="rotate(-28 190 107)" fill="#E8927C"></ellipse>
+        </g>
+
+        <ellipse cx="234" cy="122" rx="15" ry="13" fill="#F1D7B0" stroke={ink} stroke-width="3"></ellipse>
+        <ellipse cx="242" cy="117" rx="2.3" ry="3.2" fill={ink}></ellipse>
+        <g class="y-mouth">
+          <path class="y-mouth-smile" d="M228 129 Q 234 134 240 128" fill="none" stroke={ink} stroke-width="2.5" stroke-linecap="round"></path>
+          <path class="y-mouth-open" d="M227 127 Q 234 141 242 126 Z" fill={ink}></path>
+        </g>
+
+        <path d={bangs()} fill="#D9A868" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+
+        <g class="y-eye">
+          <g class="y-eye-open">
+            <ellipse cx="222" cy="107" rx="4.6" ry="5.8" fill={ink}></ellipse>
+            <circle cx="223.8" cy="104.8" r="1.7" fill="#FFFDF6"></circle>
+          </g>
+          <path class="y-eye-happy" d="M216.5 109 Q 222 101 227.5 109" fill="none" stroke={ink} stroke-width="3" stroke-linecap="round"></path>
+          <path class="y-eye-shut" d="M216.5 106 Q 222 111 227.5 106" fill="none" stroke={ink} stroke-width="3" stroke-linecap="round"></path>
+        </g>
+        <ellipse cx="214" cy="121" rx="6" ry="4" fill="#E8927C" opacity="0.65"></ellipse>
+
+        <path d="M214 76 C 222 60 238 58 240 42" fill="none" stroke={ink} stroke-width="12" stroke-linecap="round"></path>
+        <path d="M214 76 C 222 60 238 58 240 42" fill="none" stroke="#F6E7C8" stroke-width="6" stroke-linecap="round"></path>
+      </g>
+
+      <!-- scarf -->
+      <g class="y-scarf">
+        <path d="M190 124 C 176 130 160 128 148 136 L 152 146 C 164 140 178 142 192 134 Z" fill="#1E756B" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+      </g>
+      <path d="M182 92 C 192 98 198 114 194 132" fill="none" stroke={ink} stroke-width="16" stroke-linecap="round"></path>
+      <path d="M182 92 C 192 98 198 114 194 132" fill="none" stroke="#2A9D8F" stroke-width="10" stroke-linecap="round"></path>
+
+      <!-- book (read pose) -->
+      <g class="y-book">
+        <path d="M228 150 C 220 143 208 143 202 147 L 202 172 C 208 168 220 168 228 174 C 236 168 248 168 254 172 L 254 147 C 248 143 236 143 228 150 Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+        <path d="M228 150 V 174" stroke={ink} stroke-width="2.5"></path>
+        <path d="M207 154 q8 -3 16 0 M207 161 q8 -3 16 0 M233 154 q8 -3 16 0 M233 161 q8 -3 16 0" fill="none" stroke="#C9B79B" stroke-width="2" stroke-linecap="round"></path>
+      </g>
+    </g>
+  </g>
+
+  <g class="y-zzz" font-family="Caveat Variable, Caveat, cursive" font-weight="700" fill="#FFFDF6" stroke={ink} stroke-width="1.2">
+    <text x="236" y="70" font-size="22">z</text>
+    <text x="248" y="50" font-size="28">z</text>
+    <text x="262" y="26" font-size="34">Z</text>
+  </g>
+</svg>
