@@ -1187,7 +1187,9 @@ function boot() {
     });
     // skim pace (~450 wpm): the tour is a walkthrough, and they can pause to read closer
     const read = clamp(1000 + wordsInView(s.el) * 130, 2800, 11000);
-    t.dwell = Math.max(read, at + 200, t.k === n - 1 ? TOUR_MIN[s.d.id] ?? 0 : 0);
+    // the summit only needs its long hold when the look-back is going to play
+    const min = s.d.id === "summit" && !(revealDue() && !summitParty) ? 0 : TOUR_MIN[s.d.id] ?? 0;
+    t.dwell = Math.max(read, at + 200, t.k === n - 1 ? min : 0);
     t.phase = "read";
     t.t = 0;
   }
@@ -1307,6 +1309,15 @@ function boot() {
   let restAt = performance.now();
   let arrived = "";
   let summitParty = false;
+  // the summit look-back ("look how far you've climbed") plays once a day, not every climb
+  const today = () => new Date().toLocaleDateString("en-CA"); // local YYYY-MM-DD
+  const revealDue = () => {
+    try {
+      return localStorage.getItem("yak-summit-reveal") !== today();
+    } catch {
+      return true;
+    }
+  };
   let lastAlt = -1;
   let lastPlace = "";
   let lastS = -1;
@@ -1369,6 +1380,9 @@ function boot() {
   }
 
   function startReveal() {
+    try {
+      localStorage.setItem("yak-summit-reveal", today());
+    } catch {}
     // pull back from the summit so the slope you just climbed comes into view
     const sum = L[indexOf("summit")];
     const yx = sum.x0 + VW * yakFrac;
@@ -1642,7 +1656,7 @@ function boot() {
           confetti();
           sound.chime();
           window.setTimeout(() => {
-            if (stopAt(cam + VW * yakFrac)?.d.id === "summit" && Math.abs(window.scrollY - cam) < 4) startReveal();
+            if (revealDue() && stopAt(cam + VW * yakFrac)?.d.id === "summit" && Math.abs(window.scrollY - cam) < 4) startReveal();
           }, 1700);
         }
       }

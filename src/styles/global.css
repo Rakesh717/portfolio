@@ -1642,14 +1642,14 @@ h3 {
 .stop.raised .camp-flag {
   transform: translateY(0);
 }
-.camp-flag path {
+.camp-cloth {
   transform-box: fill-box;
   transform-origin: 0 50%;
   animation: campFlag 1.4s ease-in-out infinite alternate;
 }
 @keyframes campFlag {
   to {
-    transform: skewY(7deg) scaleX(0.9);
+    transform: skewY(6deg) scaleX(0.92);
   }
 }
 

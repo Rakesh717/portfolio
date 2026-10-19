@@ -44,8 +44,12 @@ const flag = stops.find((s) => s.id === id)?.color ?? "#EF476F";
         <path d="M10 230 V 6" stroke={ink} stroke-width="4" stroke-linecap="round"></path>
         <circle cx="10" cy="6" r="4" fill="#FFC53D" stroke={ink} stroke-width="2"></circle>
         <g class="camp-flag">
-          <path d="M12 14 L 56 22 L 12 42 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
-          <text x="24" y="33" font-family="Fraunces Variable, serif" font-size="12" font-weight="800" fill={ink}>{numeral}</text>
+          <!-- cloth, patch and numeral wave together, so the number stays sewn on -->
+          <g class="camp-cloth">
+            <path d="M12 12 H 57 L 47 27 L 57 42 H 12 Z" fill="currentColor" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
+            <ellipse cx="29" cy="27" rx="11.5" ry="9" fill="#FFFDF6" stroke={ink} stroke-width="2"></ellipse>
+            <text x="29" y="27.5" text-anchor="middle" dominant-baseline="central" font-family="Fraunces Variable, serif" font-size={numeral.length > 2 ? 9.5 : 11} font-weight="800" fill={ink}>{numeral}</text>
+          </g>
         </g>
       </svg>
     </div>
