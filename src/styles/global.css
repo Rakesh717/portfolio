@@ -807,25 +807,6 @@ h3 {
 .trek-on .layer-front {
   pointer-events: none;
 }
-.front-bucket {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  filter: blur(2.5px);
-}
-.fg {
-  position: absolute;
-  overflow: visible;
-}
-.fg-branch {
-  transform-origin: 0 0;
-  animation: branch 5s ease-in-out infinite alternate;
-}
-@keyframes branch {
-  to {
-    transform: rotate(2.5deg);
-  }
-}
 
 .trek-on .fog {
   position: absolute;

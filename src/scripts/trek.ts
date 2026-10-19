@@ -292,7 +292,7 @@ function boot() {
     VW = window.innerWidth;
     VH = window.innerHeight;
     mobile = VW < 768;
-    ground = Math.round(VH * (mobile ? 0.86 : 0.86));
+    ground = Math.round(VH * (mobile ? 0.88 : 0.9));
     gapW = Math.round(VW * (mobile ? 0.6 : 0.4));
     yakFrac = mobile ? 0.2 : 0.15;
     yakW = mobile ? 112 : clamp(VW * 0.13, 150, 210);
@@ -599,43 +599,6 @@ function boot() {
       el.innerHTML = html;
       near.appendChild(el);
       buckets.push({ el, x0: b0, x1: b0 + bw, shown: true });
-    }
-
-    // foreground: big, soft shapes that pass in front of the camera
-    const FRONT = 1.4;
-    const frw = Math.ceil(VW + maxCam * FRONT + 400);
-    front.style.width = `${frw}px`;
-    front.innerHTML = "";
-    frontBuckets = [];
-    const fs = mobile ? 0.6 : clamp(VH / 900, 0.8, 1.2);
-    for (let b0 = 0; b0 < frw; b0 += bw) {
-      let html = "";
-      for (let x = b0 + r() * 200; x < Math.min(b0 + bw, frw); x += (mobile ? 170 : 260) + r() * 380) {
-        const worldX = clamp((x - VW / 2) / FRONT + VW / 2, 0, worldW);
-        const b = biomeAt(worldX, r());
-        const lx = (x - b0).toFixed(0);
-        if (b === "forest" || b === "meadow") {
-          const h = (90 + r() * 70) * fs;
-          const c = b === "forest" ? "#2E6A4B" : "#5B7A3C";
-          html += `<svg class="fg" viewBox="0 0 140 100" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.35).toFixed(0)}px;width:${(h * 1.5).toFixed(0)}px;height:${h.toFixed(0)}px;color:${c}"><use href="#s-tuft"/></svg>`;
-          if (b === "forest" && r() < 0.35) {
-            const w = (240 + r() * 120) * fs;
-            html += `<svg class="fg fg-branch" viewBox="0 0 260 120" style="left:${lx}px;top:-8px;width:${w.toFixed(0)}px;color:#2A6448"><use href="#s-branch"/></svg>`;
-          }
-        } else if (b === "rock") {
-          const h = (50 + r() * 50) * fs;
-          html += `<svg class="fg" viewBox="0 0 90 56" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.3).toFixed(0)}px;width:${(h * 1.7).toFixed(0)}px;height:${h.toFixed(0)}px;color:#7D7064"><use href="#s-rock"/></svg>`;
-        } else {
-          const h = (50 + r() * 40) * fs;
-          html += `<svg class="fg" viewBox="0 0 220 70" preserveAspectRatio="none" style="left:${lx}px;bottom:${(-h * 0.3).toFixed(0)}px;width:${(h * 3.2).toFixed(0)}px;height:${h.toFixed(0)}px"><use href="#s-drift"/></svg>`;
-        }
-      }
-      const el = document.createElement("div");
-      el.className = "front-bucket";
-      el.style.cssText = `left:${b0}px;width:${bw}px`;
-      el.innerHTML = html;
-      front.appendChild(el);
-      frontBuckets.push({ el, x0: b0, x1: b0 + bw, shown: true });
     }
 
     // stars
