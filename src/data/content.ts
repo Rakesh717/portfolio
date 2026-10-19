@@ -26,7 +26,7 @@ export const hero = {
   headlineEnd: "products.",
   intro: [
     "I'm Rakesh, a Nepal based product engineer with over seven years of experience. I build web products end to end, from backend APIs to polished interfaces, with TypeScript (React, Hono), PHP (Laravel), Postgres and Tailwind CSS, and I use AI as a daily part of how I design, build and ship.",
-    "Currently CTO at Binary Digits, leading a six person engineering team. Before that I helped build three products across SaaS and fintech.",
+    "Currently CTO at Binary Digits, leading a six person engineering team. Before that I helped build mltiple products across SaaS, Fintech and E-commerce.",
   ],
 } as const;
 
@@ -95,33 +95,27 @@ export const experience: Camp[] = [
 export const testimonials = [
   {
     quote:
-      "Rakesh took our release process from a weekly ritual to a daily non-event. The team ships faster and sleeps better.",
-    name: "Aryan Shrestha",
-    role: "CEO, Binary Digits",
+      "Rakesh is a really fast learner. He got up to speed with my project quickly and understood the requirements right away. A very good communicator as well.",
+    name: "Marcus Gullberg",
+    role: "Founder, Feedbucket & cousab (cousab.se)",
   },
   {
     quote:
-      "He owned most of our platform as an early engineer. Data pipelines, charts, the AI answer experience: all of it fast and dependable.",
-    name: "Daniel Reyes",
-    role: "Founder, Artifact Analyst",
+      "Rakesh is a fast and efficient developer who writes clean code, continuously polishes his work, and leverages AI effectively to improve quality and productivity.",
+    name: "Antoine Vulcain",
+    role: "CTO @ Artifact Analyst · Founder, Financial Modeling Prep",
   },
   {
     quote:
-      "The two-way integrations Rakesh built are the reason agencies choose us. Customers resolve feedback without ever opening our app.",
-    name: "Sofia Lindqvist",
-    role: "Product Lead, Feedbucket",
+      "He always makes things right. The code quality is very good — he keeps the code tidy and easy to maintain. Great English, always on schedule.",
+    name: "Mickeel Pramono",
+    role: "Founder, Lezenda",
   },
   {
     quote:
-      "One of those engineers you hand a vague problem and get back a shipped solution. Our back office tools just worked.",
-    name: "Marco Ricci",
-    role: "Engineering Manager, Kotuko",
-  },
-  {
-    quote:
-      "Clear communication, honest estimates, zero surprises. I would hire his team again for any serious build.",
-    name: "James Carter",
-    role: "Agency Owner, Web design",
+      "Rakesh is a clear communicator and an effective programmer who executes fast and contributes his own ideas. Everything he shipped just worked — highly recommend!",
+    name: "Lino Grubben",
+    role: "Designer & Entrepreneur",
   },
 ];
 

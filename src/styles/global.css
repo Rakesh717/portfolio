@@ -1988,7 +1988,7 @@ mark.mk-teal {
 }
 .deck {
   position: relative;
-  height: clamp(200px, 27vh, 250px);
+  height: clamp(210px, 32vh, 300px);
   margin-top: 2.2rem;
   touch-action: pan-y;
 }
@@ -2026,9 +2026,9 @@ mark.mk-teal {
 }
 .note figcaption {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: baseline;
-  gap: 0.2rem 0.6rem;
+  gap: 0.6rem;
   padding-top: 0.7rem;
   border-top: 2px dashed rgb(64 48 42 / 0.25);
 }
@@ -2036,10 +2036,16 @@ mark.mk-teal {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.1rem;
+  white-space: nowrap;
 }
 .note-role {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.88rem;
   color: var(--color-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .deck-controls {
   display: flex;
@@ -2049,7 +2055,7 @@ mark.mk-teal {
 }
 .deck-count {
   color: var(--ink);
-  min-width: 4.5rem;
+  min-width: 5.5rem;
   text-align: center;
 }
 [data-deck-auto] {
