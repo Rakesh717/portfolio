@@ -1348,7 +1348,7 @@ function boot() {
   /* ---------------- camera shots: the opening drop + the summit look-back ---------------- */
 
   type Shot = {
-    kind: "intro" | "reveal";
+    kind: "reveal";
     t0: number;
     inDur: number;
     hold: number;
@@ -1390,10 +1390,6 @@ function boot() {
     }
     sh.k = k;
     return k;
-  }
-
-  function startIntro() {
-    shot = { kind: "intro", t0: performance.now(), inDur: 0, hold: 700, outDur: 3000, s: 1.08, fx: 0, fy: 0, dy: VH * 1.1, k: 1 };
   }
 
   function startReveal() {
@@ -1553,7 +1549,6 @@ function boot() {
     // camera: normally Yakku's feet sit at a fixed screen spot; shots blend away from that
     const k = shot ? shotK(now) : 0;
     const reveal = shot?.kind === "reveal" ? k : 0;
-    const dyk = shot?.kind === "intro" ? shot.dy * k : 0;
     let sc = 1;
     let fx = yakX;
     let fy = ground - e;
@@ -1569,16 +1564,16 @@ function boot() {
       sc = lerp(1, shot.s, k);
     }
     const tx = sx - fx * sc;
-    const ty = sy - fy * sc + dyk;
+    const ty = sy - fy * sc;
     world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${sc})`;
 
     const farS = 1 - reveal * 0.18;
     far.style.transformOrigin = `${VW / 2 + cam * 0.1}px ${ground}px`;
-    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3 + dyk * 0.35}px, 0) scale(${farS})`;
-    clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4 + dyk * 0.5}px, 0)`;
-    mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6 + dyk * 0.6}px, 0)`;
-    near.style.transform = `translate3d(${-cam * 0.6}px, ${dyk * 0.8}px, 0)`;
-    front.style.transform = `translate3d(${-cam * 1.4}px, ${dyk * 1.15}px, 0)`;
+    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0) scale(${farS})`;
+    clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
+    mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
+    near.style.transform = `translate3d(${-cam * 0.6}px, 0px, 0)`;
+    front.style.transform = `translate3d(${-cam * 1.4}px, 0px, 0)`;
     const layerFade = String(1 - reveal);
     mid.style.opacity = layerFade;
     near.style.opacity = layerFade;
@@ -1612,9 +1607,8 @@ function boot() {
       }
     }
 
-    // reveal stops as they come into view (but not mid-drop)
-    if (!(shot?.kind === "intro" && k > 0.35))
-      for (const s of L) if (!s.el.classList.contains("seen") && s.x0 < v1 - VW * 0.2) s.el.classList.add("seen");
+    // reveal stops as they come into view
+    for (const s of L) if (!s.el.classList.contains("seen") && s.x0 < v1 - VW * 0.2) s.el.classList.add("seen");
 
     // yak
     smSpeed += (Math.abs(vel) - smSpeed) * (1 - Math.exp(-9 * dt));
@@ -1631,7 +1625,7 @@ function boot() {
 
     const here = stopAt(yakX);
     // flags go up the moment he walks into camp; the quip still waits for him to stop
-    if (here && !here.el.classList.contains("raised") && !(shot?.kind === "intro")) here.el.classList.add("raised");
+    if (here && !here.el.classList.contains("raised")) here.el.classList.add("raised");
     const surface: Surface = here?.d.biome === "snow" || (!here && biomeAt(yakX, 0.5) === "snow") ? "snow" : biomeAt(yakX, 0.5) === "rock" ? "rock" : "grass";
 
     // footsteps: a sound on every step, and hoofprints once there's snow underfoot
@@ -1665,7 +1659,7 @@ function boot() {
       if (rest === "idle" && still > 9000) rest = "graze";
       if (grumpy) rest = "grumpy";
       if (still > 220) setPose(rest);
-      if (here && still > 260 && arrived !== here.d.id && !(shot?.kind === "intro")) {
+      if (here && still > 260 && arrived !== here.d.id) {
         arrived = here.d.id;
         L.forEach((s) => s.el.classList.toggle("here", s === here));
         here.el.classList.add("raised");
@@ -1842,10 +1836,6 @@ function boot() {
   else {
     window.scrollTo(0, 0);
     cam = 0;
-    if (!sessionStorage.getItem("yak-intro") && !sp.has("nointro")) {
-      sessionStorage.setItem("yak-intro", "1");
-      startIntro();
-    }
   }
 
   void reduced;
