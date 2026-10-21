@@ -159,11 +159,11 @@ h3 {
   box-shadow: 0 1px 0 var(--ink);
 }
 .ink-btn-primary {
-  background: var(--color-rust);
+  background: var(--color-rust-deep);
   color: var(--color-cream);
 }
 .ink-btn-primary:hover {
-  background: var(--color-rust-deep);
+  background: #a83a15;
 }
 .ink-btn-sm {
   padding: 0.5rem 0.85rem;
@@ -3028,4 +3028,18 @@ html:not(.trek-on) .deck {
 .journal-head h1 {
   font-size: clamp(3rem, 9vw, 5rem);
   line-height: 0.95;
+}
+
+/* blog widgets: calmer on narrow screens, readable primary buttons, a clear disabled state */
+.ink-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+  box-shadow: 0 2px 0 var(--ink);
+}
+@media (max-width: 560px) {
+  .journal-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

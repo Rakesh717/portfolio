@@ -20,8 +20,8 @@ import Yak from "../Yak.astro";
     right: 0;
     bottom: 0;
     z-index: 20;
-    height: 52px;
-    padding: 0 28px 0 12px;
+    height: calc(52px + env(safe-area-inset-bottom));
+    padding: 0 28px env(safe-area-inset-bottom) 12px;
     pointer-events: none;
     background: linear-gradient(transparent, rgb(255 243 222 / 0.9) 55%);
   }
@@ -42,16 +42,22 @@ import Yak from "../Yak.astro";
     left: 0;
     bottom: 8px;
     height: 3px;
-    width: 0;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
     background: var(--color-rust);
     border-radius: 3px;
   }
   .trailbar-yak {
     position: absolute;
-    left: 0;
+    left: -26px;
     bottom: 6px;
     width: 52px;
-    margin-left: -26px;
+  }
+  @media print {
+    .trailbar {
+      display: none;
+    }
   }
   .trailbar-flag {
     position: absolute;
@@ -67,21 +73,40 @@ import Yak from "../Yak.astro";
     const yakBox = bar.querySelector<HTMLElement>("[data-yak]")!;
     const yak = bar.querySelector<SVGElement>(".yak");
     const track = bar.querySelector<HTMLElement>(".trailbar-track")!;
+    const article = document.querySelector<HTMLElement>("article");
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let idle: number | undefined;
-    const update = () => {
-      const max = document.documentElement.scrollHeight - innerHeight;
+    let width = track.clientWidth;
+    let queued = false;
+    const frame = () => {
+      queued = false;
+      // progress runs to the end of the article, so Yakku summits when the post ends
+      const end = article ? article.getBoundingClientRect().bottom + scrollY : document.documentElement.scrollHeight;
+      const max = end - innerHeight;
       const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-      const x = p * track.clientWidth;
-      fill.style.width = `${x}px`;
-      yakBox.style.left = `${x}px`;
+      fill.style.transform = `scaleX(${p})`;
+      yakBox.style.transform = `translateX(${p * width}px)`;
       if (reduced) return;
-      yak?.setAttribute("data-pose", p >= 0.995 ? "celebrate" : "walk");
+      const done = p >= 0.995;
+      yak?.setAttribute("data-pose", done ? "celebrate" : "walk");
       clearTimeout(idle);
-      idle = window.setTimeout(() => yak?.setAttribute("data-pose", p >= 0.995 ? "celebrate" : "idle"), 220);
+      idle = window.setTimeout(() => yak?.setAttribute("data-pose", done ? "celebrate" : "idle"), 220);
     };
-    addEventListener("scroll", update, { passive: true });
-    addEventListener("resize", update);
-    update();
+    const queue = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(frame);
+      }
+    };
+    addEventListener("scroll", queue, { passive: true });
+    addEventListener(
+      "resize",
+      () => {
+        width = track.clientWidth;
+        queue();
+      },
+      { passive: true },
+    );
+    frame();
   }
 </script>

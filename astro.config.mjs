@@ -6,7 +6,10 @@ import mdx from "@astrojs/mdx";
 
 export default defineConfig({
   site: "https://rakeshthapa.pages.dev",
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx(), sitemap({
+      // republished posts canonicalise to Medium, so keep them out of the sitemap
+      filter: (page) => !/\/blog\/[^/]+\/?$/.test(page),
+    })],
   devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],

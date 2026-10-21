@@ -16,7 +16,7 @@ const { title = "Trail checklist", items } = Astro.props;
       <p class="hand tcheck-msg" aria-live="polite" data-msg>Tick what is already in your workflow.</p>
     </div>
   </div>
-  <div class="tcheck-bar" role="progressbar" aria-valuemin="0" aria-valuemax={items.length} aria-valuenow="0" data-bar>
+  <div class="tcheck-bar" role="progressbar" aria-label={title} aria-valuemin="0" aria-valuemax={items.length} aria-valuenow="0" data-bar>
     <span data-fill></span>
   </div>
   <div class="tcheck-list">
@@ -129,7 +129,8 @@ const { title = "Trail checklist", items } = Astro.props;
       const all = n === boxes.length;
       fill.style.width = `${(n / boxes.length) * 100}%`;
       bar.setAttribute("aria-valuenow", String(n));
-      const i = all ? msgs.length - 1 : Math.min(n, msgs.length - 2);
+      const i = all ? msgs.length - 1 : n ? 1 + Math.floor((n / boxes.length) * (msgs.length - 2)) : 0;
+      bar.setAttribute("aria-valuetext", `${n} of ${boxes.length} done`);
       msg.textContent = msgs[i];
       yak?.setAttribute("data-pose", all ? "celebrate" : n ? "walk" : "idle");
     };

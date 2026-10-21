@@ -11,7 +11,7 @@ import Yak from "../Yak.astro";
     </div>
   </header>
 
-  <div class="tb-indexes" aria-label="Available data indexes">
+  <div class="tb-indexes" role="group" aria-label="Available data indexes">
     <span class="tb-label">Indexes</span>
     <span class="tb-chip" data-idx="generalInformation">generalInformation</span>
     <span class="tb-chip" data-idx="season1Matches">season1Matches</span>
@@ -21,9 +21,9 @@ import Yak from "../Yak.astro";
   </div>
 
   <div class="tb-questions" role="group" aria-label="Pick a question">
-    <button type="button" class="ink-btn ink-btn-sm" data-q="0">Top scorer across both seasons?</button>
-    <button type="button" class="ink-btn ink-btn-sm" data-q="1">Who played in the opening match?</button>
-    <button type="button" class="ink-btn ink-btn-sm" data-q="2">Follow up: "and compared to the first?"</button>
+    <button type="button" class="ink-btn ink-btn-sm" data-q="0" aria-pressed="false">Top scorer across both seasons?</button>
+    <button type="button" class="ink-btn ink-btn-sm" data-q="1" aria-pressed="false">Who played in the opening match?</button>
+    <button type="button" class="ink-btn ink-btn-sm" data-q="2" aria-pressed="false">Follow up: "and compared to the first?"</button>
   </div>
 
   <div class="tb-stage" hidden data-stage>
@@ -176,16 +176,16 @@ import Yak from "../Yak.astro";
     background: var(--ink);
     border-radius: 6px;
   }
-  :global(.tb [data-out] > p) {
+  .tb [data-out] > :global(p) {
     margin: 0.15rem 0;
   }
-  :global(.tb-me) {
+  .tb :global(.tb-me) {
     font-weight: 700;
   }
-  :global(.tb-bot) {
+  .tb :global(.tb-bot) {
     color: var(--color-ink-soft);
   }
-  :global(.tb-code) {
+  .tb :global(.tb-code) {
     font: 600 0.82rem ui-monospace, Menlo, monospace;
     background: #fff;
     border: 1.5px solid rgb(64 48 42 / 0.3);
@@ -194,11 +194,11 @@ import Yak from "../Yak.astro";
     margin: 0.25rem 0;
     overflow-wrap: anywhere;
   }
-  :global(.tb-bad) {
+  .tb :global(.tb-bad) {
     color: #b03a1a;
     font-weight: 700;
   }
-  :global(.tb-good) {
+  .tb :global(.tb-good) {
     color: var(--color-teal-deep);
     font-weight: 700;
   }
@@ -264,10 +264,19 @@ import Yak from "../Yak.astro";
     let demo: Demo | null = null;
     let stageNo = 0;
 
+    // everything rendered below comes from the constants above, never from user or URL input
+    const hide = (n: string) => (step(n).inert = true);
+    const show = (n: string) => {
+      const el = step(n);
+      el.inert = false;
+      el.classList.add("show");
+      return el;
+    };
     const pose = (p: string) => yak?.setAttribute("data-pose", p);
     const clear = () => {
       stageNo = 0;
       ["chat", "rag", "b1", "b2"].forEach((n) => step(n).classList.remove("show"));
+      ["rag", "b1", "b2"].forEach(hide);
       chips.forEach((c) => c.classList.remove("on"));
       next.textContent = "Run Brain 1";
       next.disabled = false;
@@ -282,20 +291,24 @@ import Yak from "../Yak.astro";
       out("rag").innerHTML = `<p>${demo.rag}</p><p class="tb-bad">Wrong or incomplete</p>`;
       out("b1").innerHTML = `<p>Rewrites the question with full context:</p><div class="tb-code">${demo.reformulated}</div><p>Picks indexes: <b>${demo.indexes.join(", ")}</b></p>`;
       out("b2").innerHTML = `<p>Loads those indexes in full and answers from real data:</p><p>${demo.answer}</p><p class="tb-good">Complete and grounded</p>`;
-      step("chat").classList.add("show");
+      show("chat");
     }
     qBtns.forEach((b, i) => b.addEventListener("click", () => pick(i)));
     next.addEventListener("click", () => {
       if (!demo) return;
       stageNo++;
       if (stageNo === 1) {
-        step("rag").classList.add("show");
-        step("b1").classList.add("show");
+        show("rag");
+        const b1 = show("b1");
+        b1.tabIndex = -1;
+        b1.focus({ preventScroll: true });
         chips.forEach((c) => c.classList.toggle("on", demo!.indexes.includes(c.dataset.idx!)));
         next.textContent = "Run Brain 2";
         pose("read");
       } else {
-        step("b2").classList.add("show");
+        const b2 = show("b2");
+        b2.tabIndex = -1;
+        b2.focus({ preventScroll: true });
         next.textContent = "Done";
         next.disabled = true;
         pose("celebrate");
@@ -304,7 +317,7 @@ import Yak from "../Yak.astro";
     $("[data-reset]").addEventListener("click", () => {
       stage.hidden = true;
       demo = null;
-      qBtns.forEach((b) => b.removeAttribute("aria-pressed"));
+      qBtns.forEach((b) => b.setAttribute("aria-pressed", "false"));
       clear();
     });
   });
