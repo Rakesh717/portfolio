@@ -1,0 +1,422 @@
+---
+// A tiny playable demo: your agent books a flight, hits a CAPTCHA at checkout,
+// and you decide who deals with it. You (slowly), the agent (instantly), or nobody.
+import Yak from "../Yak.astro";
+
+const ink = "#40302A";
+const tiles = ["yak", "peak", "yak", "cloud", "yak", "tree", "peak", "cloud", "yak"] as const;
+---
+
+<div class="arun" data-arun>
+  <div class="arun-head">
+    <div class="arun-yak"><Yak pose="idle" /></div>
+    <div>
+      <p class="hand arun-kicker">You, to your agent</p>
+      <p class="arun-ask">"Book a flight from Kathmandu to Bhairahawa tomorrow at 2 PM."</p>
+    </div>
+  </div>
+
+  <ol class="arun-log" data-log aria-live="polite"></ol>
+
+  <div class="arun-gate" data-gate hidden>
+    <div class="arun-captcha">
+      <p class="arun-captcha-q">Select all squares with <strong>yaks</strong></p>
+      <div class="arun-grid" role="group" aria-label="CAPTCHA tiles" data-grid>
+        {
+          tiles.map((t, i) => (
+            <button type="button" class="arun-tile" data-kind={t} aria-pressed="false" aria-label={`Tile ${i + 1}: ${t}`} disabled>
+              <svg viewBox="0 0 60 60" aria-hidden="true">
+                {t === "yak" && (
+                  <g stroke={ink} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+                    <path d="M14 44 V50 M22 44 V50 M38 44 V50 M46 44 V50" />
+                    <path d="M10 30 C10 20 22 18 32 20 C40 21 46 22 48 28 C50 36 48 44 40 45 H18 C12 45 10 38 10 30Z" fill="#8A5A3B" />
+                    <path d="M44 22 C48 16 56 18 54 26 C53 31 48 32 45 30Z" fill="#C9925E" />
+                    <path d="M47 19 C45 13 49 11 51 13 M53 20 C56 15 59 17 57 21" fill="none" />
+                  </g>
+                )}
+                {t === "peak" && <path d="M6 50 L24 18 L32 30 L38 22 L54 50Z M24 18 L19 27 L24 25 L28 28Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round" />}
+                {t === "cloud" && (
+                  <path d="M14 42 C5 42 5 31 14 30 C13 21 26 18 31 25 C35 15 50 17 49 28 C57 28 58 42 48 42Z" fill="#FFFDF6" stroke={ink} stroke-width="2.5" stroke-linejoin="round" />
+                )}
+                {t === "tree" && (
+                  <g stroke={ink} stroke-width="2.5" stroke-linejoin="round">
+                    <path d="M30 8 L44 30 H36 L48 46 H12 L24 30 H16Z" fill="#2A9D8F" />
+                    <path d="M30 46 V54" />
+                  </g>
+                )}
+              </svg>
+            </button>
+          ))
+        }
+      </div>
+      <div class="arun-captcha-foot">
+        <span class="arun-timer" data-timer>0.0 s</span>
+        <button type="button" class="ink-btn ink-btn-sm" data-verify disabled>Verify</button>
+      </div>
+    </div>
+
+    <div class="arun-choices" data-choices>
+      <p class="hand">The airline wants proof you're human. Your move:</p>
+      <button type="button" class="ink-btn ink-btn-sm" data-choice="me">I'll solve it myself</button>
+      <button type="button" class="ink-btn ink-btn-sm" data-choice="agent">Let the agent do it</button>
+      <button type="button" class="ink-btn ink-btn-sm" data-choice="leave">Forget it</button>
+    </div>
+  </div>
+
+  <p class="hand arun-verdict" aria-live="polite" data-verdict></p>
+
+  <div class="arun-ticket" data-ticket hidden>
+    <span class="arun-ticket-route"><b>KTM</b> → <b>BWA</b></span>
+    <span>Yakku Air YK 202 · tomorrow · 14:00 · seat 4A</span>
+    <span class="stamp">Booked</span>
+  </div>
+
+  <button type="button" class="ink-btn ink-btn-primary arun-go" data-start>Send the agent</button>
+</div>
+
+<style>
+  .arun {
+    margin: 2.2rem 0;
+    padding: 1.2rem 1.3rem 1.3rem;
+    background: #fff8e6;
+    border: 2.5px solid var(--ink);
+    border-radius: 18px 22px 18px 20px;
+    box-shadow: 4px 5px 0 rgb(64 48 42 / 0.16);
+  }
+  .arun-head {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 0.9rem;
+    align-items: end;
+  }
+  .arun-kicker {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-rust-deep);
+  }
+  .arun-ask {
+    margin: 0.1rem 0 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+  .arun-log {
+    display: grid;
+    gap: 0.35rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.98rem;
+  }
+  .arun-log:empty {
+    display: none;
+  }
+  /* log lines are added by the script, so they need :global to get these styles */
+  .arun-log :global(li) {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0;
+    animation: arun-in 0.3s ease-out both;
+  }
+  .arun-log :global(li::before) {
+    content: none;
+  }
+  .arun-log :global(.tick) {
+    flex: none;
+    width: 1.3rem;
+    font-weight: 800;
+    color: var(--color-teal-deep);
+  }
+  .arun-log :global(.blocked) {
+    color: var(--color-rust-deep);
+    font-weight: 700;
+  }
+  @keyframes arun-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  .arun-gate {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .arun-gate[hidden] {
+    display: none;
+  }
+  .arun-captcha {
+    width: 13.5rem;
+    padding: 0.7rem;
+    background: var(--color-cream);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+  }
+  .arun-captcha-q {
+    margin: 0 0 0.5rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    color: #fff;
+    background: #4a7fd4;
+    border-radius: 3px;
+  }
+  .arun-captcha-q strong {
+    background: none;
+    font-size: 1.1rem;
+  }
+  .arun-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .arun-tile {
+    aspect-ratio: 1;
+    padding: 4px;
+    background: #dcecf3;
+    border: 2px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    transition:
+      transform 0.15s,
+      border-color 0.15s;
+  }
+  .arun-tile:disabled {
+    cursor: default;
+  }
+  .arun-tile svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .arun-tile[aria-pressed="true"] {
+    transform: scale(0.86);
+    border-color: #4a7fd4;
+    background: #c3dcf0;
+  }
+  .arun-captcha-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+  }
+  .arun-timer {
+    font: 700 0.85rem var(--font-body);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-soft);
+  }
+  .arun-choices {
+    display: grid;
+    gap: 0.55rem;
+    justify-items: start;
+  }
+  .arun-choices[hidden] {
+    display: none;
+  }
+  .arun-choices .hand {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+  .arun-verdict {
+    margin: 1rem 0 0;
+    font-size: 1.45rem;
+    color: var(--ink);
+  }
+  .arun-verdict:empty {
+    display: none;
+  }
+  .arun-ticket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    margin-top: 0.9rem;
+    padding: 0.7rem 1rem;
+    background: var(--color-cream);
+    border: 2px dashed var(--ink);
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    animation: arun-in 0.4s var(--bounce) both;
+  }
+  .arun-ticket[hidden] {
+    display: none;
+  }
+  .arun-ticket-route {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+  }
+  .arun-ticket .stamp {
+    margin-left: auto;
+    color: var(--color-teal-deep);
+  }
+  .arun-go {
+    margin-top: 1rem;
+  }
+  .arun-shake {
+    animation: arun-shake 0.35s;
+  }
+  @keyframes arun-shake {
+    25% {
+      transform: translateX(-6px);
+    }
+    75% {
+      transform: translateX(6px);
+    }
+  }
+  @media (max-width: 560px) {
+    .arun-head {
+      grid-template-columns: 60px 1fr;
+    }
+    .arun-gate {
+      grid-template-columns: 1fr;
+    }
+    .arun-captcha {
+      justify-self: center;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .arun-log :global(li),
+    .arun-ticket,
+    .arun-shake {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  document.querySelectorAll<HTMLElement>("[data-arun]").forEach((root) => {
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const log = $("[data-log]");
+    const gate = $("[data-gate]");
+    const choices = $("[data-choices]");
+    const verdict = $("[data-verdict]");
+    const ticket = $("[data-ticket]");
+    const start = $<HTMLButtonElement>("[data-start]");
+    const verify = $<HTMLButtonElement>("[data-verify]");
+    const timer = $("[data-timer]");
+    const captcha = $(".arun-captcha");
+    const tiles = [...root.querySelectorAll<HTMLButtonElement>(".arun-tile")];
+    const yak = root.querySelector<SVGElement>(".arun-yak .yak");
+    const pose = (p: string) => yak?.setAttribute("data-pose", p);
+
+    let run = 0; // bumps on every restart so a stale run stops talking
+    let t0 = 0;
+    let tick: number | undefined;
+
+    const line = (text: string, cls = "") => {
+      const li = document.createElement("li");
+      li.className = cls;
+      li.innerHTML = `<span class="tick">${cls === "blocked" ? "✋" : "✓"}</span><span></span>`;
+      li.lastElementChild!.textContent = text;
+      log.append(li);
+    };
+    const setTiles = (on: boolean) => tiles.forEach((b) => (b.disabled = !on));
+    const clock = (on: boolean) => {
+      clearInterval(tick);
+      if (!on) return;
+      t0 = performance.now();
+      tick = window.setInterval(() => (timer.textContent = `${((performance.now() - t0) / 1000).toFixed(1)} s`), 100);
+    };
+    const seconds = () => ((performance.now() - t0) / 1000).toFixed(1);
+    const finish = (text: string, booked: boolean, p: string) => {
+      clock(false);
+      setTiles(false);
+      verify.disabled = true;
+      verdict.textContent = text;
+      ticket.hidden = !booked;
+      if (booked) line("Booked. Confirmation sent to your inbox.");
+      else line("Booking abandoned.", "blocked");
+      pose(p);
+      start.textContent = "Run it again";
+      start.disabled = false;
+    };
+
+    start.addEventListener("click", async () => {
+      const me = ++run;
+      start.disabled = true;
+      log.textContent = "";
+      verdict.textContent = "";
+      ticket.hidden = true;
+      gate.hidden = true;
+      choices.hidden = false;
+      timer.textContent = "0.0 s";
+      tiles.forEach((b) => b.setAttribute("aria-pressed", "false"));
+      setTiles(false);
+      verify.disabled = true;
+      pose("walk");
+      const steps = [
+        "Searched flights KTM → BWA for tomorrow",
+        "Compared 4 fares across 2 airlines",
+        "Picked the 2:00 PM, cheapest with a window seat",
+        "Filled in your name, passport and phone",
+      ];
+      for (const s of steps) {
+        await wait(650);
+        if (me !== run) return;
+        line(s);
+      }
+      await wait(650);
+      if (me !== run) return;
+      line('Checkout says: "Please prove you are human."', "blocked");
+      gate.hidden = false;
+      pose("sit");
+    });
+
+    root.querySelectorAll<HTMLButtonElement>("[data-choice]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        const me = run;
+        choices.hidden = true;
+        const choice = btn.dataset.choice;
+        if (choice === "leave") {
+          finish("Cart abandoned. The airline just lost a sale to a picture of a yak.", false, "sleep");
+          return;
+        }
+        if (choice === "me") {
+          verdict.textContent = "Your phone buzzes mid meeting. Off you go.";
+          setTiles(true);
+          clock(true);
+          tiles[0].focus();
+          return;
+        }
+        // the agent: clicks every yak without hesitation, then verifies
+        verdict.textContent = "";
+        pose("read");
+        clock(true);
+        for (const b of tiles) {
+          if (b.dataset.kind !== "yak") continue;
+          await wait(380);
+          if (me !== run) return;
+          b.setAttribute("aria-pressed", "true");
+        }
+        await wait(420);
+        if (me !== run) return;
+        finish(`Solved in ${seconds()} s. So who exactly was that test for?`, true, "celebrate");
+      }),
+    );
+
+    tiles.forEach((b) =>
+      b.addEventListener("click", () => {
+        b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+        verify.disabled = !tiles.some((t) => t.getAttribute("aria-pressed") === "true");
+      }),
+    );
+
+    verify.addEventListener("click", () => {
+      const right = tiles.every((t) => (t.getAttribute("aria-pressed") === "true") === (t.dataset.kind === "yak"));
+      if (right) {
+        finish(`Done in ${seconds()} s. Your agent waited the whole time, tapping its foot.`, true, "wave");
+        return;
+      }
+      verdict.textContent = "Not quite. Look closer, human.";
+      captcha.classList.remove("arun-shake");
+      void captcha.offsetWidth;
+      captcha.classList.add("arun-shake");
+    });
+  });
+</script>

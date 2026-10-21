@@ -82,7 +82,13 @@ Started my career building backend APIs and back office tools for enterprise cli
 
 ## Blog posts
 
-Two articles republished from Medium, with their original publish times. Full text lives in `src/content/blog/`; each page's canonical link points back to the Medium original.
+Full text lives in `src/content/blog/`. Posts republished from Medium keep their original publish times, and their canonical link points back to the Medium original.
+
+### Who Is the CAPTCHA For Now?
+
+- Date: Oct 21, 2026
+- Tags: AI, Agents, Web
+- Original: first published here
 
 ### 1. Intentional Software Still Matters in the Age of AI Coding
 

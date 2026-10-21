@@ -1,0 +1,81 @@
+---
+title: "Who Is the CAPTCHA For Now?"
+description: "CAPTCHAs were built to keep bots out of websites. Now we are sending our own agents in to book flights and buy things for us. What that does to the puzzle at checkout, and what might replace it."
+pubDate: 2026-10-21T09:00:00Z
+tags: ["AI", "Agents", "Web"]
+---
+
+import YakSays from "../../components/blog/YakSays.astro";
+import AgentRun from "../../components/blog/AgentRun.astro";
+
+Picture the most ordinary errand on the internet. You need a seat on tomorrow afternoon's flight from Kathmandu to Bhairahawa. You know the routine. Open the airline's site, pick the date, wait for the fares to load, compare the times, choose a seat, type your name exactly as it appears on your ID, then your phone number, then your card. And right before the pay button, a small box slides in and asks you to click every square with a bus in it.
+
+Most of us have done that so many times we barely notice it anymore.
+
+Now picture the same errand a year or two from now. You say one sentence to an agent, "Book a flight from Kathmandu to Bhairahawa tomorrow at 2 PM," and go back to whatever you were doing. The agent opens the airline sites, compares the fares, picks the window seat you always pick, and fills in your details from memory. Then it reaches the same small box.
+
+What happens next is what this post is about.
+
+## A test built for a two-visitor internet
+
+CAPTCHA stands for "Completely Automated Public Turing test to tell Computers and Humans Apart." It is a clumsy name, but an honest one. It assumes the internet has two kinds of visitors: people, who are welcome, and programs, who are almost always up to something.
+
+For a long time that assumption held. The programs hitting a sign up page were spammers making fake accounts. The ones hitting a ticket site the second sales opened were scalpers. The ones trying thousands of passwords on a login form were exactly who you would guess. Blocking anything that couldn't read wobbly letters was a cheap and surprisingly effective way to block all of them at once.
+
+The puzzles changed over the years. Wobbly letters turned into two words, one of them lifted from a scanned book that needed digitising. Then house numbers, then traffic lights and crosswalks, then a checkbox that quietly watched how your mouse moved before it believed you. Every version answered the same pressure. Machines got better at the test, so the test got stranger for the humans taking it.
+
+By now the machines are simply better at it than we are. That is old news, and honestly not the interesting part. The interesting part is that the visitors themselves are changing.
+
+## When the bot is yours
+
+Tools like Muse and Hermes point at a different way of using the web. You stop visiting websites and start handing errands to something that visits them for you.
+
+That agent is a program, so by the CAPTCHA's definition it is the intruder. But it is acting for a real person, with a real card, on a real errand. The airline very much wants that customer. The old question, "is this a human?", now gives the airline the wrong answer.
+
+Here is how that plays out. Send the agent, and decide what happens at checkout.
+
+<AgentRun />
+
+Whichever button you pressed, the puzzle didn't protect anything.
+
+## Two ways it goes wrong
+
+If the agent stops and hands the puzzle back to you, the CAPTCHA has done exactly what it was designed to do, and the result is still bad. Your phone buzzes at an awkward moment. You open it, hunt for yaks, and send the agent on its way. Some people will do that. Plenty won't, and the airline loses a sale to someone who had already chosen a flight and was holding out a card.
+
+If the agent solves it, which takes any decent model a few seconds, the site has added a delay and stopped nobody. The scalpers and spammers have the same tools. The only visitors still slowed down are the honest ones.
+
+In both cases the CAPTCHA has stopped being protection and turned into friction, and it sits in the one place a business least wants friction: right in front of the pay button.
+
+<YakSays pose="read" title="Yakku's take">
+I have been asked to find myself in a 3×3 grid more times than I can count. I am a yak. I would like to go home.
+</YakSays>
+
+## What the CAPTCHA was really standing in for
+
+Websites never objected to programs as such. Search engines are programs, and every site wants them to visit. What sites objected to was behaviour: fake accounts, bulk buying, password guessing, aggressive scraping. "Human" was a stand-in for "probably not doing any of that," and it worked because the two used to line up almost perfectly.
+
+They don't anymore, and the mismatch runs both ways. An agent booking one seat for one person is legitimate and not human. A person paid to solve CAPTCHAs all day for a spam operation is human and not legitimate.
+
+Once you see that, the better question is easier to spot: who sent this visitor, and does what it's doing look like a customer?
+
+## What could take its place
+
+Pieces of an answer already exist. There are proposals for agents to sign their requests cryptographically, so a site can tell a known, accountable agent from an anonymous script. A passport works better than a quiz. And an agent acting for a logged in customer, with a saved card and a few years of bookings behind it, is a very different visitor from one that appeared five seconds ago with nothing.
+
+Behaviour tells you a lot too. One booking every few minutes looks like somebody's assistant. Ten thousand requests a second looks like trouble no matter who sent it, and rate limits by account and by card catch that far more reliably than a picture puzzle. Payment is a signal in its own right. A card that clears and isn't flagged says more about intent than the ability to spot a bus.
+
+Sites can also give agents a proper way in. A structured checkout or a booking API is much easier to secure and watch than a web form that agents fill in while pretending to be people. Right now most agents click through pages like humans because that is the only door anyone left open.
+
+None of this is as easy as pasting one script tag into a page, and that was always the CAPTCHA's real appeal. It let you stop thinking about the problem. The problem is asking to be thought about again.
+
+## If you run a site that sells things
+
+The first step costs almost nothing. Find out how many checkouts end at the CAPTCHA. Each one is a customer who picked a product and then gave up, and that number grows as more people hand their errands to agents.
+
+After that, move the heavy checks to where abuse actually happens, which is sign ups and logins, and go easy at the moment someone is paying with a valid card. Start counting agent traffic as its own category instead of lumping it in with "bots." You can't make good decisions about visitors you can't see.
+
+## The puzzle at the end of the trail
+
+CAPTCHAs did real work for a long time, and they did some useful side jobs along the way, like digitising old books. But they were designed for a web with two kinds of visitors, and that web is getting a third: software we send in on purpose, to act for us.
+
+The systems built to keep bots out will have to make room for the agents we deliberately send in. The sites that learn to welcome those agents safely will get the bookings. The rest will keep asking their customers to find the yaks.
