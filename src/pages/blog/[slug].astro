@@ -6,7 +6,10 @@ import TrailProgress from "../../components/blog/TrailProgress.astro";
 import ReadingWorld from "../../components/blog/ReadingWorld.astro";
 import TrailMap from "../../components/blog/TrailMap.astro";
 import ProseExtras from "../../components/blog/ProseExtras.astro";
+import ReadingLog from "../../components/blog/ReadingLog.astro";
+import TrailSound from "../../components/blog/TrailSound.astro";
 import { contact, site } from "../../data/content";
+import { trailStats } from "../../lib/reading";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -21,10 +24,7 @@ const all = (await getCollection("blog"))
 const next = all.length > 1 ? all[(all.findIndex((p) => p.id === post.id) + 1) % all.length] : undefined;
 const { Content } = await render(post);
 const { originalUrl, originalSite } = post.data;
-// prose only: drop the MDX imports and component tags before counting
-const prose = (post.body ?? "").replace(/^import .*$/gm, "").replace(/<[^>]+>/g, " ").replace(/```[\s\S]*?```/g, " ");
-const words = prose.split(/\s+/).filter(Boolean).length;
-const minutes = Math.max(1, Math.round(words / 220));
+const { words, minutes } = trailStats(post.body);
 const url = new URL(`/blog/${post.id}`, Astro.site ?? "http://localhost").href;
 const blogPosting = {
   "@context": "https://schema.org",
@@ -66,7 +66,9 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
     <ReadingWorld />
     <TrailMap />
     <ProseExtras />
-    <JournalTop back={{ href: "/blog", label: "all field notes" }} />
+    <JournalTop back={{ href: "/blog", label: "all field notes" }}>
+      <TrailSound />
+    </JournalTop>
 
     <article class="paper journal-page">
       <h1 class="journal-title">{post.data.title}</h1>
@@ -100,6 +102,7 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
     }
 
     <TrailProgress />
+    <ReadingLog slug={post.id} />
 
     <aside class="journal-cta">
       <p>{contact.heading}</p>

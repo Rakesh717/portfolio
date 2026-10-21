@@ -1,0 +1,155 @@
+---
+// The mountain, while you read. Off until asked for, and it shares the home page's
+// choice: wind that thins and rises with altitude, birds down low, footsteps that turn
+// from grass to rock to snow as you scroll, and a soft yak bell at each new section.
+const ink = "#40302A";
+---
+
+<button type="button" class="trail-sound" aria-pressed="false" title="Hear the mountain (M)" aria-keyshortcuts="M" data-trail-sound>
+  <svg width="22" height="18" viewBox="0 0 24 20" aria-hidden="true">
+    <path d="M2 7 H 6 L 11 2.5 V 17.5 L 6 13 H 2 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round"></path>
+    <path class="snd-on" d="M14.5 6.5 Q 17 10 14.5 13.5 M17.5 4 Q 22 10 17.5 16" fill="none" stroke={ink} stroke-width="2" stroke-linecap="round"></path>
+    <path class="snd-off" d="M15 7 L 21 13 M21 7 L 15 13" stroke={ink} stroke-width="2" stroke-linecap="round"></path>
+  </svg>
+  <span class="trail-sound-label">sound</span>
+</button>
+
+<style>
+  .trail-sound {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem 0.3rem 0.5rem;
+    font: 600 1.2rem/1 var(--font-hand);
+    color: var(--ink);
+    background: var(--color-cream);
+    border: 2.5px solid var(--ink);
+    border-radius: 12px 15px 12px 14px;
+    box-shadow: 3px 4px 0 rgb(64 48 42 / 0.2);
+    cursor: pointer;
+    rotate: -1.5deg;
+    transition:
+      rotate 0.3s var(--bounce),
+      background-color 0.2s;
+  }
+  .trail-sound:hover {
+    rotate: 2deg;
+  }
+  .trail-sound .snd-on,
+  .trail-sound.is-on .snd-off {
+    display: none;
+  }
+  .trail-sound.is-on .snd-on {
+    display: block;
+  }
+  .trail-sound.is-on {
+    background: #c8ecdf;
+  }
+  @media (max-width: 420px) {
+    .trail-sound-label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { createSound, type Surface } from "../../scripts/sound";
+  import { progressAt, READING_LINE } from "../../scripts/climb";
+
+  const btn = document.querySelector<HTMLButtonElement>("[data-trail-sound]");
+  if (btn) {
+    const sound = createSound();
+    const heads = [...document.querySelectorAll<HTMLElement>(".prose-trail h2[id]")];
+    let ticker: number | undefined;
+
+    const setUi = () => {
+      btn.setAttribute("aria-pressed", String(sound.on));
+      btn.classList.toggle("is-on", sound.on);
+    };
+
+    const sectionNow = () => heads.filter((h) => h.getBoundingClientRect().top <= innerHeight * READING_LINE).length;
+    let section = sectionNow();
+    let gust = 0;
+    let gustAim = 0;
+    const tick = () => {
+      const p = progressAt();
+      // a slow, wandering breeze that gusts more the higher you are
+      if (Math.random() < 0.04) gustAim = Math.random() < 0.3 + p * 0.4 ? Math.random() : 0;
+      gust += (gustAim - gust) * 0.08;
+      sound.update({ level: p, gust: gust * (0.4 + p * 0.6), fog: 0, birds: p < 0.45, fire: 0, pose: "idle" });
+    };
+    const start = () => {
+      sound.enable();
+      section = sectionNow();
+      clearInterval(ticker);
+      ticker = window.setInterval(tick, 250);
+      setUi();
+    };
+    const stop = () => {
+      sound.disable();
+      clearInterval(ticker);
+      setUi();
+    };
+
+    // footsteps while you scroll, and the bell when you reach a new section
+    let lastY = scrollY;
+    let lastStep = 0;
+    addEventListener(
+      "scroll",
+      () => {
+        if (!sound.on) return;
+        const dy = scrollY - lastY;
+        lastY = scrollY;
+        const now = performance.now();
+        if (Math.abs(dy) > 2 && now - lastStep > 420) {
+          lastStep = now;
+          const p = progressAt();
+          const surface: Surface = p < 0.35 ? "grass" : p < 0.7 ? "rock" : "snow";
+          sound.step(surface, surface === "snow" ? (p - 0.7) / 0.3 : 0);
+        }
+        const s = sectionNow();
+        if (s > section) sound.bell();
+        section = s;
+      },
+      { passive: true },
+    );
+
+    // remember the choice, but browsers only allow audio after a gesture
+    const wake = (e: Event) => {
+      if (e.target instanceof Node && btn.contains(e.target)) return;
+      if (e instanceof KeyboardEvent && e.key.toLowerCase() === "m") return;
+      stopWaking();
+      start();
+    };
+    const stopWaking = () => {
+      removeEventListener("pointerdown", wake);
+      removeEventListener("keydown", wake);
+    };
+    let wanted = false;
+    try {
+      wanted = localStorage.getItem("yak-sound") === "on";
+    } catch {}
+    if (wanted) {
+      addEventListener("pointerdown", wake);
+      addEventListener("keydown", wake);
+    }
+
+    const toggle = () => {
+      stopWaking();
+      if (sound.on) stop();
+      else start();
+      try {
+        localStorage.setItem("yak-sound", sound.on ? "on" : "off");
+      } catch {}
+    };
+    btn.addEventListener("click", toggle);
+    addEventListener("keydown", (e) => {
+      const t = e.target as HTMLElement;
+      if (e.key.toLowerCase() !== "m" || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable) return;
+      e.preventDefault();
+      toggle();
+    });
+    document.addEventListener("visibilitychange", () => sound.suspend(document.hidden));
+  }
+</script>

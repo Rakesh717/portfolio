@@ -2373,6 +2373,24 @@ mark.mk-teal {
   white-space: nowrap;
 }
 
+/* on the line every card hangs the same length: long titles and blurbs are clipped
+   so a card never reaches down into the ground or the HUD (the full text is on /blog) */
+.trek-on .postcards .postcard h3,
+.trek-on .postcards .postcard p {
+  --lines: 3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines);
+  line-clamp: var(--lines);
+  overflow: hidden;
+}
+@media (min-width: 1024px) and (max-height: 860px) {
+  .trek-on .postcards .postcard h3,
+  .trek-on .postcards .postcard p {
+    --lines: 2;
+  }
+}
+
 /* short landscape screens (tablets sideways, small laptops): tighten the
    clothesline so the longest postcard still clears the ground and HUD */
 @media (min-width: 1024px) and (max-height: 860px) {
@@ -2873,6 +2891,14 @@ html:not(.trek-on) .deck {
   max-width: 46rem;
   margin: 0 auto;
 }
+.journal-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.journal-top-actions .ink-btn {
+  white-space: nowrap;
+}
 .journal-back {
   display: inline-flex;
   align-items: center;
@@ -3005,7 +3031,57 @@ html:not(.trek-on) .deck {
   max-width: 46rem;
   margin: 2.5rem auto 0;
   display: grid;
-  gap: 2.4rem;
+  gap: 3.6rem;
+}
+.journal-list li {
+  position: relative;
+  animation: card-drop 0.7s var(--bounce) both;
+  animation-delay: calc(0.15s + var(--i) * 0.12s);
+}
+/* a footpath from one note to the next */
+.journal-list li + li::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 60px;
+  height: 3.6rem;
+  margin-left: -30px;
+  background: no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 58'%3E%3Cpath d='M30 2 C 6 16 54 40 30 56' fill='none' stroke='%2340302A' stroke-opacity='.45' stroke-width='3' stroke-dasharray='6 6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+@keyframes card-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-2deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journal-list li {
+    animation: none;
+  }
+}
+.journal-sum {
+  margin-top: 0.8rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+.postcard-progress[hidden] {
+  display: none;
+}
+.postcard-progress {
+  display: block;
+  height: 4px;
+  margin-top: 1rem;
+  border-radius: 4px;
+  background: rgb(64 48 42 / 0.1);
+  overflow: hidden;
+}
+.postcard-progress span {
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0) * 100%);
+  background: var(--color-rust);
 }
 .journal-list .postcard {
   min-height: 0;
@@ -3028,6 +3104,10 @@ html:not(.trek-on) .deck {
 .journal-head h1 {
   font-size: clamp(3rem, 9vw, 5rem);
   line-height: 0.95;
+}
+.journal-world .journal-head,
+.journal-world .journal-cta {
+  text-shadow: 0 0 12px var(--color-paper);
 }
 
 /* blog widgets: calmer on narrow screens, readable primary buttons, a clear disabled state */

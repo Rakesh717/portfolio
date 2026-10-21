@@ -13,5 +13,8 @@ const { back } = Astro.props;
     <Yak pose="read" />
     <span>← {back.label}</span>
   </a>
-  <a class="ink-btn ink-btn-sm" href={`mailto:${site.email}`}>say hi</a>
+  <div class="journal-top-actions">
+    <slot />
+    <a class="ink-btn ink-btn-sm" href={`mailto:${site.email}`}>say hi</a>
+  </div>
 </header>

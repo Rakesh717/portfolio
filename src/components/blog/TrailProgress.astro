@@ -80,13 +80,14 @@ import Yak from "../Yak.astro";
 </style>
 
 <script>
+  import { fmtAlt, progressAt } from "../../scripts/climb";
+
   const bar = document.querySelector<HTMLElement>("[data-trailbar]");
   if (bar) {
     const fill = bar.querySelector<HTMLElement>("[data-fill]")!;
     const yakBox = bar.querySelector<HTMLElement>("[data-yak]")!;
     const yak = bar.querySelector<SVGElement>(".yak");
     const track = bar.querySelector<HTMLElement>(".trailbar-track")!;
-    const article = document.querySelector<HTMLElement>("article");
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let idle: number | undefined;
     let width = track.clientWidth;
@@ -96,11 +97,9 @@ import Yak from "../Yak.astro";
     const frame = () => {
       queued = false;
       // progress runs to the end of the article, so Yakku summits when the post ends
-      const end = article ? article.getBoundingClientRect().bottom + scrollY : document.documentElement.scrollHeight;
-      const max = end - innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+      const p = progressAt();
       // Kathmandu (1,400 m) to the summit, so reading is the climb
-      alt.textContent = `${(Math.round((1400 + p * (8848 - 1400)) / 10) * 10).toLocaleString("en-US")} m`;
+      alt.textContent = fmtAlt(p);
       fill.style.transform = `scaleX(${p})`;
       yakBox.style.transform = `translateX(${p * width}px)`;
       const done = p >= 0.995;

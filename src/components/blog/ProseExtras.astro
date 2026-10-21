@@ -1,5 +1,5 @@
 ---
-// Small reading helpers: "#" anchors on headings and a copy button on code blocks.
+// Small reading helpers: "#" anchors on headings, a copy button on code blocks, and a drop cap.
 ---
 
 <style is:global>
@@ -45,6 +45,25 @@
   @media (max-width: 700px) {
     .h-anchor {
       display: none;
+    }
+  }
+
+  /* the first letter of the walk */
+  .prose-trail > p:first-of-type::first-letter {
+    float: left;
+    margin: 0.06em 0.1em 0 0;
+    font: 900 3.6em/0.8 var(--font-display);
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    color: var(--color-rust);
+    text-shadow: 2px 3px 0 rgb(64 48 42 / 0.18);
+  }
+  @supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+    .prose-trail > p:first-of-type::first-letter {
+      float: none;
+      margin: 0 0.12em 0 0;
+      -webkit-initial-letter: 3;
+      initial-letter: 3;
+      line-height: 1;
     }
   }
 </style>

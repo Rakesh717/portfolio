@@ -2,11 +2,15 @@
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import JournalTop from "../../components/JournalTop.astro";
+import ReadingWorld from "../../components/blog/ReadingWorld.astro";
 import { site } from "../../data/content";
+import { trailStats } from "../../lib/reading";
 
 const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((post) => ({ post, ...trailStats(post.body) }));
+const totalMinutes = posts.reduce((n, p) => n + p.minutes, 0);
 
 const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const stampColors = ["#4CC9F0", "#FFD166", "#06D6A0"];
@@ -18,19 +22,23 @@ const ink = "#40302A";
   title={`Field Notes — ${site.name}`}
   description="Essays by Rakesh Thapa on AI coding, reliable LLM chatbots and building software with intention."
 >
-  <main class="journal">
+  <main class="journal journal-world">
+    <ReadingWorld still={0.06} />
     <JournalTop back={{ href: "/#notes", label: "back on the trail" }} />
 
     <div class="journal-head">
       <p class="hand">Yakku's reading pile</p>
       <h1>Field notes</h1>
+      <p class="journal-sum">
+        {posts.length} notes · {totalMinutes} minutes of reading
+      </p>
     </div>
 
     <ul class="journal-list">
       {
-        posts.map((post, i) => (
-          <li>
-            <a class="postcard paper" href={`/blog/${post.id}`} style={`--r:${tilts[i % 3]}deg`}>
+        posts.map(({ post, minutes }, i) => (
+          <li style={`--i:${i}`}>
+            <a class="postcard paper" href={`/blog/${post.id}`} style={`--r:${tilts[i % 3]}deg`} data-trail={post.id}>
               <span class="postcard-stamp" style={`--c:${stampColors[i % 3]}`} aria-hidden="true">
                 <svg viewBox="0 0 40 30" width="34" height="26">
                   <path d="M2 28 L 14 10 L 21 19 L 27 12 L 38 28 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round" />
@@ -39,9 +47,17 @@ const ink = "#40302A";
               <span class="postmark">{df.format(post.data.pubDate)}</span>
               <h2>{post.data.title}</h2>
               <p>{post.data.description}</p>
+              <span class="postcard-progress" aria-hidden="true" hidden>
+                <span />
+              </span>
               <span class="postcard-foot">
                 <span class="postcard-tags">{post.data.tags.map((t) => `#${t}`).join("  ")}</span>
-                <span class="postcard-read">read →</span>
+                <span class="postcard-read">
+                  <span class="postcard-where" data-where>
+                    {minutes} min read
+                  </span>
+                  <span aria-hidden="true"> · </span>read →
+                </span>
               </span>
             </a>
           </li>
@@ -50,3 +66,19 @@ const ink = "#40302A";
     </ul>
   </main>
 </Base>
+
+<script>
+  import { fmtAlt, readLog } from "../../scripts/climb";
+
+  // where you stopped on posts you started and haven't finished
+  const log = readLog();
+  document.querySelectorAll<HTMLElement>("[data-trail]").forEach((card) => {
+    const e = log[card.dataset.trail!];
+    if (e && !e.done && e.p > 0.05) {
+      card.querySelector<HTMLElement>("[data-where]")!.textContent = `you stopped at ${fmtAlt(e.p)}`;
+      const bar = card.querySelector<HTMLElement>(".postcard-progress")!;
+      bar.hidden = false;
+      bar.style.setProperty("--p", String(e.p));
+    }
+  });
+</script>

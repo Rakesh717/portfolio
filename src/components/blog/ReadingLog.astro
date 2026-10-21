@@ -1,0 +1,132 @@
+---
+// Yakku keeps your spot: where you stopped on this post, so coming back picks up there,
+// and the field notes page can show how far you got.
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+---
+
+<div class="resume paper" data-resume={slug} hidden>
+  <p>
+    <span class="hand">Yakku kept your spot</span>
+    <span class="resume-where" data-where></span>
+  </p>
+  <button type="button" class="ink-btn ink-btn-sm ink-btn-primary" data-go>Keep climbing</button>
+  <button type="button" class="resume-x" data-x aria-label="Dismiss and start from the top">×</button>
+</div>
+
+<style>
+  .resume {
+    position: fixed;
+    left: 50%;
+    bottom: calc(68px + env(safe-area-inset-bottom));
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 0.6rem 0.7rem 0.6rem 1rem;
+    translate: -50% 0;
+    --r: -1deg;
+    animation: resume-in 0.5s var(--bounce) both;
+  }
+  .resume[hidden] {
+    display: none;
+  }
+  .resume p {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0;
+  }
+  .resume .hand {
+    font-size: 1.3rem;
+    color: var(--color-rust-deep);
+    line-height: 1;
+  }
+  .resume-where {
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .resume-x {
+    width: 2rem;
+    height: 2rem;
+    font: 700 1.3rem/1 var(--font-body);
+    color: var(--color-ink-soft);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .resume-x:hover {
+    color: var(--ink);
+    background: rgb(64 48 42 / 0.08);
+  }
+  @keyframes resume-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .resume {
+      animation: none;
+    }
+  }
+  @media print {
+    .resume {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { climbMax, fmtAlt, progressAt, readLog, writeEntry } from "../../scripts/climb";
+
+  const box = document.querySelector<HTMLElement>("[data-resume]");
+  if (box) {
+    const slug = box.dataset.resume!;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const saved = readLog()[slug];
+    let offering = false;
+    const startY = scrollY;
+    const close = () => {
+      offering = false;
+      box.hidden = true;
+    };
+
+    // only offer when they've landed at the top; a link to a section or a restored scroll wins
+    if (saved && !saved.done && saved.p > 0.05 && saved.p < 0.97 && !location.hash && scrollY < 200) {
+      const where = box.querySelector<HTMLElement>("[data-where]")!;
+      where.textContent = `at ${fmtAlt(saved.p)}, ${Math.round(saved.p * 100)}% of the way up`;
+      box.hidden = false;
+      offering = true;
+      box.querySelector("[data-go]")!.addEventListener("click", () => {
+        close();
+        scrollTo({ top: saved.p * climbMax(), behavior: reduced ? "auto" : "smooth" });
+      });
+      box.querySelector("[data-x]")!.addEventListener("click", close);
+    }
+
+    let last = 0;
+    const save = () => {
+      // while the offer is up they haven't really started yet, so keep the old spot
+      if (offering) return;
+      writeEntry(slug, { p: progressAt() });
+    };
+    addEventListener(
+      "scroll",
+      () => {
+        if (offering && Math.abs(scrollY - startY) > 320) close();
+        const now = performance.now();
+        if (now - last > 700) {
+          last = now;
+          save();
+        }
+      },
+      { passive: true },
+    );
+    addEventListener("pagehide", save);
+    addEventListener("yak:summit", () => writeEntry(slug, { p: 1, done: true }));
+  }
+</script>
