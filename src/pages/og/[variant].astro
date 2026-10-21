@@ -1,0 +1,193 @@
+---
+// Source for public/og.png. Open /og/card in dev and capture it at 1200 × 630 with a
+// device scale of 2, so the saved PNG is 2400 × 1260 (Base.astro's og:image size says so).
+// Only built in dev, so it never ships or lands in the sitemap.
+import "@fontsource-variable/fraunces/full.css";
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/caveat";
+import "../../styles/global.css";
+import Yak from "../../components/Yak.astro";
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? [{ params: { variant: "card" } }] : [];
+}
+const { variant } = Astro.params;
+const ink = "#40302A";
+// prayer flags hung exactly on a quadratic string from (40,18) to (600,26), sagging to y≈62
+const snow = Array.from({ length: 34 }, (_, i) => ({
+  x: (i * 337 + 91) % 1180 + 10,
+  y: (i * 191 + 47) % 560 + 8,
+  r: 2 + ((i * 7) % 4) * 0.8,
+}));
+const flagColors = ["#4C8FE8", "#FFFDF6", "#E85D2F", "#2A9D8F", "#FFD166"];
+const flags = Array.from({ length: 9 }, (_, i) => {
+  const t = (i + 0.7) / 9.4;
+  const x = (1 - t) ** 2 * 40 + 2 * (1 - t) * t * 320 + t ** 2 * 600;
+  const y = (1 - t) ** 2 * 18 + 2 * (1 - t) * t * 104 + t ** 2 * 26;
+  return { x, y, c: flagColors[i % 5], tilt: ((i * 5) % 7) - 3 };
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <title>OG {variant}</title>
+  </head>
+  <body>
+    <main class={`og og-${variant}`}>
+      {
+        variant === "card" && (
+          <>
+            <svg class="f-scene" viewBox="0 0 1200 630" aria-hidden="true">
+              <path d="M40 18 Q 320 104 600 26" fill="none" stroke={ink} stroke-width="2.5" />
+              {flags.map((f) => (
+                <path
+                  d={`M${f.x - 15} ${f.y} H${f.x + 15} L${f.x + 13} ${f.y + 36} H${f.x - 13} Z`}
+                  fill={f.c}
+                  stroke={ink}
+                  stroke-width="2.5"
+                  stroke-linejoin="round"
+                  transform={`rotate(${f.tilt} ${f.x} ${f.y})`}
+                />
+              ))}
+              <path d="M610 590 L812 250 L870 330 L930 214 L1010 322 L1060 280 L1200 470 V630 H610Z" fill="#E9DEE0" stroke={ink} stroke-width="3" stroke-linejoin="round" />
+              <path d="M930 214 L896 280 L924 290 L908 330 L950 306 L968 268Z M812 250 L790 290 L812 294 L800 322 L836 292Z" fill="#FFFDF6" />
+              <path d="M930 214 V156" stroke={ink} stroke-width="4" stroke-linecap="round" />
+              <path d="M930 158 l38 11 l-38 11z" fill="#E85D2F" stroke={ink} stroke-width="3" stroke-linejoin="round" />
+              {snow.map((f) => (
+                <circle cx={f.x} cy={f.y} r={f.r} fill="#FFFDF6" opacity="0.85" />
+              ))}
+              <path d="M0 586 C 240 572 420 600 640 584 C 860 568 1040 596 1200 580 V630 H0Z" fill="#FFFDF6" stroke={ink} stroke-width="3" />
+            </svg>
+            <div class="f-text">
+              <p class="hand f-hi">Namaste, I'm</p>
+              <h1>
+                Rakesh
+                <br />
+                Thapa
+              </h1>
+              <p class="f-lede">
+                AI native product engineer building
+                <br />
+                <mark class="f-butter">thoughtful</mark><span class="f-comma">,</span> <mark class="f-teal">reliable</mark> products
+              </p>
+              <p class="hand f-sign">from Kathmandu, Nepal (&amp; Yakku)</p>
+            </div>
+            <div class="f-yak"><Yak pose="wave" /></div>
+          </>
+        )
+      }
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --ink: #40302a;
+    --soft: #6f5c50;
+    --cream: #fffdf6;
+    --paper: #fff3de;
+    --rust: #e85d2f;
+    --teal: #1e756b;
+  }
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+  body {
+    font-family: "Bricolage Grotesque Variable", sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .og {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+  h1 {
+    font-family: "Fraunces Variable", serif;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+  .hand {
+    font-family: "Caveat Variable", cursive;
+    font-weight: 600;
+    color: var(--soft);
+  }
+  .yak {
+    display: block;
+    width: 100%;
+  }
+
+  /* the card */
+  .og-card {
+    background: linear-gradient(180deg, #e2bcc0 0%, #f6d3c3 45%, #ffe6c8 100%);
+  }
+  .f-scene {
+    position: absolute;
+    inset: 0;
+    width: 1200px;
+    height: 630px;
+  }
+  .f-text {
+    position: absolute;
+    left: 76px;
+    top: 112px;
+  }
+  .f-hi {
+    font-size: 40px;
+    color: var(--ink);
+    opacity: 0.8;
+  }
+  .og-card h1 {
+    margin-top: 4px;
+    font-size: 128px;
+    line-height: 0.9;
+  }
+  .f-lede {
+    margin-top: 28px;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+  .f-comma {
+    margin-left: 1px;
+  }
+  .f-lede mark {
+    padding: 0 8px 2px;
+    border-radius: 6px;
+    color: var(--ink);
+  }
+  .f-butter {
+    background: #ffd166;
+    padding-right: 5px !important;
+  }
+  .f-teal {
+    background: #2a9d8f;
+    color: #fffdf6 !important;
+  }
+  .f-sign {
+    margin-top: 14px;
+    font-size: 32px;
+    color: var(--ink);
+    opacity: 0.75;
+  }
+  .f-yak {
+    position: absolute;
+    right: 46px;
+    bottom: 34px;
+    width: 340px;
+  }
+
+</style>
