@@ -2966,6 +2966,18 @@ html:not(.trek-on) .deck {
   text-decoration: underline wavy;
   text-underline-offset: 4px;
 }
+.journal-origin {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+.journal-origin a {
+  font-weight: 700;
+  color: var(--color-rust-deep);
+  text-decoration: underline wavy;
+  text-underline-offset: 4px;
+}
 .journal-sign {
   margin-top: 2.2rem;
   padding-top: 1.2rem;

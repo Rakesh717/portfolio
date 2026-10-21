@@ -8,6 +8,9 @@ const blog = defineCollection({
     description: z.string(),
     pubDate: z.coerce.date(),
     tags: z.array(z.string()).default([]),
+    /** where the piece first appeared; the site republishes it with credit and a canonical link back */
+    originalUrl: z.string().url().optional(),
+    originalSite: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

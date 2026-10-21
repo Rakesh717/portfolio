@@ -7,7 +7,7 @@ const posts = (await getCollection("blog"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
 
-const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const stampColors = ["#4CC9F0", "#FFD166", "#06D6A0"];
 const tilts = [-2.5, 1.8, -1.2];
 const ink = "#40302A";

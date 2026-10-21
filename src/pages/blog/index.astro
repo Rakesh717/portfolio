@@ -8,7 +8,7 @@ const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const stampColors = ["#4CC9F0", "#FFD166", "#06D6A0"];
 const tilts = [-1, 0.8, -0.6];
 const ink = "#40302A";
@@ -16,7 +16,7 @@ const ink = "#40302A";
 
 <Base
   title={`Field Notes — ${site.name}`}
-  description="Notes from the trail: essays on integrations, engineering leadership and building AI products people can verify."
+  description="Essays by Rakesh Thapa on AI coding, reliable LLM chatbots and building software with intention."
 >
   <main class="journal">
     <JournalTop back={{ href: "/#notes", label: "back on the trail" }} />

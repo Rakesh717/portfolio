@@ -11,22 +11,64 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" });
+const { originalUrl, originalSite } = post.data;
+const words = (post.body ?? "").split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 220));
+const url = new URL(`/blog/${post.id}`, Astro.site ?? "http://localhost").href;
+const blogPosting = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.pubDate.toISOString(),
+  keywords: post.data.tags.join(", "),
+  wordCount: words,
+  inLanguage: "en",
+  author: { "@type": "Person", name: site.name, url: Astro.site?.href },
+  mainEntityOfPage: originalUrl ?? url,
+  ...(originalUrl && { isBasedOn: originalUrl, sameAs: originalUrl }),
+};
+const crumbs = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: Astro.site?.href },
+    { "@type": "ListItem", position: 2, name: "Field notes", item: new URL("/blog", Astro.site ?? "http://localhost").href },
+    { "@type": "ListItem", position: 3, name: post.data.title, item: url },
+  ],
+};
+const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 ---
 
-<Base title={`${post.data.title} — ${site.name}`} description={post.data.description}>
+<Base
+  title={`${post.data.title} — ${site.name}`}
+  description={post.data.description}
+  canonicalUrl={originalUrl}
+  article={{ published: post.data.pubDate, tags: post.data.tags }}
+  jsonLd={[blogPosting, crumbs]}
+>
   <main class="journal">
     <JournalTop back={{ href: "/blog", label: "all field notes" }} />
 
     <article class="paper journal-page">
       <h1 class="journal-title">{post.data.title}</h1>
       <div class="journal-meta">
-        <span class="stamp">{df.format(post.data.pubDate)}</span>
+        <time class="stamp" datetime={post.data.pubDate.toISOString()}>{df.format(post.data.pubDate)}</time>
+        <span class="tagline">{minutes} min read</span>
         <span class="tagline">{post.data.tags.map((t) => `#${t}`).join("  ")}</span>
       </div>
       <div class="prose-trail">
         <Content />
       </div>
+      {
+        originalUrl && (
+          <p class="journal-origin">
+            Originally published on <a href={originalUrl} rel="noopener" target="_blank">{originalSite ?? "the original site"}</a> on{" "}
+            <time datetime={post.data.pubDate.toISOString()}>{df.format(post.data.pubDate)}</time>.
+          </p>
+        )
+      }
       <p class="hand journal-sign">— Rakesh, from basecamp in {site.location}</p>
     </article>
 

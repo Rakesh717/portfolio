@@ -1,0 +1,105 @@
+---
+title: "Intentional Software Still Matters in the Age of AI Coding"
+description: "AI can generate, review and test code, but not reliably. A practical, step by step approach to agentic coding that keeps quality, security and maintainability in your hands."
+pubDate: 2026-04-06T18:23:38Z
+tags: ["AI","Software Engineering","Agentic Coding"]
+originalUrl: "https://medium.com/@rakeshthapac/intentional-software-still-matters-in-the-age-of-ai-coding-7bced747a56b"
+originalSite: "Medium"
+---
+
+We are entering an era of AI-first and agent-driven software development. Applications are being built much faster than ever before. But speed has come with trade-offs. We are also seeing more fragile code, unclear structure, and security vulnerabilities slipping into production.
+
+In the past, software development was slower but more deliberate. Only a small portion of code made it to production. That code was carefully reviewed, tested, and understood. Today, AI can generate the code, review it, and even write tests. It sounds ideal, but in its current state, it is far from reliable.
+
+I have been working with agentic coding for a while now, and I often feel uneasy about the code it produces. Even when I try to write thoughtful test cases to enforce intended behavior, the generated code frequently includes patterns I would not use. Fixing those issues can sometimes take longer than writing the code manually.
+
+I care deeply about building software from a user’s perspective. I try to imagine how I would feel using the product. This mindset has helped me build systems that are:
+
+- Easy to use and navigate
+- Clear in how they communicate errors
+- Secure against common attack vectors
+- Easy to maintain and debug
+
+This is not an argument against AI-generated code. It is an argument for using AI with intention and discipline.
+
+## A Practical Approach to Using AI Responsibly
+
+## 1. Start with a Manual Foundation
+
+Set up your project yourself. Choose frameworks, libraries, and architecture deliberately. Avoid handing over these decisions to AI early on.
+
+Write the initial structure with minimal AI help. Instead of giving vague instructions like “send an email after user registration,” define:
+
+- File structure
+- Function signatures
+- Data flow
+- Package usage
+
+Think of this as writing a blueprint. AI should follow your direction, not define it.
+
+## 2. Build One Feature Properly First
+
+Before introducing agents, complete a meaningful feature end to end:
+
+- Maintain a clean structure
+- Write solid test cases
+- Review everything thoroughly
+
+This establishes a reference point for quality. It becomes your standard.
+
+## 3. Introduce Agents After You Set the Standard
+
+Once you have a strong foundation, introduce agent-driven workflows.
+
+Create an AGENTS.md or similar configuration file. Let the AI study your existing code to understand your style and expectations.
+
+Keep this file concise. Avoid overloading it with rules. Instead:
+
+- Use it as a router
+- Link to focused examples in separate files
+- Show how you structure code in real scenarios
+
+## 4. Use Skills, Not Just Instructions
+
+Skills are critical in agentic development.
+
+Rather than cramming everything into a single instruction file, define reusable skills based on how you work:
+
+- Feature implementation patterns
+- Data fetching and state management
+- Error handling strategies
+- Testing philosophy
+
+This makes the system modular and scalable.
+
+## 5. Enforce Quality Gates
+
+Always enforce checks in your workflow:
+
+- Linting
+- Running test suites
+- Static analysis if possible
+
+This may feel excessive for small changes, but it prevents long-term technical debt.
+
+## 6. Be Critical of AI-Generated Tests
+
+Do not accept tests blindly.
+
+- Ensure they validate real behavior
+- Avoid tests that only increase coverage numbers
+- Reject tests that do not improve confidence
+
+Poor tests create more work than they save.
+
+## 7. Stay Picky About Code Quality
+
+Code generation is cheap now. That does not mean quality should drop.
+
+Iterate on features until they meet your standard. Ask yourself:
+
+Would I be happy using this product?
+
+If the answer is no, refine it further.
+
+I could go on about how software should be built, but this captures the core of how I believe AI should be used today. With a more thoughtful approach, we can push back against the growing wave of low-quality AI-generated code and build software that people genuinely enjoy using.

@@ -10,11 +10,17 @@ interface Props {
   description: string;
   /** "trek" = the side-scrolling home page, "journal" = reading pages */
   mode?: "trek" | "journal";
+  /** override the canonical URL, e.g. for a republished post whose original lives elsewhere */
+  canonicalUrl?: string;
+  article?: { published: Date; tags: string[] };
+  /** extra JSON-LD objects for this page */
+  jsonLd?: object[];
 }
 
-const { title, description, mode = "journal" } = Astro.props;
+const { title, description, mode = "journal", canonicalUrl, article, jsonLd = [] } = Astro.props;
 // canonical + absolute URLs only work once `site` is set in astro.config.mjs
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const pageUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const canonical = canonicalUrl ?? pageUrl;
 const ogImage = Astro.site ? new URL("/og.png", Astro.site).href : undefined;
 const person = {
   "@context": "https://schema.org",
@@ -24,7 +30,7 @@ const person = {
   worksFor: { "@type": "Organization", name: "Binary Digits" },
   address: { "@type": "PostalAddress", addressLocality: "Kathmandu", addressCountry: "NP" },
   sameAs: links.filter((l) => l.href.startsWith("http")).map((l) => l.href),
-  ...(canonical && { url: canonical }),
+  ...(pageUrl && { url: pageUrl }),
 };
 ---
 
@@ -51,11 +57,14 @@ const person = {
       )
     }
     {canonical && <link rel="canonical" href={canonical} />}
-    <meta property="og:type" content={mode === "trek" ? "website" : "article"} />
+    <meta property="og:type" content={article ? "article" : "website"} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {canonical && <meta property="og:url" content={canonical} />}
+    {pageUrl && <meta property="og:url" content={pageUrl} />}
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article && <meta property="article:author" content={site.name} />}
+    {article?.tags.map((t) => <meta property="article:tag" content={t} />)}
     {ogImage && <meta property="og:image" content={ogImage} />}
     {ogImage && <meta property="og:image:width" content="1200" />}
     {ogImage && <meta property="og:image:height" content="630" />}
@@ -65,6 +74,7 @@ const person = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {mode === "trek" && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
     <title>{title}</title>
   </head>
   <body>
