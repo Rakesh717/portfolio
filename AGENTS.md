@@ -11,8 +11,8 @@ together. This file is the extra context for making changes.
 - There is no test suite or linter. A passing `npm run build` is the bar, plus a
   visual check (below).
 - Live site: https://rakeshthapa.pages.dev (static `dist/`, Cloudflare Pages). The
-  URL is set as `site` in `astro.config.mjs`; canonical links, Open Graph URLs,
-  RSS and the sitemap all depend on it.
+  URL is set as `site` in `astro.config.mjs`; canonical links, Open Graph URLs
+  and the sitemap all depend on it.
 
 ## Commits
 
@@ -83,7 +83,8 @@ stopped on each post), `yak-summit-reveal` (summit look-back shown today).
 - Prefer subtle over busy; if something reads as distracting, remove it rather
   than tune it.
 - Tried and rejected on the blog: "camp" labels on headings, a summit pop-up and
-  confetti, "Summited" stamps, prayer flags behind the article. Don't bring back.
+  confetti, "Summited" stamps, prayer flags behind the article, an RSS feed.
+  Don't bring back.
 - Respect `prefers-reduced-motion`, and keep everything usable by keyboard.
 - Use the theme tokens in `src/styles/global.css` (ink, cream, paper, rust, teal,
   butter) and the three fonts: Fraunces (display), Bricolage Grotesque (body),

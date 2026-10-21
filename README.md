@@ -97,8 +97,7 @@ Shared scroll and altitude maths is in `src/scripts/climb.ts`; read time is in
   image falls back to the site card (`src/lib/share.ts`).
 - `src/layouts/Base.astro` writes the meta tags (Open Graph, X, robots,
   article dates) and any JSON-LD a page passes in.
-- `/rss.xml` is the feed (`src/pages/rss.xml.ts`); the sitemap filter is in
-  `astro.config.mjs`.
+- The sitemap filter is in `astro.config.mjs`.
 
 ## Accessibility and fallbacks
 
