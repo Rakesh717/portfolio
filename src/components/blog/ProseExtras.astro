@@ -1,0 +1,81 @@
+---
+// Small reading helpers: "#" anchors on headings and a copy button on code blocks.
+---
+
+<style is:global>
+  .prose-trail h2 {
+    position: relative;
+  }
+  .h-anchor {
+    position: absolute;
+    left: -1.5rem;
+    top: 50%;
+    translate: 0 -50%;
+    padding: 0.2rem;
+    font: 700 1.1rem var(--font-hand);
+    color: var(--color-rust);
+    text-decoration: none !important;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .prose-trail h2:hover .h-anchor,
+  .h-anchor:focus-visible {
+    opacity: 1;
+  }
+  .code-wrap {
+    position: relative;
+  }
+  .code-copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.6rem;
+    font: 700 0.75rem var(--font-body);
+    color: var(--ink);
+    background: var(--color-butter);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0.85;
+  }
+  .code-copy:hover,
+  .code-copy:focus-visible {
+    opacity: 1;
+  }
+  @media (max-width: 700px) {
+    .h-anchor {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".prose-trail h2[id]").forEach((h) => {
+    const a = document.createElement("a");
+    a.className = "h-anchor";
+    a.href = `#${h.id}`;
+    a.textContent = "#";
+    a.setAttribute("aria-label", `Link to this section: ${h.textContent}`);
+    h.prepend(a);
+  });
+  document.querySelectorAll<HTMLPreElement>(".prose-trail pre").forEach((pre) => {
+    const wrap = document.createElement("div");
+    wrap.className = "code-wrap";
+    pre.replaceWith(wrap);
+    wrap.append(pre);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "code-copy";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        btn.textContent = "Copied!";
+      } catch {
+        btn.textContent = "Press Ctrl+C";
+      }
+      setTimeout(() => (btn.textContent = "Copy"), 1800);
+    });
+    wrap.append(btn);
+  });
+</script>

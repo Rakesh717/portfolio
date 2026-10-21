@@ -3043,3 +3043,34 @@ html:not(.trek-on) .deck {
     padding-right: 1rem;
   }
 }
+
+.next-trail {
+  display: grid;
+  gap: 0.2rem;
+  max-width: 46rem;
+  margin: 2rem auto 0;
+  padding: 1.1rem 1.4rem;
+  color: var(--ink);
+  text-decoration: none;
+  transform: rotate(-0.6deg);
+  transition: transform 0.25s var(--bounce);
+}
+.next-trail:hover,
+.next-trail:focus-visible {
+  transform: rotate(0.4deg) translateY(-3px);
+}
+.next-trail .hand {
+  font-size: 1.5rem;
+  color: var(--color-rust-deep);
+  line-height: 1;
+}
+.next-trail strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+.next-trail-go {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-teal-deep);
+}

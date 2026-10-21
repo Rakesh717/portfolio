@@ -3,6 +3,9 @@ import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import JournalTop from "../../components/JournalTop.astro";
 import TrailProgress from "../../components/blog/TrailProgress.astro";
+import ReadingWorld from "../../components/blog/ReadingWorld.astro";
+import TrailMap from "../../components/blog/TrailMap.astro";
+import ProseExtras from "../../components/blog/ProseExtras.astro";
 import { contact, site } from "../../data/content";
 
 export async function getStaticPaths() {
@@ -11,6 +14,11 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+// the next trail: the next newest post, wrapping round to the first
+const all = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const next = all.length > 1 ? all[(all.findIndex((p) => p.id === post.id) + 1) % all.length] : undefined;
 const { Content } = await render(post);
 const { originalUrl, originalSite } = post.data;
 // prose only: drop the MDX imports and component tags before counting
@@ -54,7 +62,10 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
   article={{ published: post.data.pubDate, tags: post.data.tags }}
   jsonLd={[blogPosting, crumbs]}
 >
-  <main class="journal">
+  <main class="journal journal-world">
+    <ReadingWorld />
+    <TrailMap />
+    <ProseExtras />
     <JournalTop back={{ href: "/blog", label: "all field notes" }} />
 
     <article class="paper journal-page">
@@ -77,6 +88,16 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
       }
       <p class="hand journal-sign">— Rakesh, from basecamp in {site.location}</p>
     </article>
+
+    {
+      next && (
+        <a class="next-trail paper" href={`/blog/${next.id}`}>
+          <span class="hand">Next trail</span>
+          <strong>{next.data.title}</strong>
+          <span class="next-trail-go">follow Yakku →</span>
+        </a>
+      )
+    }
 
     <TrailProgress />
 

@@ -1,0 +1,130 @@
+---
+// A trail map in the margin: every heading becomes a camp, the current one lights up.
+---
+
+<nav class="tmap" aria-label="Trail map: sections of this article" data-tmap hidden>
+  <p class="tmap-title hand">Trail map</p>
+  <ol class="tmap-list" data-list></ol>
+</nav>
+
+<style is:global>
+  .tmap {
+    position: fixed;
+    top: 7.5rem;
+    right: calc(50% + 23rem + 1.6rem);
+    width: 11.5rem;
+    z-index: 2;
+    display: none;
+  }
+  @media (min-width: 1240px) {
+    .tmap:not([hidden]) {
+      display: block;
+    }
+  }
+  .tmap-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    color: var(--color-rust-deep);
+    text-align: right;
+  }
+  .tmap-list {
+    position: relative;
+    margin: 0;
+    padding: 0 0.9rem 0 0;
+    list-style: none;
+    display: grid;
+    gap: 0.15rem;
+    text-align: right;
+  }
+  .tmap-list::before {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 6px;
+    bottom: 6px;
+    border-right: 2.5px dashed rgb(64 48 42 / 0.3);
+  }
+  .tmap-list a {
+    position: relative;
+    display: block;
+    padding: 0.25rem 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .tmap-list a::after {
+    content: "";
+    position: absolute;
+    right: -0.9rem;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    background: var(--color-cream);
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    transition:
+      background 0.2s,
+      transform 0.3s var(--bounce);
+  }
+  .tmap-list a:hover {
+    color: var(--ink);
+  }
+  .tmap-list a.here {
+    color: var(--ink);
+    font-weight: 800;
+  }
+  .tmap-list a.here::after {
+    background: var(--color-rust);
+    transform: scale(1.35);
+  }
+  .tmap-list a.passed::after {
+    background: var(--color-butter);
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>("[data-tmap]");
+  const heads = [...document.querySelectorAll<HTMLElement>(".prose-trail h2[id]")];
+  if (nav && heads.length >= 3) {
+    const list = nav.querySelector<HTMLElement>("[data-list]")!;
+    const links = heads.map((h) => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = `#${h.id}`;
+      a.textContent = h.textContent!.replace(/^\d+\.\s*/, "");
+      li.append(a);
+      list.append(li);
+      return a;
+    });
+    nav.hidden = false;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const line = innerHeight * 0.35;
+      let cur = -1;
+      heads.forEach((h, i) => {
+        if (h.getBoundingClientRect().top < line) cur = i;
+      });
+      links.forEach((a, i) => {
+        a.classList.toggle("here", i === cur);
+        a.classList.toggle("passed", i < cur);
+        if (i === cur) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
+      });
+    };
+    addEventListener(
+      "scroll",
+      () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>
