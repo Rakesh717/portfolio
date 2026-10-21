@@ -10,6 +10,7 @@ import ReadingLog from "../../components/blog/ReadingLog.astro";
 import TrailSound from "../../components/blog/TrailSound.astro";
 import { contact, site } from "../../data/content";
 import { trailStats } from "../../lib/reading";
+import { postImage } from "../../lib/share";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -26,18 +27,20 @@ const { Content } = await render(post);
 const { originalUrl, originalSite } = post.data;
 const { words, minutes } = trailStats(post.body);
 const url = new URL(`/blog/${post.id}`, Astro.site ?? "http://localhost").href;
+const image = postImage(post);
+const modified = post.data.updatedDate ?? post.data.pubDate;
 const blogPosting = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: post.data.title,
   description: post.data.description,
   datePublished: post.data.pubDate.toISOString(),
-  dateModified: post.data.pubDate.toISOString(),
+  dateModified: modified.toISOString(),
   keywords: post.data.tags.join(", "),
   wordCount: words,
   inLanguage: "en",
   url,
-  image: Astro.site ? new URL("/og.png", Astro.site).href : undefined,
+  image: Astro.site ? new URL(image?.src ?? "/og.png", Astro.site).href : undefined,
   publisher: { "@type": "Person", name: site.name, url: Astro.site?.href },
   author: { "@type": "Person", name: site.name, url: Astro.site?.href },
   mainEntityOfPage: originalUrl ?? url,
@@ -59,7 +62,8 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
   title={`${post.data.title} — ${site.name}`}
   description={post.data.description}
   canonicalUrl={originalUrl}
-  article={{ published: post.data.pubDate, tags: post.data.tags }}
+  article={{ published: post.data.pubDate, modified, tags: post.data.tags }}
+  image={image}
   jsonLd={[blogPosting, crumbs]}
 >
   <main class="journal journal-world">

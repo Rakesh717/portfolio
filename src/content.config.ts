@@ -12,6 +12,15 @@ const blog = defineCollection({
     originalUrl: z.string().url().optional(),
     originalSite: z.string().optional(),
     draft: z.boolean().default(false),
+    /** when the post last changed meaningfully; defaults to pubDate */
+    updatedDate: z.coerce.date().optional(),
+    /** Yakku on this post's share image: his pose and what he says */
+    og: z
+      .object({
+        pose: z.enum(["idle", "walk", "wave", "sit", "read", "celebrate", "sleep"]).default("wave"),
+        quip: z.string(),
+      })
+      .optional(),
   }),
 });
 

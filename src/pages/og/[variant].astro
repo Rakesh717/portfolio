@@ -1,17 +1,28 @@
 ---
-// Source for public/og.png. Open /og/card in dev and capture it at 1200 × 630 with a
-// device scale of 2, so the saved PNG is 2400 × 1260 (Base.astro's og:image size says so).
-// Only built in dev, so it never ships or lands in the sitemap.
+// Sources for the share images. In dev, open /og/card (the site image, public/og.png) or
+// /og/<post slug> (public/og/blog/<slug>.png) and capture at 1200 × 630 with a device scale
+// of 2, so each PNG is 2400 × 1260 (the size Base.astro declares).
+// Only built in dev, so none of this ships or lands in the sitemap.
 import "@fontsource-variable/fraunces/full.css";
 import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/caveat";
 import "../../styles/global.css";
+import { getCollection, type CollectionEntry } from "astro:content";
 import Yak from "../../components/Yak.astro";
+import { trailStats } from "../../lib/reading";
 
-export function getStaticPaths() {
-  return import.meta.env.DEV ? [{ params: { variant: "card" } }] : [];
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  const posts = (await getCollection("blog")).filter((p) => !p.data.draft);
+  return [{ params: { variant: "card" } }, ...posts.map((post) => ({ params: { variant: post.id }, props: { post } }))];
 }
 const { variant } = Astro.params;
+const { post } = Astro.props as { post?: CollectionEntry<"blog"> };
+const minutes = post ? trailStats(post.body).minutes : 0;
+const title = post?.data.title ?? "";
+// long titles step down so they always fit on the card in three lines or fewer
+const titleSize = title.length <= 28 ? 76 : title.length <= 48 ? 62 : 54;
+const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const ink = "#40302A";
 // prayer flags hung exactly on a quadratic string from (40,18) to (600,26), sagging to y≈62
 const snow = Array.from({ length: 34 }, (_, i) => ({
@@ -36,7 +47,40 @@ const flags = Array.from({ length: 9 }, (_, i) => {
     <title>OG {variant}</title>
   </head>
   <body>
-    <main class={`og og-${variant}`}>
+    <main class={`og og-${post ? "post" : variant}`}>
+      {
+        post && (
+          <>
+            <svg class="p-scene" viewBox="0 0 1200 630" aria-hidden="true">
+              {snow.map((f) => (
+                <circle cx={f.x} cy={f.y} r={f.r} fill="#FFFDF6" opacity="0.9" />
+              ))}
+              <path d="M700 590 L860 420 L930 480 L1030 360 L1110 450 L1200 400 V630 H700Z" fill="#E5D5D6" stroke={ink} stroke-width="3" stroke-linejoin="round" />
+              <path d="M1030 360 L1006 400 L1026 406 L1014 432 L1046 416 L1056 392Z" fill="#FFFDF6" />
+              <path d="M0 586 C 240 572 420 600 640 584 C 860 568 1040 596 1200 580 V630 H0Z" fill="#FFFDF6" stroke={ink} stroke-width="3" />
+            </svg>
+            <article class="p-card">
+              <span class="p-stamp" aria-hidden="true">
+                <svg viewBox="0 0 40 30" width="48" height="36">
+                  <path d="M2 28 L 14 10 L 21 19 L 27 12 L 38 28 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="p-postmark">{df.format(post.data.pubDate)}</span>
+              <h1 style={`font-size:${titleSize}px`}>{title}</h1>
+              <p class="p-foot">
+                <span class="p-site">Field notes · Rakesh Thapa</span>
+                <span class="p-read">{minutes} min read</span>
+              </p>
+            </article>
+            <div class="p-right">
+              {post.data.og && <p class="hand p-bubble">{post.data.og.quip}</p>}
+              <div class="p-yak">
+                <Yak pose={post.data.og?.pose ?? "wave"} />
+              </div>
+            </div>
+          </>
+        )
+      }
       {
         variant === "card" && (
           <>
@@ -190,4 +234,114 @@ const flags = Array.from({ length: 9 }, (_, i) => {
     width: 340px;
   }
 
+  /* a post: its title on a postcard, Yakku beside it with something to say */
+  .og-post {
+    background: linear-gradient(180deg, #bfe3f0 0%, #e3f1ec 50%, #fff3de 100%);
+  }
+  .p-scene {
+    position: absolute;
+    inset: 0;
+    width: 1200px;
+    height: 630px;
+  }
+  .p-card {
+    position: absolute;
+    left: 64px;
+    top: 74px;
+    width: 700px;
+    height: 452px;
+    display: flex;
+    flex-direction: column;
+    padding: 44px 52px 40px;
+    background: var(--cream);
+    border: 3px solid var(--ink);
+    border-radius: 6px 9px 7px 10px;
+    box-shadow: 9px 11px 0 rgb(64 48 42 / 0.16);
+    rotate: -1.6deg;
+  }
+  .p-stamp {
+    position: absolute;
+    top: 30px;
+    right: 32px;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 90px;
+    background: #ffd166;
+    border: 3px solid var(--ink);
+    outline: 4px dotted var(--cream);
+    outline-offset: -9px;
+  }
+  .p-postmark {
+    align-self: flex-start;
+    padding: 12px 12px;
+    font: 800 14px/1 "Bricolage Grotesque Variable", sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(64 48 42 / 0.55);
+    border: 2.5px solid rgb(64 48 42 / 0.35);
+    border-radius: 50%;
+    rotate: -9deg;
+  }
+  .og-post h1 {
+    margin: 30px 70px 0 0;
+    line-height: 1.02;
+    font-weight: 800;
+  }
+  .p-foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 2.5px dashed rgb(64 48 42 / 0.2);
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .p-site {
+    color: var(--teal);
+  }
+  .p-read {
+    color: var(--rust);
+  }
+  /* the bubble sits right on top of Yakku whatever his pose, tail pointing at his head */
+  .p-right {
+    position: absolute;
+    right: 40px;
+    bottom: 36px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .p-bubble {
+    position: relative;
+    max-width: 340px;
+    margin-bottom: 26px;
+    padding: 16px 26px 18px;
+    font-size: 40px;
+    line-height: 1.05;
+    color: var(--ink);
+    text-align: center;
+    text-wrap: balance;
+    background: var(--cream);
+    border: 3px solid var(--ink);
+    border-radius: 26px 30px 26px 30px;
+    box-shadow: 5px 6px 0 rgb(64 48 42 / 0.16);
+    rotate: 2deg;
+  }
+  .p-bubble::after {
+    content: "";
+    position: absolute;
+    left: 68%;
+    bottom: -14px;
+    width: 24px;
+    height: 24px;
+    background: var(--cream);
+    border-right: 3px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+    rotate: 45deg;
+  }
+  .p-yak {
+    width: 330px;
+  }
 </style>
