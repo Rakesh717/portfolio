@@ -82,53 +82,19 @@ Started my career building backend APIs and back office tools for enterprise cli
 
 ## Blog posts
 
-Three sample drafts (full bodies below). Replace freely.
+Two articles republished from Medium, with their original publish times. Full text lives in `src/content/blog/`; each page's canonical link points back to the Medium original.
 
-### 1. Two-way integrations are a product moat
+### 1. Intentional Software Still Matters in the Age of AI Coding
 
-- Date: Aug 12, 2026
-- Tags: SaaS, Integrations
-- Description: What shipping a dozen two-way integrations at Feedbucket taught me about retention, partnerships and when to say no to one-way syncs.
+- Date: Apr 6, 2026
+- Tags: AI, Software Engineering, Agentic Coding
+- Original: https://medium.com/@rakeshthapac/intentional-software-still-matters-in-the-age-of-ai-coding-7bced747a56b
 
-When I joined Feedbucket, the feedback widget was solid but the integration story was thin. Teams loved collecting feedback, then lost hours copying it into Jira or Asana by hand.
+### 2. Dead Simple Two Brain System for Reliable AI Chatbots
 
-We rebuilt our integrations as true two-way syncs: resolve a ticket in Jira and the feedback closes in Feedbucket, comment in either tool and both stay current. Adoption told the story. Teams who connected a tool resolved feedback far faster, and integrations became the reason agencies picked us over tools with longer feature lists.
-
-Three things I would tell anyone building integrations:
-
-- Sync state, not just data. One-way pushes create silent divergence that customers discover at the worst moment.
-- Treat each integration as a product with its own onboarding, docs and error surface.
-- Say no to shallow integrations. A deep one that never breaks beats five that half work.
-
-Two-way sync is hard, invisible work. That is exactly why it compounds into a moat.
-
-### 2. What rebuilding our CI/CD pipeline taught me about leading engineers
-
-- Date: Jun 3, 2026
-- Tags: Leadership, DevOps
-- Description: Taking Binary Digits from weekly releases to daily deploys. The pipeline was the easy part, the habits around it were the real work.
-
-When I became CTO at Binary Digits I inherited a talented team and a release process nobody enjoyed. Deploys happened weekly, in batches, with a cleanup ritual afterwards.
-
-Rebuilding the pipeline itself took a few weeks: shared architecture standards, automated checks, and a path to production that did not depend on one person's laptop. The pipeline was the easy part.
-
-What actually moved us to daily releases was habit work. Making reviews fast enough that nobody queued changes. Making rollbacks boring. Celebrating the first on-call week where nothing caught fire.
-
-A year in, releases are a non-event, and new project kickoffs that used to take weeks now take days because the defaults are already right. The lesson I keep relearning: engineers do not need pep talks, they need a floor that never collapses under them.
-
-### 3. AI answers people can verify
-
-- Date: Feb 19, 2026
-- Tags: AI, Product
-- Description: At Artifact Analyst every AI insight cites its sources. Verifiability, not model quality, decided whether analysts trusted the product.
-
-Equity analysts are professional skeptics. Their job is to not take a claim at face value, so a black box that speaks confidently is worthless to them.
-
-At Artifact Analyst we treated citations as the product, not a feature. Every AI generated answer links to the exact page of the filing or transcript it came from. Analysts click, verify, then decide whether to trust the next answer.
-
-The engineering was mostly plumbing with care: clean pipelines over SEC filings, stable document IDs, and charting that never rounded a number the source did not round.
-
-If you are building on AI, the trust bar is not "sounds right". It is "show me". Design for the click.
+- Date: Nov 20, 2025
+- Tags: AI, LLM, Chatbots
+- Original: https://medium.com/@rakeshthapac/dead-simple-two-brain-system-for-reliable-ai-chatbots-d8c72e60dfb7
 
 ## Contact CTA
 
