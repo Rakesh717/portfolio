@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import JournalTop from "../../components/JournalTop.astro";
+import TrailProgress from "../../components/blog/TrailProgress.astro";
 import { contact, site } from "../../data/content";
 
 export async function getStaticPaths() {
@@ -12,7 +13,9 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const { originalUrl, originalSite } = post.data;
-const words = (post.body ?? "").split(/\s+/).filter(Boolean).length;
+// prose only: drop the MDX imports and component tags before counting
+const prose = (post.body ?? "").replace(/^import .*$/gm, "").replace(/<[^>]+>/g, " ").replace(/```[\s\S]*?```/g, " ");
+const words = prose.split(/\s+/).filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 220));
 const url = new URL(`/blog/${post.id}`, Astro.site ?? "http://localhost").href;
 const blogPosting = {
@@ -71,6 +74,8 @@ const df = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", yea
       }
       <p class="hand journal-sign">— Rakesh, from basecamp in {site.location}</p>
     </article>
+
+    <TrailProgress />
 
     <aside class="journal-cta">
       <p>{contact.heading}</p>

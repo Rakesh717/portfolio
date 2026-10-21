@@ -1,0 +1,311 @@
+---
+import Yak from "../Yak.astro";
+---
+
+<section class="tb" data-tb aria-label="Interactive two brain demo">
+  <header class="tb-head">
+    <div class="tb-yak"><Yak pose="sit" /></div>
+    <div>
+      <p class="tb-title">Try the two brain system</p>
+      <p class="tb-sub">Pick a question. Yakku shows what basic RAG and the two brain pipeline do with it. The data is made up, the flow is real.</p>
+    </div>
+  </header>
+
+  <div class="tb-indexes" aria-label="Available data indexes">
+    <span class="tb-label">Indexes</span>
+    <span class="tb-chip" data-idx="generalInformation">generalInformation</span>
+    <span class="tb-chip" data-idx="season1Matches">season1Matches</span>
+    <span class="tb-chip" data-idx="season1Players">season1Players</span>
+    <span class="tb-chip" data-idx="season2Players">season2Players</span>
+    <span class="tb-chip" data-idx="season2FanRatings">season2FanRatings</span>
+  </div>
+
+  <div class="tb-questions" role="group" aria-label="Pick a question">
+    <button type="button" class="ink-btn ink-btn-sm" data-q="0">Top scorer across both seasons?</button>
+    <button type="button" class="ink-btn ink-btn-sm" data-q="1">Who played in the opening match?</button>
+    <button type="button" class="ink-btn ink-btn-sm" data-q="2">Follow up: "and compared to the first?"</button>
+  </div>
+
+  <div class="tb-stage" hidden data-stage>
+    <div class="tb-step" data-step="chat">
+      <span class="tb-badge">Chat</span>
+      <div data-out="chat"></div>
+    </div>
+    <div class="tb-cols">
+      <div class="tb-col tb-rag">
+        <p class="tb-coltitle">Basic RAG <small>top 3 chunks</small></p>
+        <div class="tb-step" data-step="rag"><div data-out="rag"></div></div>
+      </div>
+      <div class="tb-col tb-two">
+        <p class="tb-coltitle">Two brain</p>
+        <div class="tb-step" data-step="b1"><span class="tb-badge">Brain 1</span><div data-out="b1"></div></div>
+        <div class="tb-step" data-step="b2"><span class="tb-badge">Brain 2</span><div data-out="b2"></div></div>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button type="button" class="ink-btn ink-btn-primary ink-btn-sm" data-next>Run Brain 1</button>
+      <button type="button" class="ink-btn ink-btn-sm" data-reset>Reset</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tb {
+    margin: 2.2rem 0;
+    padding: 1.2rem 1.3rem 1.4rem;
+    background: #fff8e6;
+    border: 2.5px solid var(--ink);
+    border-radius: 22px;
+    box-shadow: 5px 6px 0 rgb(64 48 42 / 0.16);
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+  .tb-head {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .tb-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.5rem;
+  }
+  .tb-sub {
+    margin: 0.2rem 0 0;
+    color: var(--color-ink-soft);
+    font-size: 0.92rem;
+  }
+  .tb-indexes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 1rem 0 0.8rem;
+  }
+  .tb-label {
+    font: 700 0.75rem var(--font-body);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    margin-right: 0.3rem;
+  }
+  .tb-chip {
+    padding: 0.2rem 0.6rem;
+    font: 600 0.8rem ui-monospace, Menlo, monospace;
+    background: #fff;
+    border: 2px solid rgb(64 48 42 / 0.35);
+    border-radius: 99px;
+    transition:
+      background 0.25s,
+      border-color 0.25s,
+      transform 0.25s var(--bounce);
+  }
+  .tb-chip.on {
+    background: var(--color-butter);
+    border-color: var(--ink);
+    transform: translateY(-2px) rotate(-1.5deg);
+  }
+  .tb-questions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .tb-questions .ink-btn[aria-pressed="true"] {
+    background: var(--color-butter);
+  }
+  .tb-stage {
+    margin-top: 1.1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .tb-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+  .tb-col {
+    padding: 0.7rem 0.8rem;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    background: var(--color-cream);
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+  .tb-rag {
+    background: #fdeeea;
+  }
+  .tb-two {
+    background: #e9f6f3;
+  }
+  .tb-coltitle {
+    margin: 0;
+    font: 800 1rem var(--font-body);
+  }
+  .tb-coltitle small {
+    font-weight: 600;
+    color: var(--color-ink-soft);
+  }
+  .tb-step {
+    opacity: 0.18;
+    transform: translateY(4px);
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+  .tb-step.show {
+    opacity: 1;
+    transform: none;
+  }
+  .tb-step[data-step="chat"] {
+    padding: 0.6rem 0.8rem;
+    background: var(--color-cream);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+  }
+  .tb-badge {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    padding: 0.05rem 0.5rem;
+    font: 800 0.7rem var(--font-body);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--ink);
+    border-radius: 6px;
+  }
+  :global(.tb [data-out] > p) {
+    margin: 0.15rem 0;
+  }
+  :global(.tb-me) {
+    font-weight: 700;
+  }
+  :global(.tb-bot) {
+    color: var(--color-ink-soft);
+  }
+  :global(.tb-code) {
+    font: 600 0.82rem ui-monospace, Menlo, monospace;
+    background: #fff;
+    border: 1.5px solid rgb(64 48 42 / 0.3);
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+    margin: 0.25rem 0;
+    overflow-wrap: anywhere;
+  }
+  :global(.tb-bad) {
+    color: #b03a1a;
+    font-weight: 700;
+  }
+  :global(.tb-good) {
+    color: var(--color-teal-deep);
+    font-weight: 700;
+  }
+  .tb-actions {
+    display: flex;
+    gap: 0.7rem;
+  }
+  @media (max-width: 640px) {
+    .tb-cols {
+      grid-template-columns: 1fr;
+    }
+    .tb-head {
+      grid-template-columns: 62px 1fr;
+    }
+  }
+</style>
+
+<script>
+  type Demo = {
+    chat: string[];
+    rag: string;
+    reformulated: string;
+    indexes: string[];
+    answer: string;
+  };
+  const demos: Demo[] = [
+    {
+      chat: ["You: Who scored the most across both seasons?"],
+      rag: "Retrieves 3 player rows that mention goals. Asha Rana is not among them, so it confidently names <b>Bikram Shah (7 goals)</b>.",
+      reformulated: "Total goals per player across season 1 and season 2. Name the top scorer.",
+      indexes: ["season1Players", "season2Players"],
+      answer: "<b>Asha Rana</b> with 14 goals (9 in season 1, 5 in season 2), ahead of Bikram Shah on 11.",
+    },
+    {
+      chat: ["You: Who played in the opening match?"],
+      rag: "Retrieves the match summary and 2 player bios. Answers with <b>4 names</b> and silently drops the rest of the squad.",
+      reformulated: "List every player who took part in match 1 of season 1.",
+      indexes: ["season1Matches", "season1Players"],
+      answer: "Match 1 was Everest FC 2-1 Lumbini United. Everest fielded <b>all 11 players</b>, listed in full from the data.",
+    },
+    {
+      chat: [
+        "You: How did fans rate season 2?",
+        "Bot: 4.3 out of 5.",
+        "You: and compared to the first?",
+      ],
+      rag: "Searches for the literal text <b>\"and compared to the first?\"</b>. Nothing relevant matches, so the answer is vague or wrong.",
+      reformulated: "How did fans rate season 2 compared with season 1? Give both averages.",
+      indexes: ["season2FanRatings", "generalInformation"],
+      answer: "Season 2 averaged <b>4.3 / 5</b> against <b>3.9 / 5</b> in season 1, up 0.4.",
+    },
+  ];
+
+  document.querySelectorAll<HTMLElement>("[data-tb]").forEach((root) => {
+    const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const stage = $("[data-stage]");
+    const next = $<HTMLButtonElement>("[data-next]");
+    const yak = root.querySelector<SVGElement>(".yak");
+    const chips = [...root.querySelectorAll<HTMLElement>("[data-idx]")];
+    const qBtns = [...root.querySelectorAll<HTMLButtonElement>("[data-q]")];
+    const step = (n: string) => root.querySelector<HTMLElement>(`[data-step="${n}"]`)!;
+    const out = (n: string) => root.querySelector<HTMLElement>(`[data-out="${n}"]`)!;
+    let demo: Demo | null = null;
+    let stageNo = 0;
+
+    const pose = (p: string) => yak?.setAttribute("data-pose", p);
+    const clear = () => {
+      stageNo = 0;
+      ["chat", "rag", "b1", "b2"].forEach((n) => step(n).classList.remove("show"));
+      chips.forEach((c) => c.classList.remove("on"));
+      next.textContent = "Run Brain 1";
+      next.disabled = false;
+      pose("sit");
+    };
+    function pick(i: number) {
+      demo = demos[i];
+      qBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
+      stage.hidden = false;
+      clear();
+      out("chat").innerHTML = demo.chat.map((l) => `<p class="${l.startsWith("You") ? "tb-me" : "tb-bot"}">${l}</p>`).join("");
+      out("rag").innerHTML = `<p>${demo.rag}</p><p class="tb-bad">Wrong or incomplete</p>`;
+      out("b1").innerHTML = `<p>Rewrites the question with full context:</p><div class="tb-code">${demo.reformulated}</div><p>Picks indexes: <b>${demo.indexes.join(", ")}</b></p>`;
+      out("b2").innerHTML = `<p>Loads those indexes in full and answers from real data:</p><p>${demo.answer}</p><p class="tb-good">Complete and grounded</p>`;
+      step("chat").classList.add("show");
+    }
+    qBtns.forEach((b, i) => b.addEventListener("click", () => pick(i)));
+    next.addEventListener("click", () => {
+      if (!demo) return;
+      stageNo++;
+      if (stageNo === 1) {
+        step("rag").classList.add("show");
+        step("b1").classList.add("show");
+        chips.forEach((c) => c.classList.toggle("on", demo!.indexes.includes(c.dataset.idx!)));
+        next.textContent = "Run Brain 2";
+        pose("read");
+      } else {
+        step("b2").classList.add("show");
+        next.textContent = "Done";
+        next.disabled = true;
+        pose("celebrate");
+      }
+    });
+    $("[data-reset]").addEventListener("click", () => {
+      stage.hidden = true;
+      demo = null;
+      qBtns.forEach((b) => b.removeAttribute("aria-pressed"));
+      clear();
+    });
+  });
+</script>

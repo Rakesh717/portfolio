@@ -7,26 +7,34 @@ originalUrl: "https://medium.com/@rakeshthapac/intentional-software-still-matter
 originalSite: "Medium"
 ---
 
+import YakSays from "../../components/blog/YakSays.astro";
+import ProductCheck from "../../components/blog/ProductCheck.astro";
+import TrailChecklist from "../../components/blog/TrailChecklist.astro";
+
 We are entering an era of AI-first and agent-driven software development. Applications are being built much faster than ever before. But speed has come with trade-offs. We are also seeing more fragile code, unclear structure, and security vulnerabilities slipping into production.
 
 In the past, software development was slower but more deliberate. Only a small portion of code made it to production. That code was carefully reviewed, tested, and understood. Today, AI can generate the code, review it, and even write tests. It sounds ideal, but in its current state, it is far from reliable.
 
 I have been working with agentic coding for a while now, and I often feel uneasy about the code it produces. Even when I try to write thoughtful test cases to enforce intended behavior, the generated code frequently includes patterns I would not use. Fixing those issues can sometimes take longer than writing the code manually.
 
-I care deeply about building software from a user’s perspective. I try to imagine how I would feel using the product. This mindset has helped me build systems that are:
+I care deeply about building software from a user’s perspective. I try to imagine how I would feel using the product. This mindset has helped me build systems that are:
 
-- Easy to use and navigate
+- Easy to use and navigate
 - Clear in how they communicate errors
-- Secure against common attack vectors
-- Easy to maintain and debug
+- Secure against common attack vectors
+- Easy to maintain and debug
 
 This is not an argument against AI-generated code. It is an argument for using AI with intention and discipline.
+
+<YakSays pose="wave">
+Yakku is pro AI. He just checks the route before he follows anyone up a mountain.
+</YakSays>
 
 ## A Practical Approach to Using AI Responsibly
 
 ## 1. Start with a Manual Foundation
 
-Set up your project yourself. Choose frameworks, libraries, and architecture deliberately. Avoid handing over these decisions to AI early on.
+Set up your project yourself. Choose frameworks, libraries, and architecture deliberately. Avoid handing over these decisions to AI early on.
 
 Write the initial structure with minimal AI help. Instead of giving vague instructions like “send an email after user registration,” define:
 
@@ -35,35 +43,35 @@ Write the initial structure with minimal AI help. Instead of giving vague instru
 - Data flow
 - Package usage
 
-Think of this as writing a blueprint. AI should follow your direction, not define it.
+Think of this as writing a blueprint. AI should follow your direction, not define it.
 
-## 2. Build One Feature Properly First
+## 2. Build One Feature Properly First
 
-Before introducing agents, complete a meaningful feature end to end:
+Before introducing agents, complete a meaningful feature end to end:
 
 - Maintain a clean structure
-- Write solid test cases
+- Write solid test cases
 - Review everything thoroughly
 
 This establishes a reference point for quality. It becomes your standard.
 
-## 3. Introduce Agents After You Set the Standard
+## 3. Introduce Agents After You Set the Standard
 
 Once you have a strong foundation, introduce agent-driven workflows.
 
 Create an AGENTS.md or similar configuration file. Let the AI study your existing code to understand your style and expectations.
 
-Keep this file concise. Avoid overloading it with rules. Instead:
+Keep this file concise. Avoid overloading it with rules. Instead:
 
-- Use it as a router
-- Link to focused examples in separate files
+- Use it as a router
+- Link to focused examples in separate files
 - Show how you structure code in real scenarios
 
 ## 4. Use Skills, Not Just Instructions
 
 Skills are critical in agentic development.
 
-Rather than cramming everything into a single instruction file, define reusable skills based on how you work:
+Rather than cramming everything into a single instruction file, define reusable skills based on how you work:
 
 - Feature implementation patterns
 - Data fetching and state management
@@ -72,34 +80,49 @@ Rather than cramming everything into a single instruction file, define reusable 
 
 This makes the system modular and scalable.
 
-## 5. Enforce Quality Gates
+## 5. Enforce Quality Gates
 
 Always enforce checks in your workflow:
 
 - Linting
-- Running test suites
-- Static analysis if possible
+- Running test suites
+- Static analysis if possible
 
 This may feel excessive for small changes, but it prevents long-term technical debt.
 
 ## 6. Be Critical of AI-Generated Tests
 
-Do not accept tests blindly.
+Do not accept tests blindly.
 
-- Ensure they validate real behavior
-- Avoid tests that only increase coverage numbers
+- Ensure they validate real behavior
+- Avoid tests that only increase coverage numbers
 - Reject tests that do not improve confidence
 
-Poor tests create more work than they save.
+Poor tests create more work than they save.
 
-## 7. Stay Picky About Code Quality
+## 7. Stay Picky About Code Quality
 
-Code generation is cheap now. That does not mean quality should drop.
+Code generation is cheap now. That does not mean quality should drop.
 
 Iterate on features until they meet your standard. Ask yourself:
 
-Would I be happy using this product?
+Would I be happy using this product?
 
-If the answer is no, refine it further.
+If the answer is no, refine it further.
 
-I could go on about how software should be built, but this captures the core of how I believe AI should be used today. With a more thoughtful approach, we can push back against the growing wave of low-quality AI-generated code and build software that people genuinely enjoy using.
+<ProductCheck />
+
+I could go on about how software should be built, but this captures the core of how I believe AI should be used today. With a more thoughtful approach, we can push back against the growing wave of low-quality AI-generated code and build software that people genuinely enjoy using.
+
+<TrailChecklist
+  title="Your pre-flight checklist"
+  items={[
+    "I set up the project structure and chose the architecture myself",
+    "One feature is built and tested end to end as the quality bar",
+    "My AGENTS.md is short and links to focused examples",
+    "I have reusable skills for how I work",
+    "Linting, tests and static analysis run on every change",
+    "I reject AI tests that only raise coverage numbers",
+    "I would be happy using what I shipped",
+  ]}
+/>

@@ -1,0 +1,138 @@
+---
+import Yak from "../Yak.astro";
+
+interface Props {
+  title?: string;
+  items: string[];
+}
+const { title = "Trail checklist", items } = Astro.props;
+---
+
+<div class="tcheck" data-tcheck>
+  <div class="tcheck-head">
+    <div class="tcheck-yak"><Yak pose="idle" /></div>
+    <div>
+      <p class="tcheck-title">{title}</p>
+      <p class="hand tcheck-msg" aria-live="polite" data-msg>Tick what is already in your workflow.</p>
+    </div>
+  </div>
+  <div class="tcheck-bar" role="progressbar" aria-valuemin="0" aria-valuemax={items.length} aria-valuenow="0" data-bar>
+    <span data-fill></span>
+  </div>
+  <div class="tcheck-list">
+    {
+      items.map((item) => (
+        <label class="tcheck-item">
+          <input type="checkbox" />
+          <span>{item}</span>
+        </label>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .tcheck {
+    margin: 2rem 0;
+    padding: 1.1rem 1.3rem 1.3rem;
+    background: var(--color-cream);
+    border: 2.5px solid var(--ink);
+    border-radius: 20px 24px 20px 26px;
+    box-shadow: 5px 6px 0 rgb(64 48 42 / 0.16);
+  }
+  .tcheck-head {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .tcheck-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.5rem;
+  }
+  .tcheck-msg {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-rust-deep);
+  }
+  .tcheck-bar {
+    height: 14px;
+    margin: 0.9rem 0 0.6rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 99px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .tcheck-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--color-teal);
+    transition: width 0.4s var(--bounce);
+  }
+  .tcheck-list {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .tcheck-item {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    padding: 0.45rem 0.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .tcheck-item:hover {
+    background: rgb(255 209 102 / 0.28);
+  }
+  .tcheck-item input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.2rem;
+    accent-color: var(--color-teal-deep);
+  }
+  .tcheck-item:has(input:checked) span {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-rust);
+    color: var(--color-ink-soft);
+  }
+  @media (max-width: 560px) {
+    .tcheck-head {
+      grid-template-columns: 60px 1fr;
+    }
+  }
+</style>
+
+<script>
+  const msgs = [
+    "Tick what is already in your workflow.",
+    "Good start. Keep climbing.",
+    "Getting somewhere.",
+    "Halfway to base camp.",
+    "Solid foundations.",
+    "Nearly at the summit.",
+    "One more step.",
+    "Summit! Now go ship something you would enjoy using.",
+  ];
+  document.querySelectorAll<HTMLElement>("[data-tcheck]").forEach((root) => {
+    const boxes = [...root.querySelectorAll<HTMLInputElement>("input")];
+    const fill = root.querySelector<HTMLElement>("[data-fill]")!;
+    const bar = root.querySelector<HTMLElement>("[data-bar]")!;
+    const msg = root.querySelector<HTMLElement>("[data-msg]")!;
+    const yak = root.querySelector<SVGElement>(".yak");
+    const update = () => {
+      const n = boxes.filter((b) => b.checked).length;
+      const all = n === boxes.length;
+      fill.style.width = `${(n / boxes.length) * 100}%`;
+      bar.setAttribute("aria-valuenow", String(n));
+      const i = all ? msgs.length - 1 : Math.min(n, msgs.length - 2);
+      msg.textContent = msgs[i];
+      yak?.setAttribute("data-pose", all ? "celebrate" : n ? "walk" : "idle");
+    };
+    boxes.forEach((b) => b.addEventListener("change", update));
+  });
+</script>

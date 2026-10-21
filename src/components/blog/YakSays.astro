@@ -1,0 +1,64 @@
+---
+import Yak from "../Yak.astro";
+
+interface Props {
+  pose?: string;
+  title?: string;
+}
+const { pose = "sit", title = "Yakku says" } = Astro.props;
+---
+
+<aside class="yak-says">
+  <div class="yak-says-yak"><Yak pose={pose} /></div>
+  <div class="yak-says-bubble">
+    <p class="hand yak-says-title">{title}</p>
+    <div class="yak-says-body"><slot /></div>
+  </div>
+</aside>
+
+<style>
+  .yak-says {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 0.9rem;
+    align-items: end;
+    margin: 2rem 0;
+  }
+  .yak-says-bubble {
+    position: relative;
+    padding: 0.9rem 1.2rem 1rem;
+    background: var(--color-cream);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px 22px 20px 8px;
+    box-shadow: 4px 5px 0 rgb(64 48 42 / 0.16);
+    transform: rotate(-0.4deg);
+  }
+  .yak-says-bubble::before {
+    content: "";
+    position: absolute;
+    left: -11px;
+    bottom: 14px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-cream);
+    border-left: 2.5px solid var(--ink);
+    border-bottom: 2.5px solid var(--ink);
+    transform: rotate(45deg);
+  }
+  .yak-says-title {
+    margin: 0 0 0.1rem;
+    font-size: 1.35rem;
+    color: var(--color-rust-deep);
+  }
+  .yak-says-body :global(p) {
+    margin: 0.4em 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  @media (max-width: 560px) {
+    .yak-says {
+      grid-template-columns: 64px 1fr;
+      gap: 0.6rem;
+    }
+  }
+</style>

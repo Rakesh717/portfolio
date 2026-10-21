@@ -1,0 +1,74 @@
+---
+import Yak from "../Yak.astro";
+
+interface Props {
+  question?: string;
+}
+const { question = "Would I be happy using this product?" } = Astro.props;
+---
+
+<div class="pcheck" data-pcheck>
+  <div class="pcheck-yak"><Yak pose="read" /></div>
+  <div class="pcheck-main">
+    <p class="pcheck-q">{question}</p>
+    <div class="pcheck-btns">
+      <button type="button" class="ink-btn ink-btn-sm" data-answer="yes">Yes, I'd use it</button>
+      <button type="button" class="ink-btn ink-btn-sm" data-answer="no">Hmm, not yet</button>
+    </div>
+    <p class="hand pcheck-reply" aria-live="polite" data-reply>Be honest. Yakku is watching.</p>
+  </div>
+</div>
+
+<style>
+  .pcheck {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin: 2rem 0;
+    padding: 1rem 1.2rem;
+    background: #fff8e6;
+    border: 2.5px dashed var(--ink);
+    border-radius: 18px;
+  }
+  .pcheck-q {
+    margin: 0 0 0.7rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+    line-height: 1.25;
+  }
+  .pcheck-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+  .pcheck-reply {
+    margin: 0.8rem 0 0;
+    font-size: 1.35rem;
+    min-height: 1.6em;
+  }
+  @media (max-width: 560px) {
+    .pcheck {
+      grid-template-columns: 64px 1fr;
+    }
+  }
+</style>
+
+<script>
+  const replies = {
+    yes: ["Then ship it. Yakku approves.", "celebrate"],
+    no: ["Then iterate until you would. Cheap code is no excuse.", "grumpy"],
+  } as const;
+  document.querySelectorAll<HTMLElement>("[data-pcheck]").forEach((root) => {
+    const yak = root.querySelector<SVGElement>(".yak");
+    const reply = root.querySelector<HTMLElement>("[data-reply]");
+    root.querySelectorAll<HTMLButtonElement>("[data-answer]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const [msg, pose] = replies[btn.dataset.answer as "yes" | "no"];
+        yak?.setAttribute("data-pose", pose);
+        if (reply) reply.textContent = msg;
+      }),
+    );
+  });
+</script>
