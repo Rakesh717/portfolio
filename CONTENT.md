@@ -56,22 +56,17 @@ Started my career building backend APIs and back office tools for enterprise cli
 
 ## Testimonials
 
-> Placeholder quotes for layout. Replace with genuine testimonials before launch.
+**Marcus Gullberg · Founder, Feedbucket & cousab (cousab.se)**
+"Rakesh is a really fast learner. He got up to speed with my project quickly and understood the requirements right away. A very good communicator as well."
 
-**Aryan Shrestha · CEO, Binary Digits**
-"Rakesh took our release process from a weekly ritual to a daily non-event. The team ships faster and sleeps better."
+**Antoine Vulcain · CTO @ Artifact Analyst · Founder, Financial Modeling Prep**
+"Rakesh is a fast and efficient developer who writes clean code, continuously polishes his work, and leverages AI effectively to improve quality and productivity."
 
-**Daniel Reyes · Founder, Artifact Analyst**
-"He owned most of our platform as an early engineer. Data pipelines, charts, the AI answer experience: all of it fast and dependable."
+**Mickeel Pramono · Founder, Lezenda**
+"He always makes things right. The code quality is very good — he keeps the code tidy and easy to maintain. Great English, always on schedule."
 
-**Sofia Lindqvist · Product Lead, Feedbucket**
-"The two-way integrations Rakesh built are the reason agencies choose us. Customers resolve feedback without ever opening our app."
-
-**Marco Ricci · Engineering Manager, Kotuko**
-"One of those engineers you hand a vague problem and get back a shipped solution. Our back office tools just worked."
-
-**James Carter · Agency Owner, Web design**
-"Clear communication, honest estimates, zero surprises. I would hire his team again for any serious build."
+**Lino Grubben · Designer & Entrepreneur**
+"Rakesh is a clear communicator and an effective programmer who executes fast and contributes his own ideas. Everything he shipped just worked — highly recommend!"
 
 ## Links
 
