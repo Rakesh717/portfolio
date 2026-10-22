@@ -912,6 +912,7 @@ function boot() {
     return line;
   };
   function speak(text: string, ms = 3400) {
+    if (tween?.quiet) return; // the quick walk (W) is a silent stroll
     quip.textContent = text;
     quip.classList.add("show");
     window.clearTimeout(quipTimer);
@@ -1007,7 +1008,7 @@ function boot() {
 
   /* ---------------- travel ---------------- */
 
-  let tween: { from: number; to: number; t0: number; dur: number; ease?: (t: number) => number } | null = null;
+  let tween: { from: number; to: number; t0: number; dur: number; ease?: (t: number) => number; quiet?: boolean } | null = null;
   const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
   // gentler peak (about 1.6x the average speed, vs 3x) so a long tween stays a walk, not a run
   const easeSine = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2;
@@ -1197,13 +1198,13 @@ function boot() {
     const lines = all.filter((_, j) => Math.min(n - 1, Math.floor((j * n) / all.length)) === t.k);
     let at = 200; // let him settle before he talks
     t.cues = lines.map((text) => {
-      const ms = clamp(1100 + text.length * 42, 2400, 5200);
+      const ms = clamp(900 + text.length * 34, 2000, 4200);
       const cue = { at, text, ms };
       at += ms + 120;
       return cue;
     });
-    // skim pace (~450 wpm): the tour is a walkthrough, and they can pause to read closer
-    const read = clamp(1000 + wordsInView(s.el) * 130, 2800, 11000);
+    // skim pace (~650 wpm): the tour is a walkthrough, and they can pause to read closer
+    const read = clamp(800 + wordsInView(s.el) * 92, 2000, 8000);
     // the summit only needs its long hold when the look-back is going to play
     const min = s.d.id === "summit" && !(revealDue() && !summitParty) ? 0 : TOUR_MIN[s.d.id] ?? 0;
     t.dwell = Math.max(read, at + 200, t.k === n - 1 ? min : 0);
@@ -1311,6 +1312,30 @@ function boot() {
   window.addEventListener("wheel", () => pauseTour(), { passive: true });
   window.addEventListener("touchmove", () => pauseTour(), { passive: true });
   setTourUi();
+
+  // steady pace: ease in and out over the first and last 6%, constant speed in between
+  // (a sine ease peaks at 1.6x the average, which reads as a sprint mid-trail)
+  const easeSteady = (t: number) => {
+    const a = 0.06;
+    const v = 1 / (1 - a);
+    if (t < a) return (v * t * t) / (2 * a);
+    if (t > 1 - a) return 1 - (v * (1 - t) ** 2) / (2 * a);
+    return v * (t - a / 2);
+  };
+
+  // W: back to the trailhead, then one unbroken walk to the end of the trail. No reading stops, no chatter;
+  // any key, wheel or touch stops it (the travel handlers above drop the tween)
+  window.addEventListener("keydown", (e) => {
+    if (!isShortcut(e, "w") || e.repeat) return;
+    e.preventDefault();
+    if (tour) endTour();
+    cancelShot();
+    quip.classList.remove("show");
+    window.scrollTo(0, 0);
+    cam = 0;
+    // slower than the tour's stroll, so he walks the whole way and never breaks into a run
+    tween = { from: 0, to: maxCam, t0: performance.now(), dur: (maxCam / (mobile ? 430 : 680)) * 1000, ease: easeSteady, quiet: true };
+  });
 
   /* ---------------- main loop ---------------- */
 

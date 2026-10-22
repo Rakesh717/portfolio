@@ -44,7 +44,10 @@ npm run build      # static build in dist/
 ## Interactions
 
 - **Guided tour:** the tour button in the HUD has Yakku walk the whole trail
-  and talk you through each stop (lines in `tour` in `content.ts`).
+  and talk you through each stop (lines in `tour` in `content.ts`). P plays
+  and pauses it, Esc stops it.
+- **Quick walk:** W takes Yakku back to the trailhead and walks him the whole
+  trail to night camp, with no reading stops and no quips. Any key or scroll stops it.
 - **Foreground:** blurred grass, branches, rocks and snow drifts pass in front
   of the camera for depth.
 - **Cloud bank:** the long climb before High Camp walks you through a whiteout.
