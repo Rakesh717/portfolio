@@ -59,7 +59,8 @@ fallback working.
 
 All optional, wrapped in try/catch, and the site works without them:
 `yak-sound` (sound on/off, shared by home and blog), `yak-trails` (where you
-stopped on each post), `yak-summit-reveal` (summit look-back shown today).
+stopped on each post), `yak-summit-reveal` (summit look-back shown today), `yak-404-best` (best
+altitude in the 404 trail run).
 
 ## Blog posts
 

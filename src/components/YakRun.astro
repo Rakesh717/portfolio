@@ -1,0 +1,651 @@
+---
+/**
+ * Yakku's trail run: a small endless runner for the 404 page. Yakku runs up from Lukla,
+ * jumps cairns, mani stones, chortens, prayer wheels, rhododendrons and sleeping trail
+ * dogs, and the altitude is the score. Hidden without JavaScript and for visitors who
+ * prefer reduced motion; the page reads fine without it.
+ */
+import Yak from "./Yak.astro";
+import { lost } from "../data/content";
+
+const g = lost.game;
+const ink = "#40302A";
+const ridge = "M0 70 L60 45 L110 62 L180 18 L240 52 L300 38 L360 66 L430 24 L500 58 L560 40 L620 70 L690 30 L750 55 L800 70";
+const hills = "M0 30 Q50 12 100 24 T200 20 T300 28 T400 16 T500 26 T600 30";
+---
+
+<section class="yr paper" data-yr data-copy={JSON.stringify(g)} hidden aria-labelledby="yr-title">
+  <div class="yr-hud">
+    <h2 id="yr-title" class="yr-title hand">{g.title}</h2>
+    <p class="yr-alt">
+      <span data-yr-alt>2,860 m</span>
+      <span class="yr-best" data-yr-best hidden></span>
+    </p>
+  </div>
+
+  <div class="yr-stage" data-yr-stage data-biome="forest" tabindex="0" role="button" aria-label={g.label}>
+    <div class="yr-far" data-yr-far aria-hidden="true">
+      {
+        [0, 1].map(() => (
+          <svg viewBox="0 0 800 110" width="800" height="110">
+            <path d={`${ridge} V110 H0 Z`} fill="#E5D5D6" />
+            <path d="M180 18 L166 34 L178 38 L186 30 L197 36 Z M430 24 L417 38 L428 41 L436 35 L446 40 Z M690 30 L678 42 L689 46 L697 40 L706 44 Z" fill="#FFFDF6" />
+            <path d={ridge} fill="none" stroke={ink} stroke-width="2.5" stroke-linejoin="round" opacity="0.55" />
+          </svg>
+        ))
+      }
+    </div>
+    <div class="yr-near" data-yr-near aria-hidden="true">
+      {
+        [0, 1].map(() => (
+          <svg viewBox="0 0 600 50" width="600" height="50">
+            <path class="yr-hill" d={`${hills} V50 H0 Z`} />
+            <path d={hills} fill="none" stroke={ink} stroke-width="2.5" stroke-linecap="round" />
+          </svg>
+        ))
+      }
+    </div>
+    <div class="yr-ground" data-yr-ground aria-hidden="true"></div>
+    <div class="yr-obs" data-yr-obs aria-hidden="true"></div>
+    <!-- Yakku's own shadow would leave the ground with him, so the ground gets its own -->
+    <svg class="yr-shadow" viewBox="0 0 260 210" aria-hidden="true">
+      <ellipse data-yr-shadow cx="122" cy="200" rx="86" ry="7" fill={ink} opacity="0.14" />
+    </svg>
+    <div class="yr-yak" data-yr-yak aria-hidden="true"><Yak pose="graze" /></div>
+    <p class="yr-note hand" data-yr-note aria-live="polite"></p>
+    <p class="yr-msg" data-yr-msg aria-live="polite">{g.start}</p>
+  </div>
+
+  <!--
+    obstacles, cloned by the script. Sizes are in stage units (200 = stage height) and match
+    each viewBox; data-biomes says where on the climb they turn up.
+  -->
+  <template data-kind="cairn" data-w="30" data-h="38" data-weight="3" data-biomes="forest rock snow">
+    <svg viewBox="0 0 30 38" stroke={ink} stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="15" cy="37" rx="15" ry="2.4" fill={ink} opacity="0.14" stroke="none" />
+      <path d="M16 9 V1" stroke-width="1.6" />
+      <path d="M16 1.2 L22.5 3.2 L16 5.4 Z" fill="#E85D2F" stroke-width="1.4" />
+      <path d="M2 35.5 Q1 29 9 28 Q16 26.5 23 28 Q29.5 29.5 28 35 Q27 37 15 37 Q3.5 37 2 35.5 Z" fill="#A79D93" />
+      <path d="M6 27 Q5 22 12 21 Q19 20 23 22.5 Q26 25.5 22 27.5 Q14 29 6 27 Z" fill="#C4BAAF" />
+      <path d="M9 20.5 Q9 15.5 15 15 Q21 15 21 19 Q20.5 21.5 15 21.5 Q10 21.5 9 20.5 Z" fill="#B3A89D" />
+      <path d="M12 14.5 Q12 10.5 16 10.5 Q19.5 11 19 14 Q16 15.6 12 14.5 Z" fill="#D6CEC4" />
+      <path d="M7 31 q4 -1.6 8 -1.2 M10 24 q3 -1.4 6 -1 M12.5 18 q2 -1.2 4 -0.8" stroke="#FFFDF6" stroke-width="1.4" opacity="0.8" />
+    </svg>
+  </template>
+  <template data-kind="mani" data-w="60" data-h="30" data-weight="2" data-biomes="forest rock snow">
+    <svg viewBox="0 0 60 30" stroke={ink} stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="30" cy="29.4" rx="30" ry="2.4" fill={ink} opacity="0.14" stroke="none" />
+      <path d="M1.5 29 L2.5 21 H57.5 L58.5 29 Z" fill="#A79D93" stroke-width="2.2" />
+      <path d="M2 25 H58 M11 21 V25 M24 21 V25 M38 21 V25 M50 21 V25 M17 25 V29 M31 25 V29 M44 25 V29" stroke-width="1.2" opacity="0.55" />
+      <path d="M6 21 Q4.5 8 12 5 Q30 1 46 3.5 Q55.5 6.5 54 21 Z" fill="#8FA39E" stroke-width="2.4" />
+      <path d="M11 10 H47" stroke="#FFFDF6" stroke-width="1.3" />
+      <path d="M13 10 v5 q1.5 2 3 0 M19 10 q-1 4 2 6 M24 10 v6 M22.5 13 h3 M29 10 q3 1.5 0 3.5 q3 1 0 3 M35 10 v6 q1 1 2.5 -0.5 M41 10 q-2 3 0.5 3 q2 0 0 3.5 M45.5 10 v4" stroke="#FFFDF6" stroke-width="1.5" fill="none" />
+      <path d="M8 21 q2.5 -3 5 0 q2.5 -2.4 5 0 Z M40 21 q2 -2.4 4 0 Z" fill="#7FB36A" stroke-width="1.2" />
+      <path d="M44 5.5 q5 1 7 6" stroke="#FFFDF6" stroke-width="1.3" opacity="0.6" fill="none" />
+    </svg>
+  </template>
+  <template data-kind="chorten" data-w="40" data-h="60" data-weight="1" data-from="200" data-biomes="forest rock snow">
+    <svg viewBox="0 0 40 60" stroke={ink} stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="20" cy="59.4" rx="20" ry="2.4" fill={ink} opacity="0.14" stroke="none" />
+      <path d="M20 4 Q11 16 0.5 30 M20 4 Q29 16 39.5 30" fill="none" stroke-width="1" />
+      <path d="M15.5 9.5 l-3 1 l1.5 3 Z M11.6 14.6 l-3 1.2 l1.6 2.9 Z M7.6 19.7 l-3 1.3 l1.7 2.8 Z M3.6 24.8 l-3 1.4 l1.8 2.7 Z" fill="#4CC9F0" stroke-width="0.9" />
+      <path d="M24.5 9.5 l3 1 l-1.5 3 Z M28.4 14.6 l3 1.2 l-1.6 2.9 Z M32.4 19.7 l3 1.3 l-1.7 2.8 Z M36.4 24.8 l3 1.4 l-1.8 2.7 Z" fill="#E85D2F" stroke-width="0.9" />
+      <path d="M11.6 14.6 l-3 1.2 l1.6 2.9 Z M32.4 19.7 l3 1.3 l-1.7 2.8 Z" fill="#06D6A0" stroke-width="0.9" />
+      <path d="M7.6 19.7 l-3 1.3 l1.7 2.8 Z M28.4 14.6 l3 1.2 l-1.6 2.9 Z" fill="#FFD166" stroke-width="0.9" />
+      <path d="M2 59 V47.5 H38 V59 Z" fill="#FFFDF6" stroke-width="2.3" />
+      <path d="M17 59 V53.5 Q20 50.5 23 53.5 V59 Z" fill="#8A5A3B" stroke-width="1.6" />
+      <path d="M6 47.5 V42 H34 V47.5 Z M9 42 V37.5 H31 V42 Z" fill="#FFFDF6" stroke-width="2.3" />
+      <path d="M9 37.5 Q8 24.5 20 23.5 Q32 24.5 31 37.5 Z" fill="#FFFDF6" stroke-width="2.3" />
+      <path d="M14 26 Q12 31 13 37 M26 26 Q28 31 27 37 M20 24 V37" stroke="#FFD166" stroke-width="1.8" fill="none" />
+      <rect x="14" y="16.5" width="12" height="7" fill="#FFD166" stroke-width="2" />
+      <path d="M15.5 20 q2 -2 4 0 q-2 1.6 -4 0 Z M20.5 20 q2 -2 4 0 q-2 1.6 -4 0 Z" fill="#FFFDF6" stroke-width="0.9" />
+      <circle cx="17.5" cy="20" r="0.8" fill={ink} stroke="none" />
+      <circle cx="22.5" cy="20" r="0.8" fill={ink} stroke="none" />
+      <path d="M15 16.5 L17.5 5.5 H22.5 L25 16.5 Z" fill="#FFD166" stroke-width="2" />
+      <path d="M15.7 13.5 H24.3 M16.4 11 H23.6 M17 8.4 H23" stroke-width="1.1" />
+      <path d="M15.5 5.5 Q20 1.6 24.5 5.5 Z" fill="#E85D2F" stroke-width="1.6" />
+      <circle cx="20" cy="2" r="1.5" fill="#FFD166" stroke-width="1.2" />
+    </svg>
+  </template>
+  <template data-kind="dog" data-w="54" data-h="28" data-weight="2" data-biomes="forest rock">
+    <svg viewBox="0 0 50 26" stroke={ink} stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="25" cy="25.4" rx="22" ry="2" fill={ink} opacity="0.14" stroke="none" />
+      <path d="M40 3.5 h3 l-3 3 h3 M45.5 0.5 h2 l-2 2 h2" fill="none" stroke="#6F5C50" stroke-width="1.2" />
+      <path d="M9 24 Q-1 23 1.5 15 Q3.5 9.5 8.5 12.5 Q5.5 15.5 7 19 Q8.5 21 11.5 21 Z" fill="#D9A066" stroke-width="2" />
+      <path d="M6 25 Q4 15 14 13 Q26 10 34 15 Q38 18 37 25 Z" fill="#D9A066" stroke-width="2.2" />
+      <ellipse cx="19" cy="17.5" rx="5" ry="3" fill="#B97A4B" stroke="none" />
+      <path d="M30 25 Q36 22.5 42 24 Q43.5 25.5 38 25.5 Z" fill="#F1D7B0" stroke-width="1.8" />
+      <circle cx="37.5" cy="18" r="6.5" fill="#D9A066" stroke-width="2.2" />
+      <path d="M41.5 17.5 Q48 17 48.5 21 Q47.5 23.5 42 23 Z" fill="#F1D7B0" stroke-width="2" />
+      <ellipse cx="47.6" cy="19.6" rx="1.4" ry="1.1" fill={ink} stroke="none" />
+      <path d="M34.5 13 Q30 13.5 30.5 20 Q34.5 19 36.5 14 Z" fill="#8A5A3B" stroke-width="1.8" />
+      <path d="M37.8 17 q1.5 1.2 3 0" fill="none" stroke-width="1.4" />
+    </svg>
+  </template>
+  <template data-kind="wheel" data-w="26" data-h="52" data-weight="1" data-biomes="forest rock">
+    <svg viewBox="0 0 26 52" stroke={ink} stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="13" cy="51.4" rx="11" ry="2" fill={ink} opacity="0.14" stroke="none" />
+      <rect x="11.5" y="4" width="3" height="42" fill="#8A5A3B" stroke-width="1.8" />
+      <path d="M5.5 51 L7 45 H19 L20.5 51 Z" fill="#A79D93" stroke-width="2" />
+      <rect x="4" y="12" width="18" height="24" rx="3" fill="#C7491F" stroke-width="2.3" />
+      <path d="M4.3 16 H21.7 M4.3 32 H21.7" stroke="#FFD166" stroke-width="2.6" />
+      <path d="M7 21.5 q1.5 -3 3 0 v3 M12 20 h3 M13.5 20 v4.5 M17 21.5 q1.5 -3 3 0 M7 27.5 H19" stroke="#FFFDF6" stroke-width="1.4" fill="none" />
+      <path d="M5 12 Q13 6 21 12 Z" fill="#FFD166" stroke-width="2" />
+      <circle cx="13" cy="5" r="2" fill="#FFD166" stroke-width="1.6" />
+      <path d="M22 22 h3 v5" fill="none" stroke-width="1.6" />
+    </svg>
+  </template>
+  <template data-kind="bush" data-w="52" data-h="30" data-weight="2" data-biomes="forest">
+    <svg viewBox="0 0 52 30" stroke={ink} stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="26" cy="29.4" rx="25" ry="2.2" fill={ink} opacity="0.14" stroke="none" />
+      <path d="M3 29 Q0 21 6 18 Q5 9.5 14 9 Q18 3 26 5 Q33 2 38 8 Q47 8 47 16 Q53 20 49 29 Z" fill="#5F9E6E" stroke-width="2.3" />
+      <path d="M10 22 q4 -3 8 0 M27 15 q4 -3 8 0 M33 24 q4 -3 8 0 M17 13 q3 -2 6 0" stroke="#2E6B45" stroke-width="1.4" fill="none" />
+      <g fill="#E0435A" stroke-width="1.2">
+        <circle cx="12" cy="14" r="3.4" /><circle cx="24" cy="9" r="3.4" /><circle cx="37" cy="11.5" r="3.4" />
+        <circle cx="43" cy="20" r="3.2" /><circle cx="21" cy="20" r="3.2" /><circle cx="31" cy="21" r="3" />
+      </g>
+      <g fill="#FFD166" stroke="none">
+        <circle cx="12" cy="14" r="1" /><circle cx="24" cy="9" r="1" /><circle cx="37" cy="11.5" r="1" />
+        <circle cx="43" cy="20" r="1" /><circle cx="21" cy="20" r="1" /><circle cx="31" cy="21" r="1" />
+      </g>
+    </svg>
+  </template>
+</section>
+
+<style>
+  .yr {
+    max-width: 46rem;
+    margin: 2rem auto 0;
+    padding: 0.8rem 1rem 1rem;
+    text-shadow: none;
+  }
+  .yr-hud {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 0.2rem 0.5rem;
+  }
+  .yr-title {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+  .yr-alt {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .yr-best {
+    margin-left: 0.6rem;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+  }
+
+  .yr-stage {
+    --gh: 34px;
+    --near: #bcd8ae;
+    --ground: #dcc9a2;
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+    border: 2.5px solid var(--ink);
+    border-radius: 6px 9px 7px 10px;
+    background: linear-gradient(180deg, #cfe9f2, #f4efe2 85%);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .yr-stage:focus-visible {
+    outline: 3px solid var(--color-teal);
+    outline-offset: 3px;
+  }
+  .yr-stage[data-biome="rock"] {
+    --near: #cdc2b4;
+    --ground: #cdbda5;
+  }
+  .yr-stage[data-biome="snow"] {
+    --near: #f2ede7;
+    --ground: #f8f4ee;
+  }
+
+  .yr-far,
+  .yr-near {
+    position: absolute;
+    left: 0;
+    display: flex;
+    will-change: transform;
+  }
+  .yr-far {
+    bottom: calc(var(--gh) + 18px);
+  }
+  .yr-near {
+    bottom: calc(var(--gh) - 3px);
+  }
+  .yr-far svg,
+  .yr-near svg {
+    flex: none;
+    display: block;
+  }
+  .yr-hill {
+    fill: var(--near);
+    transition: fill 1.5s ease;
+  }
+  .yr-ground {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: var(--gh);
+    border-top: 2.5px solid var(--ink);
+    background-color: var(--ground);
+    background-image:
+      radial-gradient(circle at 12px 11px, rgb(64 48 42 / 0.28) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 54px 22px, rgb(64 48 42 / 0.18) 0 1.5px, transparent 2px),
+      radial-gradient(circle at 90px 8px, rgb(255 255 255 / 0.6) 0 2px, transparent 2.5px);
+    background-size: 120px 100%;
+    transition: background-color 1.5s ease;
+  }
+  .yr-yak,
+  .yr-shadow {
+    position: absolute;
+    left: 5%;
+    bottom: calc(var(--gh) - 8px);
+    z-index: 2;
+    width: 100px;
+  }
+  .yr-yak {
+    transform-origin: 50% 100%;
+    will-change: transform;
+  }
+  .yr-yak :global(.y-shadow) {
+    display: none;
+  }
+  .yr-shadow {
+    z-index: 1;
+    overflow: visible;
+  }
+  .yr-shadow ellipse {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  :global(.yr-ob) {
+    position: absolute;
+    left: 0;
+    bottom: calc(var(--gh) - 3px);
+    z-index: 1;
+    will-change: transform;
+  }
+  :global(.yr-ob svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  :global(.yr-ob.is-hit svg) {
+    animation: yrWobble 0.5s ease-in-out;
+    transform-origin: 50% 100%;
+  }
+  @keyframes yrWobble {
+    30% {
+      rotate: 12deg;
+    }
+    65% {
+      rotate: -6deg;
+    }
+  }
+
+  .yr-msg {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    z-index: 3;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    margin: 0;
+    padding: 0.45rem 0.9rem;
+    translate: -50% 0;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    white-space: pre-line;
+    background: var(--color-cream);
+    border: 2.5px solid var(--ink);
+    border-radius: 12px 15px 12px 16px;
+    box-shadow: 0 4px 0 var(--ink);
+  }
+  .yr-msg:empty {
+    display: none;
+  }
+  .yr-note {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    z-index: 3;
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--color-rust-deep);
+    opacity: 0;
+    translate: 0 -6px;
+    transition:
+      opacity 0.4s ease,
+      translate 0.4s ease;
+  }
+  .yr-note.is-on {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @media (max-width: 560px) {
+    .yr {
+      padding: 0.7rem 0.7rem 0.8rem;
+    }
+    .yr-title {
+      font-size: 1.4rem;
+    }
+    .yr-stage {
+      --gh: 30px;
+      height: 180px;
+    }
+    .yr-yak,
+    .yr-shadow {
+      left: 4%;
+      width: 84px;
+    }
+    .yr-msg {
+      top: 0.5rem;
+      font-size: 0.95rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .yr {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { createSound, type Surface } from "../scripts/sound";
+
+  type Copy = {
+    start: string;
+    again: string;
+    paused: string;
+    best: string;
+    crashes: Record<string, string>;
+    stops: { name: string; alt: number }[];
+  };
+  type Kind = { kind: string; w: number; h: number; weight: number; from: number; biomes: string[]; tpl: HTMLTemplateElement };
+  type Ob = { el: HTMLElement; x: number; w: number; h: number; kind: string };
+
+  const root = document.querySelector<HTMLElement>("[data-yr]");
+  if (root && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    root.hidden = false;
+    const copy: Copy = JSON.parse(root.dataset.copy!);
+    const $ = <T extends Element = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const stage = $("[data-yr-stage]");
+    const yakBox = $("[data-yr-yak]");
+    const yak = yakBox.querySelector<SVGElement>(".yak")!;
+    const shadow = $<SVGEllipseElement>("[data-yr-shadow]");
+    const far = $("[data-yr-far]");
+    const near = $("[data-yr-near]");
+    const ground = $("[data-yr-ground]");
+    const obsLayer = $("[data-yr-obs]");
+    const altEl = $("[data-yr-alt]");
+    const bestEl = $("[data-yr-best]");
+    const noteEl = $("[data-yr-note]");
+    const msgEl = $("[data-yr-msg]");
+    const kinds: Kind[] = [...root.querySelectorAll<HTMLTemplateElement>("template[data-kind]")].map((tpl) => ({
+      kind: tpl.dataset.kind!,
+      w: Number(tpl.dataset.w),
+      h: Number(tpl.dataset.h),
+      weight: Number(tpl.dataset.weight),
+      from: Number(tpl.dataset.from ?? 0),
+      biomes: tpl.dataset.biomes!.split(" "),
+      tpl,
+    }));
+
+    // physics in stage units (the stage is 200 tall at s = 1)
+    const START = 2860; // Lukla
+    const GRAVITY = 2500;
+    const JUMP = 690;
+    const SPEED0 = 330;
+    const SPEED_MAX = 720;
+    const ACCEL = 7;
+    const PX_PER_M = 14;
+    const SIZE = 1.2; // obstacle scale on top of their drawn size
+
+    const sound = createSound();
+    let soundWanted = false;
+    let best = 0;
+    try {
+      soundWanted = localStorage.getItem("yak-sound") === "on";
+      best = Number(localStorage.getItem("yak-404-best")) || 0;
+    } catch {}
+
+    let state: "ready" | "run" | "paused" | "over" = "ready";
+    let s = 1;
+    let yakX = 0;
+    let yakW = 0;
+    let yakH = 0;
+    let stageW = 0;
+    let dist = 0;
+    let speed = SPEED0;
+    let y = 0;
+    let vy = 0;
+    let holding = false;
+    let obs: Ob[] = [];
+    let gap = 0;
+    let raf = 0;
+    let last = 0;
+    let overAt = 0;
+    let stopIdx = 0;
+    let shownAlt = -1;
+    let noteTimer = 0;
+
+    const fmt = (m: number) => `${Math.round(m).toLocaleString("en-US")} m`;
+    const alt = () => START + dist / s / PX_PER_M;
+    const showBest = () => {
+      bestEl.hidden = best <= START;
+      bestEl.textContent = `${copy.best} ${fmt(best)}`;
+    };
+    showBest();
+
+    const measure = () => {
+      s = stage.clientHeight / 200;
+      stageW = stage.clientWidth;
+      yakX = yakBox.offsetLeft;
+      yakW = yakBox.offsetWidth;
+      yakH = (yakW * 210) / 260;
+    };
+
+    const pick = () => {
+      const climbed = alt() - START;
+      const biome = stage.dataset.biome!;
+      const pool = kinds.filter((k) => climbed >= k.from && k.biomes.includes(biome));
+      let r = Math.random() * pool.reduce((n, k) => n + k.weight, 0);
+      return pool.find((k) => (r -= k.weight) < 0) ?? pool[0];
+    };
+    const spawn = () => {
+      const k = pick();
+      const el = document.createElement("span");
+      el.className = "yr-ob";
+      el.append(k.tpl.content.firstElementChild!.cloneNode(true));
+      const w = k.w * s * SIZE;
+      const h = k.h * s * SIZE;
+      el.style.width = `${w}px`;
+      el.style.height = `${h}px`;
+      const o: Ob = { el, x: stageW + 10, w, h, kind: k.kind };
+      el.style.transform = `translateX(${o.x}px)`;
+      obsLayer.append(el);
+      obs.push(o);
+      // enough room to land and take off again, more when slow, never a wall of them
+      const v = speed * s;
+      gap = w + yakW + v * 0.6 + Math.random() * v * 0.95;
+    };
+
+    const note = (text: string) => {
+      noteEl.textContent = text;
+      noteEl.classList.add("is-on");
+      clearTimeout(noteTimer);
+      noteTimer = window.setTimeout(() => noteEl.classList.remove("is-on"), 2600);
+    };
+
+    const render = () => {
+      const tilt = y > 0 ? Math.max(-10, Math.min(8, (-vy / (JUMP * s)) * 10)) : 0;
+      yakBox.style.transform = y > 0 ? `translateY(${-y}px) rotate(${tilt}deg)` : "";
+      // the shadow stays on the ground and shrinks while he's in the air
+      shadow.style.transform = y > 0 ? `scale(${Math.max(0.45, 1 - y / (yakH * 1.6))})` : "";
+      far.style.transform = `translateX(${-((dist * 0.08) % 800)}px)`;
+      near.style.transform = `translateX(${-((dist * 0.3) % 600)}px)`;
+      ground.style.backgroundPositionX = `${-dist}px`;
+      const a = alt();
+      const rounded = Math.floor(a / 10) * 10;
+      if (rounded !== shownAlt) {
+        shownAlt = rounded;
+        altEl.textContent = fmt(rounded);
+        const biome = a < 3900 ? "forest" : a < 4900 ? "rock" : "snow";
+        if (stage.dataset.biome !== biome) stage.dataset.biome = biome;
+      }
+    };
+
+    const crash = (o: Ob) => {
+      state = "over";
+      overAt = performance.now();
+      cancelAnimationFrame(raf);
+      y = 0;
+      vy = 0;
+      render();
+      yak.dataset.pose = "grumpy";
+      o.el.classList.add("is-hit");
+      sound.bleat();
+      const a = Math.floor(alt() / 10) * 10;
+      if (a > best) {
+        best = a;
+        try {
+          localStorage.setItem("yak-404-best", String(best));
+        } catch {}
+        showBest();
+      }
+      msgEl.textContent = `${copy.crashes[o.kind]}\n${copy.again}`;
+    };
+
+    const frame = (t: number) => {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      last = t;
+      speed = Math.min(SPEED_MAX, speed + ACCEL * dt);
+      const px = speed * s * dt;
+      dist += px;
+
+      // a tap is a hop, holding is a full jump
+      if (y > 0) {
+        vy -= GRAVITY * s * dt * (holding || vy < 0 ? 1 : 2.2);
+        y += vy * dt;
+        if (y <= 0) {
+          y = 0;
+          vy = 0;
+        }
+      }
+
+      gap -= px;
+      if (gap <= 0) spawn();
+      for (const o of obs) {
+        o.x -= px;
+        o.el.style.transform = `translateX(${o.x}px)`;
+      }
+      while (obs.length && obs[0].x + obs[0].w < -20) obs.shift()!.el.remove();
+
+      // forgiving boxes: Yakku's body without the flag pole, the obstacle without its edges
+      const left = yakX + yakW * 0.22;
+      const right = yakX + yakW * 0.9;
+      const feet = y + yakH * 0.07;
+      for (const o of obs) {
+        if (o.x + o.w * 0.15 < right && o.x + o.w * 0.85 > left && o.h * 0.82 > feet) return crash(o);
+      }
+
+      const a = alt();
+      const stop = copy.stops[stopIdx];
+      if (stop && a >= stop.alt) {
+        stopIdx++;
+        note(`${stop.name} · ${fmt(stop.alt)}`);
+        if (stopIdx === copy.stops.length) sound.chime();
+        else sound.bell();
+      }
+
+      render();
+      raf = requestAnimationFrame(frame);
+    };
+
+    const run = () => {
+      state = "run";
+      yak.dataset.pose = "run";
+      msgEl.textContent = "";
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => {
+      measure();
+      obs.forEach((o) => o.el.remove());
+      obs = [];
+      dist = 0;
+      speed = SPEED0;
+      y = 0;
+      vy = 0;
+      gap = stageW * 0.5;
+      stopIdx = 0;
+      shownAlt = -1;
+      noteEl.classList.remove("is-on");
+      if (soundWanted && !sound.on) sound.enable();
+      const r = stage.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ block: "center", behavior: "smooth" });
+      run();
+    };
+
+    const press = () => {
+      if (state === "ready") return start();
+      if (state === "paused") return run();
+      if (state === "over") {
+        if (performance.now() - overAt > 450) start();
+        return;
+      }
+      holding = true;
+      if (y === 0) {
+        vy = JUMP * s;
+        y = 0.01;
+        const surface: Surface = stage.dataset.biome === "forest" ? "grass" : stage.dataset.biome === "rock" ? "rock" : "snow";
+        sound.step(surface, 0);
+      }
+    };
+    const release = () => {
+      holding = false;
+    };
+
+    const jumpKey = (e: KeyboardEvent) => e.key === " " || e.key === "ArrowUp" || (e.key === "Enter" && e.target === stage);
+    addEventListener("keydown", (e) => {
+      if (!jumpKey(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+      // links and buttons keep their own keys; the game listens on the stage and the page itself
+      if (e.target !== stage && e.target !== document.body) return;
+      e.preventDefault();
+      if (!e.repeat) press();
+    });
+    addEventListener("keyup", (e) => {
+      if (jumpKey(e)) release();
+    });
+    stage.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      press();
+    });
+    addEventListener("pointerup", release);
+    addEventListener("pointercancel", release);
+    addEventListener("resize", () => state !== "ready" && measure());
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden || state !== "run") return;
+      cancelAnimationFrame(raf);
+      state = "paused";
+      holding = false;
+      yak.dataset.pose = "idle";
+      msgEl.textContent = copy.paused;
+    });
+  }
+</script>

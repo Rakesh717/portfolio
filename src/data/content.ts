@@ -127,6 +127,41 @@ export const contact = {
   linkedinHref: "https://www.linkedin.com/in/rakesh717",
 };
 
+/** the 404 page, for any path that isn't on the trail, and the little runner game on it */
+export const lost = {
+  hand: "Yakku wandered off the path",
+  heading: "This trail doesn't go anywhere.",
+  subcopy: "The page you were looking for isn't here. It may have moved, or the link had a typo. Either way, Yakku is happy to walk you back.",
+  home: "Back to the trailhead",
+  notes: "Read the field notes",
+  game: {
+    title: "Yakku's trail run",
+    label: "Yakku's trail run. Press Space or tap to jump.",
+    start: "Press Space or tap to start running",
+    again: "Space or tap to go again.",
+    paused: "Paused. Space or tap to keep going.",
+    best: "best",
+    crashes: {
+      cairn: "Down went a cairn. Someone spent all morning on that.",
+      mani: "Mani walls stay on your right, Yakku. Not underneath you.",
+      chorten: "Yakku tried to go through a chorten. Clockwise, around it.",
+      dog: "Yakku tripped over a sleeping trail dog. It didn't wake up.",
+      wheel: "Prayer wheels turn clockwise. Not when you run into them.",
+      bush: "Yakku ran into a rhododendron, Nepal's national flower. He's wearing some of it now.",
+    },
+    stops: [
+      { name: "Namche Bazaar", alt: 3440 },
+      { name: "Tengboche", alt: 3867 },
+      { name: "Dingboche", alt: 4410 },
+      { name: "Lobuche", alt: 4940 },
+      { name: "Gorak Shep", alt: 5164 },
+      { name: "Everest Base Camp", alt: 5364 },
+      { name: "Kala Patthar", alt: 5645 },
+      { name: "Everest summit!", alt: 8849 },
+    ],
+  },
+};
+
 /* --------------------------------------------------------------- */
 /* The trek — every stop on the trail, left to right                */
 /* --------------------------------------------------------------- */

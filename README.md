@@ -36,6 +36,11 @@ npm run build      # static build in dist/
 - `src/components/Yak.astro` — the side-view mascot rig. Poses are driven
   by `data-pose` in `src/styles/global.css`: idle, walk, run, wave, sit,
   read, graze, celebrate, sleep.
+- `src/components/YakRun.astro` — Yakku's trail run, the small endless
+  runner on the 404 page: jump cairns, mani stones, chortens, prayer
+  wheels, rhododendrons and sleeping trail dogs from Lukla upward; altitude is
+  the score and trek stops are milestones. Obstacles are `<template>`s with a
+  `data-biomes` list, so the snowy stretch only has stone ones. Hidden without JavaScript and under reduced motion.
 - `src/scripts/trek.ts` — the engine. Maps vertical scroll to a horizontal
   camera, puts stops on plateaus at their altitude, generates the ground and
   forest from a seeded RNG, runs weather (leaves, petals, snow, gusts that
@@ -101,6 +106,14 @@ Shared scroll and altitude maths is in `src/scripts/climb.ts`; read time is in
 - `src/layouts/Base.astro` writes the meta tags (Open Graph, X, robots,
   article dates) and any JSON-LD a page passes in.
 - The sitemap filter is in `astro.config.mjs`.
+- `src/pages/404.astro` builds `dist/404.html`, which Cloudflare Pages serves
+  with a real 404 status for unknown paths. Without that file Pages treats the
+  site as a single-page app and answers every path with the home page and a
+  200. It passes `noindex` to `Base.astro`, which also drops its canonical link.
+- `src/pages/404.astro` builds `dist/404.html`, which Cloudflare Pages serves
+  with a real 404 status for unknown paths. Without that file Pages treats the
+  site as a single-page app and answers every path with the home page and a
+  200. It passes `noindex` to `Base.astro`, which also drops its canonical link.
 
 ## Accessibility and fallbacks
 

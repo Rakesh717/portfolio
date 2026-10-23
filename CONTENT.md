@@ -102,3 +102,25 @@ Full text lives in `src/content/blog/`. Posts republished from Medium keep their
 - Heading: Let's build something thoughtful.
 - Subcopy: The fastest way to reach me is email. I read everything myself.
 - Buttons: Email me · Connect on LinkedIn
+
+## Not found (404)
+
+- Hand note: 404 · Yakku wandered off the path
+- Heading: This trail doesn't go anywhere.
+- Subcopy: The page you were looking for isn't here. It may have moved, or the link had a typo. Either way, Yakku is happy to walk you back.
+- Buttons: Back to the trailhead · Read the field notes
+
+### Trail run (the game on the 404 page)
+
+- Title: Yakku's trail run
+- Start: Press Space or tap to start running
+- Again: Space or tap to go again.
+- Paused: Paused. Space or tap to keep going.
+- Starts at Lukla, 2,860 m. Milestones: Namche Bazaar 3,440 m · Tengboche 3,867 m · Dingboche 4,410 m · Lobuche 4,940 m · Gorak Shep 5,164 m · Everest Base Camp 5,364 m · Kala Patthar 5,645 m · Everest summit! 8,849 m
+- Crash lines:
+  - Cairn: Down went a cairn. Someone spent all morning on that.
+  - Mani stone: Mani walls stay on your right, Yakku. Not underneath you.
+  - Chorten: Yakku tried to go through a chorten. Clockwise, around it.
+  - Trail dog: Yakku tripped over a sleeping trail dog. It didn't wake up.
+  - Prayer wheel: Prayer wheels turn clockwise. Not when you run into them.
+  - Rhododendron: Yakku ran into a rhododendron, Nepal's national flower. He's wearing some of it now.

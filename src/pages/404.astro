@@ -1,0 +1,63 @@
+---
+// Cloudflare Pages serves dist/404.html with a 404 status for any unmatched path.
+// Without it, Pages falls back to index.html with a 200, as if this were an SPA.
+import Base from "../layouts/Base.astro";
+import JournalTop from "../components/JournalTop.astro";
+import YakRun from "../components/YakRun.astro";
+import { lost, site } from "../data/content";
+---
+
+<Base title={`Off the trail — ${site.name}`} description={lost.subcopy} noindex>
+  <main class="journal">
+    <JournalTop back={{ href: "/", label: "back on the trail" }} />
+
+    <div class="lost">
+      <p class="hand">404 · {lost.hand}</p>
+      <h1>{lost.heading}</h1>
+      <p class="lost-sub">{lost.subcopy}</p>
+      <div class="lost-actions">
+        <a class="ink-btn ink-btn-primary" href="/">{lost.home}</a>
+        <a class="ink-btn" href="/blog">{lost.notes}</a>
+      </div>
+      <YakRun />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .lost {
+    max-width: 44rem;
+    margin: 2.5rem auto 0;
+    text-align: center;
+  }
+  .lost h1 {
+    margin-top: 0.4rem;
+    font-size: clamp(2.3rem, 6vw, 3.6rem);
+    line-height: 1;
+    text-wrap: balance;
+  }
+  .lost-sub {
+    max-width: 32rem;
+    margin: 1rem auto 0;
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+    text-wrap: pretty;
+  }
+  .lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-top: 1.6rem;
+  }
+  .lost :global(.yr) {
+    margin-top: 2.6rem;
+    text-align: left;
+  }
+  @media (max-width: 560px) {
+    .lost {
+      margin-top: 1.8rem;
+    }
+  }
+</style>
