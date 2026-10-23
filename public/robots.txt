@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rakeshthapa.pages.dev/sitemap-index.xml
+Sitemap: https://rakeshthapa.is-a.dev/sitemap-index.xml

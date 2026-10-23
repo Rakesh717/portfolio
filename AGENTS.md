@@ -10,9 +10,9 @@ together. This file is the extra context for making changes.
 - `npm run dev` (Astro, default port 4321; any free port is fine) and `npm run build`.
 - There is no test suite or linter. A passing `npm run build` is the bar, plus a
   visual check (below).
-- Live site: https://rakeshthapa.pages.dev (static `dist/`, Cloudflare Pages). The
-  URL is set as `site` in `astro.config.mjs`; canonical links, Open Graph URLs
-  and the sitemap all depend on it.
+- Live site: https://rakeshthapa.is-a.dev (static `dist/`, Cloudflare Pages, custom
+  domain via is-a.dev). The URL is set as `site` in `astro.config.mjs`; canonical
+  links, Open Graph URLs and the sitemap all depend on it.
 
 ## Commits
 

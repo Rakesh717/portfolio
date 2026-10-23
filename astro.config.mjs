@@ -12,7 +12,7 @@ const republished = readdirSync("src/content/blog")
   .map((f) => f.replace(/\.mdx?$/, ""));
 
 export default defineConfig({
-  site: "https://rakeshthapa.pages.dev",
+  site: "https://rakeshthapa.is-a.dev",
   integrations: [mdx(), sitemap({
       filter: (page) => !republished.some((slug) => new RegExp(`/blog/${slug}/?$`).test(page)),
     })],
