@@ -1,9 +1,8 @@
 ---
 import Stop from "./Stop.astro";
-import { links, site } from "../../data/content";
+import { links } from "../../data/content";
 
 const ink = "#40302A";
-const year = new Date().getFullYear();
 ---
 
 <Stop id="night" label="Night camp — footer" class="s-night">
@@ -41,6 +40,5 @@ const year = new Date().getFullYear();
       }
     </ul>
     <button class="ink-btn ink-btn-sm" data-go="basecamp">↩ Walk back down to basecamp</button>
-    <p class="night-fine">© {year} {site.name}</p>
   </footer>
 </Stop>

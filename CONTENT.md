@@ -70,8 +70,8 @@ Started my career building backend APIs and back office tools for enterprise cli
 
 ## Links
 
-- GitHub: https://github.com/rakesh717
 - LinkedIn: https://www.linkedin.com/in/rakesh717
+- GitHub: https://github.com/rakesh717
 - X: https://x.com/rakeshthapa717
 - Email: rakeshthapac@proton.me
 

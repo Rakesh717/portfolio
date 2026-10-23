@@ -239,6 +239,9 @@ type Particle = {
   color: string;
   life: number;
   depth: number;
+  /** flutter: phase and rate of the side-to-side sway */
+  ph: number;
+  sw: number;
 };
 
 const PALETTE: Record<Biome, { grass: string; body: string; line: string }> = {
@@ -781,10 +784,15 @@ function boot() {
       color: "#FFFFFF",
       life: 1,
       depth: 0.5 + Math.random() * 0.7,
+      ph: Math.random() * 6.28,
+      sw: 0.7 + Math.random() * 0.9,
     };
     if (kind === "snow") {
-      p.r = 1.6 + Math.random() * 2.8;
-      p.vy = 30 + Math.random() * 40;
+      // most flakes are far off: small, slow and faint; the few near ones are big, quick and inked
+      p.depth = 0.3 + Math.random() ** 1.5 * 1.05;
+      p.r = 0.8 + p.depth * 2.6 + Math.random() * 0.6;
+      p.vy = 26 + p.depth * 34 + Math.random() * 10;
+      p.vr = 0;
     } else if (kind === "leaf" || kind === "petal") {
       p.r = 4 + Math.random() * 3;
       p.vy = 24 + Math.random() * 26;
@@ -826,10 +834,22 @@ function boot() {
       biome === "snow" ? 70 + level * 90 : biome === "rock" ? 22 : biome === "meadow" ? 14 : 10;
     const target = Math.round((density * VW) / 1440);
     const ambient = parts.filter((p) => p.kind !== "confetti" && p.kind !== "puff").length;
-    if (ambient < target && Math.random() < 0.6) {
-      const kind = biome === "snow" || biome === "rock" ? "snow" : biome === "meadow" ? (Math.random() < 0.6 ? "petal" : "leaf") : Math.random() < 0.25 ? "petal" : "leaf";
-      const fromSide = Math.random() < 0.3;
-      spawn(kind, fromSide ? -10 : Math.random() * VW * 1.1, fromSide ? Math.random() * VH * 0.6 : -10);
+    const deficit = target - ambient;
+    if (deficit > 0 && Math.random() < 0.6) {
+      // the sky fills from wherever the air is coming from: upwind, or ahead of the yak when he walks
+      const drift = wind * 0.8 - camVel * 0.5;
+      const fromSide = Math.random() < Math.min(0.75, 0.15 + Math.abs(drift) / 260);
+      // far short (a deep link, a teleport): fill the whole view at once, fading in
+      const scatter = deficit > target * 0.5;
+      for (let n = Math.min(scatter ? 6 : 2, deficit); n > 0; n--) {
+        const kind = biome === "snow" || biome === "rock" ? "snow" : biome === "meadow" ? (Math.random() < 0.6 ? "petal" : "leaf") : Math.random() < 0.25 ? "petal" : "leaf";
+        if (scatter) spawn(kind, Math.random() * VW, Math.random() * VH * 0.9);
+        else if (fromSide) spawn(kind, drift >= 0 ? -10 : VW + 10, Math.random() * VH * 0.7);
+        else spawn(kind, (Math.random() * 1.3 - 0.15) * VW, -10);
+        const p = parts[parts.length - 1];
+        p.life = 0.01;
+        p.vx = wind * p.depth;
+      }
     }
 
     if (moving && Math.random() < 0.35) {
@@ -850,7 +870,10 @@ function boot() {
         p.life -= dt * 1.6;
         p.r += dt * 10;
       } else {
-        p.vx = wind * p.depth + Math.sin(now / 700 + p.rot) * 14;
+        // ease into the wind rather than snapping to it, so a gust sweeps through and lets go
+        const sway = Math.sin((now / 1000) * p.sw * 1.6 + p.ph) * (p.kind === "snow" ? 6 + p.depth * 12 : 14);
+        p.vx += (wind * p.depth + sway - p.vx) * (1 - Math.exp(-(p.kind === "snow" ? 2.2 : 4) * dt));
+        p.life = Math.min(1, p.life + dt * 1.5);
       }
       p.x += (p.vx - camVel * p.depth * 0.6) * dt;
       p.y += p.vy * dt * (p.kind === "snow" ? p.depth : 1);
@@ -865,11 +888,20 @@ function boot() {
       ctx.fillStyle = p.color;
       ctx.strokeStyle = "rgba(64,48,42,0.35)";
       ctx.lineWidth = 1.2;
-      if (p.kind === "snow" || p.kind === "puff") {
+      if (p.kind === "snow") {
+        // distance reads as haze: far flakes fade back, only the near ones get an ink outline
+        ctx.globalAlpha *= Math.min(1, 0.5 + p.depth * 0.5);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, 6.283);
         ctx.fill();
-        if (p.kind === "snow") ctx.stroke();
+        if (p.depth > 0.75) {
+          ctx.globalAlpha *= Math.min(1, (p.depth - 0.75) * 3);
+          ctx.stroke();
+        }
+      } else if (p.kind === "puff") {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.283);
+        ctx.fill();
       } else {
         ctx.save();
         ctx.translate(p.x, p.y);

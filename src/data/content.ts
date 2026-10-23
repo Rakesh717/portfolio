@@ -14,8 +14,8 @@ export const site = {
 } as const;
 
 export const links = [
-  { label: "GitHub", href: "https://github.com/rakesh717", icon: "github" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/rakesh717", icon: "linkedin" },
+  { label: "GitHub", href: "https://github.com/rakesh717", icon: "github" },
   { label: "X", href: "https://x.com/rakeshthapa717", icon: "x" },
   { label: "Email", href: "mailto:rakeshthapac@proton.me", icon: "mail" },
 ] as const;

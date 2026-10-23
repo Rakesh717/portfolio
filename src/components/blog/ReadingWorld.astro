@@ -225,38 +225,51 @@ const clouds = [
     );
     paint();
 
-    type P = { x: number; y: number; r: number; vx: number; vy: number; ph: number };
-    const flakes: P[] = Array.from({ length: reduced ? 0 : innerWidth < 640 ? 28 : 60 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: 1.5 + Math.random() * 2.8,
-      vx: 0,
-      vy: 0.25 + Math.random() * 0.6,
-      ph: Math.random() * 6.28,
-    }));
+    // depth ties size, speed and opacity together: most flakes are far off, small and faint
+    type P = { x: number; y: number; r: number; d: number; vy: number; ph: number; sw: number };
+    const flakes: P[] = Array.from({ length: reduced ? 0 : innerWidth < 640 ? 28 : 60 }, () => {
+      const d = 0.3 + Math.random() ** 1.5 * 0.9;
+      return {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        d,
+        r: 0.8 + d * 2.8 + Math.random() * 0.5,
+        vy: 14 + d * 30 + Math.random() * 6,
+        ph: Math.random() * 6.28,
+        sw: 0.6 + Math.random() * 0.8,
+      };
+    });
+    flakes.sort((a, b) => a.d - b.d);
     if (!reduced) {
-      let t = 0;
-      const loop = () => {
+      let t = 0,
+        last = performance.now();
+      const loop = (now: number) => {
         requestAnimationFrame(loop);
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
         if (document.hidden) return;
-        t += 0.016;
+        t += dt;
         vel += (scrollY - lastY - vel) * 0.15;
         lastY = scrollY;
+        // a slow breeze that leans the whole fall one way, then eases off
+        const breeze = 6 + Math.sin(t / 7) * 10;
         ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "rgba(255,253,246,.9)";
+        ctx.fillStyle = "#FFFDF6";
         for (const f of flakes) {
-          f.y += f.vy - vel * 0.12;
-          f.x += Math.sin(t + f.ph) * 0.35;
-          if (f.y > H + 6) f.y = -6;
-          if (f.y < -6) f.y = H + 6;
+          // scrolling climbs through the snow, nearer flakes rush past faster
+          f.y += f.vy * dt - vel * 0.14 * f.d;
+          f.x += (breeze * f.d + Math.sin(t * f.sw * 1.6 + f.ph) * (5 + f.d * 10)) * dt;
+          if (f.y > H + 6) (f.y = -6), (f.x = Math.random() * W);
+          if (f.y < -6) (f.y = H + 6), (f.x = Math.random() * W);
           if (f.x > W + 6) f.x = -6;
           if (f.x < -6) f.x = W + 6;
+          ctx.globalAlpha = Math.min(0.95, 0.4 + f.d * 0.5);
           ctx.beginPath();
           ctx.arc(f.x, f.y, f.r, 0, 6.283);
           ctx.fill();
         }
       };
-      loop();
+      requestAnimationFrame(loop);
     }
   }
 </script>
