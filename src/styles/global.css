@@ -2226,7 +2226,10 @@ mark.mk-teal {
   width: 14px;
   background: var(--color-wood-dark);
   border: 2.5px solid var(--ink);
-  border-radius: 4px 4px 0 0;
+  border-radius: 5px 6px 0 0;
+  box-shadow:
+    inset 3px 0 0 rgb(255 253 246 / 0.16),
+    inset -3px 0 0 rgb(64 48 42 / 0.18);
 }
 .clothes::before {
   left: 0;
@@ -2294,14 +2297,16 @@ mark.mk-teal {
 .peg {
   position: absolute;
   z-index: 2;
-  top: -16px;
+  top: -18px;
   left: 50%;
-  width: 12px;
-  height: 32px;
-  margin-left: -6px;
-  background: #e2b07c;
-  border: 2.5px solid var(--ink);
-  border-radius: 3px;
+  width: 16px;
+  height: 38px;
+  margin-left: -8px;
+}
+.peg svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .postcard {
   position: relative;

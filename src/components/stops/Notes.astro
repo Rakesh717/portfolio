@@ -26,11 +26,20 @@ const ink = "#40302A";
       {
         posts.map((post, i) => (
           <li class="postcard-wrap" style={`--r:${tilts[i]}deg;--i:${i}`}>
-            <span class="peg" aria-hidden="true" />
+            <span class="peg" aria-hidden="true">
+              <svg viewBox="0 0 16 38">
+                <rect x="2" y="1.5" width="12" height="35" rx="3.5" fill="#E2B07C" stroke={ink} stroke-width="2.5" />
+                <path d="M8 19 V36" stroke={ink} stroke-width="2" stroke-linecap="round" />
+                <path d="M5 5 V10" stroke="#FFFDF6" stroke-opacity=".6" stroke-width="2" stroke-linecap="round" />
+                <rect x="0.5" y="12.5" width="15" height="5" rx="2" fill="#A79C90" stroke={ink} stroke-width="2" />
+              </svg>
+            </span>
             <a class="postcard paper" href={`/blog/${post.id}`}>
               <span class="postcard-stamp" style={`--c:${stampColors[i % 3]}`} aria-hidden="true">
                 <svg viewBox="0 0 40 30" width="34" height="26">
+                  <circle cx="31" cy="7" r="3.5" fill="#FFFDF6" stroke={ink} stroke-width="1.8" />
                   <path d="M2 28 L 14 10 L 21 19 L 27 12 L 38 28 Z" fill="#FFFDF6" stroke={ink} stroke-width="2" stroke-linejoin="round" />
+                  <path d="M9.6 16.6 L 12 18 L 14.2 16.2 L 16.4 18 L 18.4 15.6" fill="none" stroke={ink} stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </span>
               <span class="postmark" aria-hidden="true">{df.format(post.data.pubDate)}</span>
