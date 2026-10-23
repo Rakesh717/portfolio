@@ -16,10 +16,24 @@ const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
           <path class="flame f2" d="M76 112 C 56 110 54 88 66 74 C 68 84 74 86 76 76 C 78 64 86 56 88 46 C 98 62 104 78 100 92 C 96 106 88 112 76 112 Z" fill="#FFC53D" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>
           <path class="flame f3" d="M77 112 C 68 110 66 100 72 92 C 74 98 78 98 79 92 C 81 98 86 102 85 106 C 84 110 81 112 77 112 Z" fill="#FFFDF6"></path>
         </g>
-        <rect x="14" y="104" width="122" height="16" rx="8" transform="rotate(-10 75 112)" fill="#7C4F2E" stroke={ink} stroke-width="3"></rect>
-        <rect x="14" y="104" width="122" height="16" rx="8" transform="rotate(10 75 112)" fill="#8A5A3B" stroke={ink} stroke-width="3"></rect>
-        <circle cx="18" cy="122" r="6" fill="#A79C90" stroke={ink} stroke-width="2.5"></circle>
-        <circle cx="132" cy="122" r="6" fill="#A79C90" stroke={ink} stroke-width="2.5"></circle>
+        {
+          ["rotate(-10 75 112) translate(150 0) scale(-1 1)", "rotate(10 75 112)"].map((t) => (
+            <g transform={t}>
+              <path d="M22 104 L130 104 L130 120 L22 120 C17 120 14 116.5 14 112 C14 107.5 17 104 22 104 Z" fill="#8A5A3B"></path>
+              <path d="M16 116.5 Q70 119.5 130 117.5 L130 120 L22 120 C19 120 17 118.5 16 116.5 Z" fill="#6F4529"></path>
+              <path d="M26 107.5 Q70 106.5 118 107.5" fill="none" stroke="#A8744C" stroke-width="2.5" stroke-linecap="round"></path>
+              <g fill="none" stroke={ink} stroke-opacity=".35" stroke-width="1.6" stroke-linecap="round">
+                <path d="M34 111.5 q9 -1 18 0"></path>
+                <path d="M70 113 q8 1 16 0"></path>
+                <path d="M100 111 h11"></path>
+              </g>
+              <path d="M22 104 L130 104 L130 120 L22 120 C17 120 14 116.5 14 112 C14 107.5 17 104 22 104 Z" fill="none" stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
+              <ellipse cx="130" cy="112" rx="5.5" ry="8" fill="#7C4F2E" stroke={ink} stroke-width="2.5"></ellipse>
+              <ellipse cx="130.3" cy="112" rx="3.6" ry="5.8" fill="#E0A970"></ellipse>
+              <ellipse cx="130.3" cy="112" rx="1.8" ry="3" fill="none" stroke="#9A6A42" stroke-width="1.2"></ellipse>
+            </g>
+          ))
+        }
       </svg>
     </div>
     <div class="plant log-seat" style="--x:42%;--xm:-20%;--w:min(9vw,130px);--wm:90px">
