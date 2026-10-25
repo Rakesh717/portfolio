@@ -2685,8 +2685,18 @@ mark.mk-teal {
     justify-content: flex-start;
     gap: 1.6rem;
   }
+  /* the line hangs between two poles here, as on desktop */
+  .clothes::before {
+    display: block;
+  }
+  .rope {
+    left: 7px;
+    width: calc(100% - 14px);
+  }
+  /* two postcards fit across the screen when Yakku arrives, the third comes
+     into view as he walks on */
   .postcard-wrap {
-    flex: 0 0 min(24rem, 78vw);
+    flex: 0 0 min(24rem, calc((100vw - 4rem - 1.6rem) / 2));
   }
   .postcard-wrap:nth-child(2) {
     margin-top: 24px;
