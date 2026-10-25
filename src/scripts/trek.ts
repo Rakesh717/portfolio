@@ -684,7 +684,7 @@ function boot() {
     const close = () => {
       const a = seg[0];
       const b = seg[seg.length - 1];
-      const n = Math.max(2, Math.round((b[0] - a[0]) / 14));
+      const n = Math.max(3, Math.round((b[0] - a[0]) / 26));
       for (let k = 1; k < n; k++) seg.push([lerp(b[0], a[0], k / n), line + (k % 2 ? jag : -jag * 0.7)]);
       caps.push(seg.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ") + " Z");
       seg = [];
@@ -712,7 +712,7 @@ function boot() {
       const d = P.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ") + " Z";
       return (
         `<path d="${d}" fill="#D3DEEC" stroke-width="2.2" ${ink}/>` +
-        `<path d="${snowCaps(P, base - snow * h, Math.max(5, h * 0.018))}" fill="#FFFFFF" stroke-width="2" ${ink}/>`
+        `<path d="${snowCaps(P, base - snow * h, Math.max(8, h * 0.035))}" fill="#FFFFFF" stroke-width="2" ${ink}/>`
       );
     };
     let out = "";
@@ -2023,7 +2023,11 @@ function boot() {
     if (near0 < 1) mist.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0)`;
     clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
     mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
-    near.style.transform = `translate3d(${-cam * 0.6}px, 0px, 0)`;
+    // the near tree line sits at Yakku's level; where the trail ahead drops
+    // below him (down from the summit) it drops too, so nothing floats
+    let drop = 0;
+    for (let f = 0.35; f <= 1; f += 0.325) drop = Math.max(drop, e - elev(cam + VW * f));
+    near.style.transform = `translate3d(${-cam * 0.6}px, ${drop.toFixed(1)}px, 0)`;
     front.style.transform = `translate3d(${-cam * 1.4}px, 0px, 0)`;
     const layerFade = String(1 - reveal);
     mid.style.opacity = layerFade;
