@@ -25,9 +25,7 @@
   --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ------------------------------------------------------------------ */
-/* Base                                                               */
-/* ------------------------------------------------------------------ */
+/* Base */
 
 body {
   background: var(--color-paper);
@@ -82,9 +80,7 @@ h3 {
   white-space: nowrap;
 }
 
-/* ------------------------------------------------------------------ */
-/* Tactile primitives: paper, wood, stamps, ink buttons               */
-/* ------------------------------------------------------------------ */
+/* Tactile primitives: paper, stamps, ink buttons */
 
 .paper {
   background: var(--color-cream);
@@ -125,13 +121,6 @@ h3 {
   rotate: -3deg;
 }
 
-.wood {
-  background-color: var(--color-wood);
-  background-image:
-    repeating-linear-gradient(90deg, transparent 0 22px, rgb(64 48 42 / 0.08) 22px 24px, transparent 24px 61px),
-    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 60%);
-}
-
 .ink-btn {
   display: inline-flex;
   align-items: center;
@@ -170,9 +159,7 @@ h3 {
   font-size: 0.95rem;
 }
 
-/* ------------------------------------------------------------------ */
-/* Yakku rig                                                          */
-/* ------------------------------------------------------------------ */
+/* Yakku rig */
 
 .yak {
   display: block;
@@ -714,9 +701,7 @@ h3 {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Trek mode — the side-scrolling world                               */
-/* ------------------------------------------------------------------ */
+/* Trek mode: the side-scrolling world */
 
 .trek-on .trek {
   position: fixed;
@@ -801,10 +786,6 @@ h3 {
   height: 1px;
   overflow: visible;
   fill: rgb(96 122 150 / 0.75);
-  pointer-events: none;
-}
-
-.trek-on .layer-front {
   pointer-events: none;
 }
 
@@ -1085,7 +1066,7 @@ h3 {
   bottom: calc(var(--vh) - var(--ground));
   display: flex;
   flex-direction: column;
-  /* if content ever outgrows the space, spill up into the sky — never down past the ground */
+  /* if content ever outgrows the space, spill up into the sky, never down past the ground */
   justify-content: flex-end;
 }
 .trek-on .content > * {
@@ -1215,9 +1196,7 @@ h3 {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* HUD                                                                */
-/* ------------------------------------------------------------------ */
+/* HUD */
 
 .hud {
   display: none;
@@ -1442,7 +1421,7 @@ h3 {
 .hud-tour[data-state="playing"] {
   background: #c8ecdf;
 }
-/* nudge it until it's been tried, but only at the start of the trail */
+/* nudge the tour button while the tour is idle */
 .hud-tour[data-state="idle"] svg {
   animation: tourNudge 1.6s ease-in-out infinite;
 }
@@ -1481,9 +1460,7 @@ h3 {
     center/contain no-repeat;
 }
 
-/* ------------------------------------------------------------------ */
-/* Scenery pieces                                                     */
-/* ------------------------------------------------------------------ */
+/* Scenery pieces */
 
 /* sized from Yakku, like the other props, so the sign keeps its scale next
    to him on every screen (0.82rem beside a 187px yak at 1440 wide) */
@@ -1702,9 +1679,7 @@ h3 {
   left: 75%;
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: Basecamp                                                     */
-/* ------------------------------------------------------------------ */
+/* Stop: Basecamp */
 
 .base {
   --name-fs: clamp(3.6rem, min(max(11.5vw, calc(7vw + 64px)), 20vh), 14.5rem);
@@ -1779,9 +1754,7 @@ mark.mk-teal {
   color: var(--ink);
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: Trailhead notice board                                       */
-/* ------------------------------------------------------------------ */
+/* Stop: Trailhead notice board */
 
 .board {
   --legs: clamp(48px, 8vh, 80px);
@@ -1959,9 +1932,7 @@ mark.mk-teal {
   rotate: -8deg;
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: camps (experience)                                           */
-/* ------------------------------------------------------------------ */
+/* Stop: camps (experience) */
 
 .logbook {
   --legs: clamp(44px, 7vh, 70px);
@@ -2066,9 +2037,7 @@ mark.mk-teal {
   rotate: -4deg;
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: fireside (testimonials)                                      */
-/* ------------------------------------------------------------------ */
+/* Stop: fireside (testimonials) */
 
 .register {
   width: min(100%, 38rem);
@@ -2163,9 +2132,7 @@ mark.mk-teal {
   background: var(--color-butter);
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: field notes (clothesline)                                    */
-/* ------------------------------------------------------------------ */
+/* Stop: field notes (clothesline) */
 
 .clothes {
   --rope: clamp(84px, 15vh, 130px);
@@ -2376,9 +2343,7 @@ mark.mk-teal {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: summit                                                       */
-/* ------------------------------------------------------------------ */
+/* Stop: summit */
 
 .summit {
   position: relative;
@@ -2422,9 +2387,7 @@ mark.mk-teal {
   font-size: 1.7rem;
 }
 
-/* ------------------------------------------------------------------ */
-/* Stop: night camp (footer)                                          */
-/* ------------------------------------------------------------------ */
+/* Stop: night camp (footer) */
 
 .night {
   max-width: 32rem;
@@ -2459,9 +2422,7 @@ mark.mk-teal {
   color: #ffd166;
 }
 
-/* ------------------------------------------------------------------ */
-/* Trek mode on phones                                                */
-/* ------------------------------------------------------------------ */
+/* Trek mode on phones */
 
 @media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
   :root {
@@ -2657,7 +2618,7 @@ mark.mk-teal {
   }
 }
 
-/* portrait tablets: the phone strip is too wide for a tablet — keep the
+/* portrait tablets: the phone strip is too wide for a tablet, so keep the
    compact engine but lay the notice board out like desktop, as one board
    standing on its plateau instead of a three-screen wall */
 @media (orientation: portrait) and (min-width: 768px) and (max-width: 1023px) {
@@ -2694,9 +2655,7 @@ mark.mk-teal {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Static fallback — no JS or reduced motion: a calm vertical page    */
-/* ------------------------------------------------------------------ */
+/* Static fallback (no JS or reduced motion): a calm vertical page */
 
 html:not(.trek-on) .trek {
   background: linear-gradient(180deg, #cfe9f2 0, #fff3de 520px);
@@ -2791,9 +2750,7 @@ html:not(.trek-on) .deck {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Large screens: let the trek breathe and the type grow               */
-/* ------------------------------------------------------------------ */
+/* Large screens: let the trek breathe and the type grow */
 
 @media (min-width: 1536px) {
   :root {
@@ -2857,9 +2814,7 @@ html:not(.trek-on) .deck {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Journal pages (blog)                                               */
-/* ------------------------------------------------------------------ */
+/* Journal pages (blog) */
 
 .journal {
   min-height: 100vh;

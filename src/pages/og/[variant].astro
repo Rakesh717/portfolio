@@ -24,12 +24,12 @@ const title = post?.data.title ?? "";
 const titleSize = title.length <= 28 ? 76 : title.length <= 48 ? 62 : 54;
 const df = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const ink = "#40302A";
-// prayer flags hung exactly on a quadratic string from (40,18) to (600,26), sagging to y≈62
 const snow = Array.from({ length: 34 }, (_, i) => ({
   x: (i * 337 + 91) % 1180 + 10,
   y: (i * 191 + 47) % 560 + 8,
   r: 2 + ((i * 7) % 4) * 0.8,
 }));
+// prayer flags hung on the card's string: M40 18 Q 320 104 600 26
 const flagColors = ["#4C8FE8", "#FFFDF6", "#E85D2F", "#2A9D8F", "#FFD166"];
 const flags = Array.from({ length: 9 }, (_, i) => {
   const t = (i + 0.7) / 9.4;
@@ -132,7 +132,6 @@ const flags = Array.from({ length: 9 }, (_, i) => {
     --ink: #40302a;
     --soft: #6f5c50;
     --cream: #fffdf6;
-    --paper: #fff3de;
     --rust: #e85d2f;
     --teal: #1e756b;
   }

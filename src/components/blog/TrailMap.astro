@@ -120,6 +120,8 @@ import Yak from "../Yak.astro";
 </style>
 
 <script>
+  import { READING_LINE } from "../../scripts/climb";
+
   const nav = document.querySelector<HTMLElement>("[data-tmap]");
   const article = document.querySelector<HTMLElement>("article");
   const heads = [...document.querySelectorAll<HTMLElement>(".prose-trail h2[id]")];
@@ -183,7 +185,7 @@ import Yak from "../Yak.astro";
     let idle: number | undefined;
     function update() {
       queued = false;
-      const line = scrollY + innerHeight * 0.35;
+      const line = scrollY + innerHeight * READING_LINE;
       const y = markerY(line);
       fill.style.height = `${y}px`;
       yakBox.style.transform = `translateY(${y}px)`;

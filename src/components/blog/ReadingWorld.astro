@@ -1,8 +1,6 @@
 ---
-// The world behind a post: a sky that moves from morning toward sunset as you read,
-// parallax Himalaya that sink as you climb, a sun that sets behind them, clouds you climb
-// up through, and drifting snow.
-// Everything sits behind the paper, so the text never changes.
+// The world behind a post: a sky warming toward sunset, parallax peaks that sink,
+// a setting sun, clouds you climb through and drifting snow. All behind the paper.
 interface Props {
   /** hold the world at one point of the climb instead of following the scroll (0..1) */
   still?: number;
@@ -151,7 +149,7 @@ const clouds = [
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // morning -> midday -> late afternoon -> sunset, light enough that ink text always reads
-    const STOPS: [number, string, string][] = [
+    const SKY: [number, string, string][] = [
       [0, "#BFE3F0", "#FFF3DE"],
       [0.45, "#B5D6EE", "#FFF0DC"],
       [0.8, "#DCC6D2", "#FFEBD2"],
@@ -164,9 +162,9 @@ const clouds = [
     };
     const skyAt = (p: number) => {
       let i = 0;
-      while (i < STOPS.length - 2 && p > STOPS[i + 1][0]) i++;
-      const [p0, t0, b0] = STOPS[i];
-      const [p1, t1, b1] = STOPS[i + 1];
+      while (i < SKY.length - 2 && p > SKY[i + 1][0]) i++;
+      const [p0, t0, b0] = SKY[i];
+      const [p1, t1, b1] = SKY[i + 1];
       const t = Math.min(1, Math.max(0, (p - p0) / (p1 - p0)));
       return [mix(t0, t1, t), mix(b0, b1, t)];
     };
@@ -226,8 +224,8 @@ const clouds = [
     paint();
 
     // depth ties size, speed and opacity together: most flakes are far off, small and faint
-    type P = { x: number; y: number; r: number; d: number; vy: number; ph: number; sw: number };
-    const flakes: P[] = Array.from({ length: reduced ? 0 : innerWidth < 640 ? 28 : 60 }, () => {
+    type Flake = { x: number; y: number; r: number; d: number; vy: number; ph: number; sw: number };
+    const flakes: Flake[] = Array.from({ length: reduced ? 0 : innerWidth < 640 ? 28 : 60 }, () => {
       const d = 0.3 + Math.random() ** 1.5 * 0.9;
       return {
         x: Math.random() * W,

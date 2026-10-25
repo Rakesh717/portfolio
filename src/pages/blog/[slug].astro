@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import JournalTop from "../../components/JournalTop.astro";
 import TrailProgress from "../../components/blog/TrailProgress.astro";
@@ -9,19 +9,18 @@ import ProseExtras from "../../components/blog/ProseExtras.astro";
 import ReadingLog from "../../components/blog/ReadingLog.astro";
 import TrailSound from "../../components/blog/TrailSound.astro";
 import { contact, site } from "../../data/content";
+import { publishedPosts } from "../../lib/posts";
 import { trailStats } from "../../lib/reading";
 import { postImage } from "../../lib/share";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
+  const posts = await publishedPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
 const { post } = Astro.props;
-// the next trail: the next newest post, wrapping round to the first
-const all = (await getCollection("blog"))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+// the next trail: the next older post, wrapping round to the newest
+const all = await publishedPosts();
 const next = all.length > 1 ? all[(all.findIndex((p) => p.id === post.id) + 1) % all.length] : undefined;
 const { Content } = await render(post);
 const { originalUrl, originalSite } = post.data;

@@ -1,4 +1,4 @@
-# Rakesh Thapa — Portfolio
+# Rakesh Thapa: portfolio
 
 A side-scrolling Himalayan trek. Scroll (or swipe, or press ← →) and Yakku
 the yak walks the trail from basecamp at 1,400 m to the summit at 8,848 m:
@@ -18,30 +18,30 @@ npm run build      # static build in dist/
 
 ## Where the copy lives
 
-- `src/data/content.ts` — all site copy, the trail stops (altitude, biome,
+- `src/data/content.ts`: all site copy, the trail stops (altitude, biome,
   Yakku's pose), Yakku's quips and poke lines.
-- `src/content/blog/*.mdx` — field notes (blog posts). Frontmatter schema is in
+- `src/content/blog/*.mdx`: field notes (blog posts). Frontmatter schema is in
   `src/content.config.ts`.
-- `CONTENT.md` — every piece of copy in one readable file, kept in sync with
+- `CONTENT.md`: every piece of copy in one readable file, kept in sync with
   the two above.
 
 ## How it fits together
 
-- `src/components/Trek.astro` — the world shell: sky, sun/moon/stars,
+- `src/components/Trek.astro`: the world shell: sky, sun/moon/stars,
   parallax mountain, ridge and forest layers, the yak, and the HUD
   (altimeter + trail map, which is the navigation).
-- `src/components/stops/*` — one component per stop: Basecamp (intro),
+- `src/components/stops/*`: one component per stop: Basecamp (intro),
   Trailhead (notice board), Camp ×4 (experience), Fireside (testimonial
   deck), Notes (clothesline of postcards), Summit (contact), Night (footer).
-- `src/components/Yak.astro` — the side-view mascot rig. Poses are driven
+- `src/components/Yak.astro`: the side-view mascot rig. Poses are driven
   by `data-pose` in `src/styles/global.css`: idle, walk, run, wave, sit,
-  read, graze, celebrate, sleep.
-- `src/components/YakRun.astro` — Yakku's trail run, the small endless
+  read, graze, celebrate, sleep, grumpy.
+- `src/components/YakRun.astro`: Yakku's trail run, the small endless
   runner on the 404 page: jump cairns, mani stones, chortens, prayer
   wheels, rhododendrons and sleeping trail dogs from Lukla upward; altitude is
   the score and trek stops are milestones. Obstacles are `<template>`s with a
   `data-biomes` list, so the snowy stretch only has stone ones. Hidden without JavaScript and under reduced motion.
-- `src/scripts/trek.ts` — the engine. Maps vertical scroll to a horizontal
+- `src/scripts/trek.ts`: the engine. Maps vertical scroll to a horizontal
   camera, puts stops on plateaus at their altitude, generates the ground and
   forest from a seeded RNG, runs weather (leaves, petals, snow, gusts that
   bend the trees), time of day, the HUD, and Yakku's behaviour.
@@ -60,8 +60,6 @@ npm run build      # static build in dist/
   further back are filled silhouettes that sink as you climb above them.
   Trees, rocks and flags are sized from Yakku's width, like the props on the
   stops.
-- **Foreground:** blurred grass, branches, rocks and snow drifts pass in front
-  of the camera for depth.
 - **Basecamp clearing:** on the first screen nothing tall grows behind the
   name and intro. `measureClearing()` in `trek.ts` measures the words, and the
   trees, hills and clouds are laid out around them: the hills part into a misty
@@ -89,19 +87,19 @@ npm run build      # static build in dist/
 Reading a post is a climb too. `src/pages/blog/[slug].astro` puts the article
 on a sheet of paper in front of a world that changes as you scroll:
 
-- `ReadingWorld` — sky from morning to dusk, parallax peaks, snow; on wide
+- `ReadingWorld`: sky from morning to dusk, parallax peaks, snow; on wide
   screens a setting sun and clouds you climb through. All behind the paper.
-- `TrailProgress` — Yakku walks a trail bar with an altitude readout
+- `TrailProgress`: Yakku walks a trail bar with an altitude readout
   (1,400 m → 8,848 m). `TrailMap` lists the sections in the margin.
-- `ReadingLog` — remembers where you stopped (localStorage) and offers to pick
+- `ReadingLog`: remembers where you stopped (localStorage) and offers to pick
   up there; the index shows how far you got.
-- `TrailSound` — optional sound, sharing the home page's on/off setting.
-- `ProseExtras` — heading anchors, code copy buttons, drop cap.
+- `TrailSound`: optional sound, sharing the home page's on/off setting.
+- `ProseExtras`: heading anchors, code copy buttons, drop cap.
 - In-article widgets (`YakSays`, `AgentRun`, `TwoBrain`, …) live in
   `src/components/blog/` and are imported by the `.mdx` posts.
 
 Shared scroll and altitude maths is in `src/scripts/climb.ts`; read time is in
-`src/lib/reading.ts`.
+`src/lib/reading.ts`; the published-post query is in `src/lib/posts.ts`.
 
 ### Adding a post
 
@@ -125,10 +123,6 @@ Shared scroll and altitude maths is in `src/scripts/climb.ts`; read time is in
   with a real 404 status for unknown paths. Without that file Pages treats the
   site as a single-page app and answers every path with the home page and a
   200. It passes `noindex` to `Base.astro`, which also drops its canonical link.
-- `src/pages/404.astro` builds `dist/404.html`, which Cloudflare Pages serves
-  with a real 404 status for unknown paths. Without that file Pages treats the
-  site as a single-page app and answers every path with the home page and a
-  200. It passes `noindex` to `Base.astro`, which also drops its canonical link.
 
 ## Accessibility and fallbacks
 
@@ -138,7 +132,7 @@ focused element into view on the trail.
 
 ## QA hooks
 
-- `/?at=summit` — start at a stop (any stop id from `content.ts`).
-- `/?x=2400` — start at a camera offset in pixels.
-- `/#notes` — deep link to a stop by id, same as `?at=`.
-- `/?static=1` — force the vertical fallback.
+- `/?at=summit`: start at a stop (any stop id from `content.ts`).
+- `/?x=2400`: start at a camera offset in pixels.
+- `/#notes`: deep link to a stop by id, same as `?at=`.
+- `/?static=1`: force the vertical fallback.

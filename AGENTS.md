@@ -50,7 +50,7 @@ fallback working.
 
 - `src/components/Yak.astro` is the SVG rig; poses come from `data-pose` CSS in
   `src/styles/global.css`: idle, walk, run, wave, sit, read, graze, celebrate,
-  sleep (plus grumpy, used by a blog widget). Set the pose attribute; don't add
+  sleep (plus grumpy: the poke strike, the 404 run and a blog widget). Set the pose attribute; don't add
   inline transforms.
 - The pose lists in `content.ts` (`Pose`) and `content.config.ts` (`og.pose`) are
   subsets; extend them when a new pose should be allowed there.

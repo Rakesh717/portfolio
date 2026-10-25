@@ -22,13 +22,12 @@ export function progressAt(y = scrollY) {
   return max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
 }
 
-export const altitude = (p: number) => Math.round((BASE + p * (SUMMIT - BASE)) / 10) * 10;
+const altitude = (p: number) => Math.round((BASE + p * (SUMMIT - BASE)) / 10) * 10;
 export const fmtAlt = (p: number) => `${altitude(p).toLocaleString("en-US")} m`;
 
 /** how far down the screen a heading counts as "reached" */
 export const READING_LINE = 0.35;
 
-// ---------------------------------------------------------------------------
 // The reading log: where you stopped on each post, and which ones you finished.
 // It lives only in this browser and everything works without it.
 

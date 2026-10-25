@@ -17,6 +17,7 @@ const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySe
 const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const NS = "http://www.w3.org/2000/svg";
 
 /** tiny seeded RNG so the scenery is the same on every visit */
 function rng(seed: number) {
@@ -29,9 +30,7 @@ function rng(seed: number) {
   };
 }
 
-/* ------------------------------------------------------------------ */
-/* Things that work with or without the trek                          */
-/* ------------------------------------------------------------------ */
+// Things that work with or without the trek
 
 const say = (text: string) => window.dispatchEvent(new CustomEvent("yak:say", { detail: text }));
 
@@ -215,9 +214,7 @@ function initCopy() {
   });
 }
 
-/* ------------------------------------------------------------------ */
-/* The trek                                                           */
-/* ------------------------------------------------------------------ */
+// The trek
 
 type Laid = {
   el: HTMLElement;
@@ -274,7 +271,6 @@ function mix(a: string, b: string, t: number) {
 
 function boot() {
   const data = (JSON.parse($("#trek-config").textContent || "{}") as { stops: StopData[] }).stops;
-  const reduced = false; // trek mode is only enabled when motion is OK
 
   const trek = $("#trek");
   const world = $("#world");
@@ -287,7 +283,6 @@ function boot() {
   const far = $("#layer-far");
   const mid = $("#layer-mid");
   const near = $("#layer-near");
-  const front = $("#layer-front");
   const fog = $<HTMLCanvasElement>("#fog");
   const fogCtx = fog.getContext("2d")!;
   const prints = $("#prints") as unknown as SVGSVGElement;
@@ -332,7 +327,6 @@ function boot() {
   let L: Laid[] = [];
   let chunks: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
   let buckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
-  let frontBuckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
   let fogA = 0;
   let fogB = 0;
   // Basecamp's clearing, in screen x at the start (which is also x in every
@@ -349,7 +343,7 @@ function boot() {
   // how fast the near tree line moves against the trail, across and up
   const NEAR = 0.6;
 
-  /* ---------------- geometry ---------------- */
+  // geometry
 
   function elev(x: number) {
     if (x <= L[0].x0 + L[0].w) return L[0].level;
@@ -379,7 +373,7 @@ function boot() {
     return L[L.length - 1].d.altitude;
   }
 
-  /** fractional stop index — drives sky + time of day */
+  /** fractional stop index; drives the sky and time of day */
   function stopUnits(x: number) {
     for (let i = 0; i < L.length - 1; i++) {
       if (x < L[i + 1].x0) return i + clamp((x - L[i].x0) / (L[i + 1].x0 - L[i].x0), 0, 1);
@@ -414,15 +408,15 @@ function boot() {
     return PALETTE[L[L.length - 1].d.biome].body;
   }
 
+  const mapY = (level: number) => 27 - (level / maxLevel) * 23; // y in the HUD map's 100x30 viewBox
   const stopAt = (x: number) => L.find((s) => x >= s.x0 && x <= s.x0 + s.w) ?? null;
 
-  /* ---------------- layout ---------------- */
+  // layout
 
   function layout() {
     VW = window.innerWidth;
     VH = window.innerHeight;
-    // phones — and portrait tablets: the compact layout reads better when the
-    // viewport is tall and narrow, so tablets under 1024px in portrait get it too
+    // phones, and portrait tablets under 1024px: the compact layout suits a tall, narrow viewport
     mobile = VW < 768 || (VH > VW && VW < 1024);
     ground = Math.round(VH * (mobile ? 0.88 : 0.9));
     gapW = Math.round(VW * (mobile ? 0.6 : 0.4));
@@ -486,7 +480,7 @@ function boot() {
     buildSummitFlags();
   }
 
-  /* ---------------- ground + forest ---------------- */
+  // ground + forest
 
   let treeTop = 0; // the top of the last tree drawn, in its parent's coordinates
   function tree(sym: string, x: number, y: number, h: number, ratio: number, color: string, r: () => number, cls = "tree") {
@@ -681,7 +675,7 @@ function boot() {
     });
   }
 
-  /* ---------------- distant mountains, ridges, clouds ---------------- */
+  // distant mountains, ridges, clouds
 
   // Peaks you'd know, drawn from their outlines (x across, height up, as
   // fractions of a box): Machhapuchhre's split fishtail summit just past the
@@ -992,7 +986,7 @@ function boot() {
     const py = pole.offsetTop + 8;
     const size = mobile ? 12 : 17;
     const w = summit.w;
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "summit-flags");
     svg.setAttribute("viewBox", `0 0 ${w} ${VH}`);
     // every string is pegged to the ground, some on each side of the pole. Desktop: two
@@ -1016,13 +1010,13 @@ function boot() {
     summit.el.querySelector(".scene")!.prepend(svg);
   }
 
-  /* ---------------- trail map ---------------- */
+  // trail map
 
   function buildMap() {
     let d = "";
     for (let i = 0; i <= 100; i++) {
       const x = (i / 100) * worldW;
-      d += `${i ? "L" : "M"}${i} ${(27 - (elev(x) / maxLevel) * 23).toFixed(2)} `;
+      d += `${i ? "L" : "M"}${i} ${mapY(elev(x)).toFixed(2)} `;
     }
     mapLine.innerHTML = `<path d="${d}" fill="none" stroke="#40302A" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
     mapStops.forEach((li, i) => {
@@ -1030,11 +1024,11 @@ function boot() {
       if (!s) return;
       const x = s.x0 + VW * yakFrac;
       li.style.left = `${(x / worldW) * 100}%`;
-      li.style.top = `${((27 - (s.level / maxLevel) * 23) / 30) * 100}%`;
+      li.style.top = `${(mapY(s.level) / 30) * 100}%`;
     });
   }
 
-  /* ---------------- cloud bank ---------------- */
+  // cloud bank
 
   // A bank three viewports wide: billowy leading edge, a solid core the width
   // of the screen, billowy trailing edge, with wisps streaming through it. It
@@ -1185,7 +1179,7 @@ function boot() {
     c.globalCompositeOperation = "source-over";
   }
 
-  /* ---------------- weather ---------------- */
+  // weather
 
   const parts: Particle[] = [];
   let wind = 0.3;
@@ -1356,7 +1350,7 @@ function boot() {
     ctx.globalAlpha = 1;
   }
 
-  /* ---------------- the yak ---------------- */
+  // the yak
 
   let quipTimer = 0;
   let lastLine = "";
@@ -1403,7 +1397,11 @@ function boot() {
     window.removeEventListener("pointerdown", wake);
     window.removeEventListener("keydown", wake);
   };
-  if (localStorage.getItem("yak-sound") === "on") {
+  let soundWasOn = false;
+  try {
+    soundWasOn = localStorage.getItem("yak-sound") === "on";
+  } catch {}
+  if (soundWasOn) {
     window.addEventListener("pointerdown", wake);
     window.addEventListener("keydown", wake);
   }
@@ -1411,7 +1409,9 @@ function boot() {
     stopWaking();
     if (sound.on) sound.disable();
     else sound.enable();
-    localStorage.setItem("yak-sound", sound.on ? "on" : "off");
+    try {
+      localStorage.setItem("yak-sound", sound.on ? "on" : "off");
+    } catch {}
     setSoundUi();
     if (sound.on) speak("Listen… that's the mountain.");
   };
@@ -1424,7 +1424,7 @@ function boot() {
   });
   document.addEventListener("visibilitychange", () => sound.suspend(document.hidden));
 
-  // poke him. poke him ten times and see what happens.
+  // ten pokes, each within 4s of the last, and he goes on strike
   let pokeCount = 0;
   let lastPoke = 0;
   let grumpyUntil = 0;
@@ -1461,7 +1461,7 @@ function boot() {
     speak(warnings[pokeCount] ?? pick(pokes));
   });
 
-  /* ---------------- travel ---------------- */
+  // travel
 
   let tween: { from: number; to: number; t0: number; dur: number; ease?: (t: number) => number; quiet?: boolean } | null = null;
   const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
@@ -1585,7 +1585,7 @@ function boot() {
     }
   });
 
-  /* ---------------- guided tour: Yakku walks you up and talks you through it ---------------- */
+  // guided tour: Yakku walks you up and talks you through it
 
   const tourBtn = $<HTMLButtonElement>("#hud-tour");
   const tourLabel = $("#hud-tour-label");
@@ -1792,7 +1792,7 @@ function boot() {
     tween = { from: 0, to: maxCam, t0: performance.now(), dur: (maxCam / (mobile ? 430 : 680)) * 1000, ease: easeSteady, quiet: true };
   });
 
-  /* ---------------- main loop ---------------- */
+  // main-loop state: camera, pose, gait, summit
 
   let cam = 0;
   let lastT = 0;
@@ -1825,7 +1825,7 @@ function boot() {
     yak.dataset.pose = p;
   }
 
-  /* ---------------- camera shots: the opening drop + the summit look-back ---------------- */
+  // camera shot: the summit look-back
 
   type Shot = {
     kind: "reveal";
@@ -1836,7 +1836,6 @@ function boot() {
     s: number;
     fx: number;
     fy: number;
-    dy: number;
     cancelAt?: number;
     cancelK?: number;
     k: number;
@@ -1888,13 +1887,12 @@ function boot() {
       s: mobile ? 0.45 : 0.5,
       fx: yx - VW * 0.35,
       fy: ground - sum.level - VH * 0.1,
-      dy: 0,
       k: 0,
     };
     sound.whoosh();
   }
 
-  /* ---------------- the trail map that unfolds at the top ---------------- */
+  // the trail map that unfolds at the top
 
   const TRAIL = "M150 520 C 260 512 330 500 360 486 C 300 470 250 456 262 440 C 300 424 400 418 446 400 C 380 380 330 362 352 344 C 400 328 470 318 500 300 C 452 280 420 262 436 244 C 470 228 520 220 540 204 C 506 186 484 168 500 152 C 520 138 540 128 548 112 C 538 98 540 84 552 70";
   let mapRaf = 0;
@@ -1982,9 +1980,8 @@ function boot() {
     if (e.target === trailmap) cancelShot();
   });
 
-  /* ---------------- hoofprints in the snow ---------------- */
+  // hoofprints in the snow
 
-  const NS = "http://www.w3.org/2000/svg";
   let stepAcc = 0;
   let stepFoot = 0;
   function hoofprint(x: number, slope: number) {
@@ -1997,7 +1994,7 @@ function boot() {
     if (prints.childElementCount > 700) prints.firstElementChild?.remove();
   }
 
-  /* ---------------- main loop ---------------- */
+  // main loop
 
   let fogSaid = 0;
   let fogShown = false;
@@ -2041,8 +2038,6 @@ function boot() {
       fy = lerp(fy, shot.fy, k);
       sx = lerp(sx, VW / 2, k);
       sy = lerp(sy, VH * 0.6, k);
-    } else if (shot) {
-      sc = lerp(1, shot.s, k);
     }
     const tx = sx - fx * sc;
     const ty = sy - fy * sc;
@@ -2069,23 +2064,14 @@ function boot() {
     // buildBackdrop), so it moves NEAR as far as the trail in both directions
     // and meets it under Yakku's feet
     near.style.transform = `translate3d(${-cam * NEAR}px, ${e * NEAR}px, 0)`;
-    front.style.transform = `translate3d(${-cam * 1.4}px, 0px, 0)`;
     const layerFade = String(1 - reveal);
     mid.style.opacity = layerFade;
     near.style.opacity = layerFade;
-    front.style.opacity = layerFade;
     if (shot?.kind === "reveal" && reveal > 0.9 && !trailmap.classList.contains("show")) showTrailmap();
     if (trailmap.classList.contains("show") && (!shot || shot.kind !== "reveal" || shot.cancelAt !== undefined)) hideTrailmap();
 
     for (const b of buckets) {
       const show = b.x1 > cam * NEAR - 200 && b.x0 < cam * NEAR + VW + 200;
-      if (show !== b.shown) {
-        b.shown = show;
-        b.el.style.display = show ? "" : "none";
-      }
-    }
-    for (const b of frontBuckets) {
-      const show = b.x1 > cam * 1.4 - 400 && b.x0 < cam * 1.4 + VW + 200;
       if (show !== b.shown) {
         b.shown = show;
         b.el.style.display = show ? "" : "none";
@@ -2235,7 +2221,6 @@ function boot() {
       stars.style.opacity = String(night);
       tint.style.opacity = String(night * 0.55);
       chunksEl.style.filter = night > 0.01 ? `brightness(${1 - night * 0.38}) saturate(${1 - night * 0.3})` : "";
-      front.style.filter = night > 0.01 ? `brightness(${1 - night * 0.5})` : "";
       root.classList.toggle("is-night", night > 0.5);
       const daySpan = L.length - 2.4;
       const sy2 = su < daySpan ? 0.2 - 0.1 * Math.sin((Math.PI * su) / daySpan) : 0.2 + (su - daySpan) * 0.75;
@@ -2261,7 +2246,7 @@ function boot() {
       mapStops.forEach((li, i) => li.classList.toggle("is-here", L[i] === here));
     }
     mapYak.style.left = `${(yakX / worldW) * 100}%`;
-    mapYak.style.top = `${((27 - (e / maxLevel) * 23) / 30) * 100}%`;
+    mapYak.style.top = `${(mapY(e) / 30) * 100}%`;
 
     const biome = here?.d.biome ?? biomeAt(yakX, 0.5);
     weather(dt, now, vel, biome, e / maxLevel, moving && speed > 80 && k < 0.05, face);
@@ -2277,7 +2262,7 @@ function boot() {
     requestAnimationFrame(frame);
   }
 
-  /* ---------------- boot ---------------- */
+  // boot
 
   let lastW = 0;
   let lastH = 0;
@@ -2345,11 +2330,8 @@ function boot() {
     cam = 0;
   }
 
-  void reduced;
   requestAnimationFrame(frame);
 }
-
-/* ------------------------------------------------------------------ */
 
 initDeck();
 initCopy();

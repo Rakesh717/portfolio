@@ -1,7 +1,4 @@
-/**
- * Single source of truth for all site copy.
- * When copy changes, update this file so the site renders it.
- */
+/** Site copy and trail data shared across components. One-off strings live in their components. */
 
 export const site = {
   name: "Rakesh Thapa",
@@ -26,7 +23,7 @@ export const hero = {
   headlineEnd: "products.",
   intro: [
     "I'm Rakesh, a Nepal based product engineer with over seven years of experience. I build web products end to end, from backend APIs to polished interfaces, with TypeScript (React, Hono), PHP (Laravel), Postgres and Tailwind CSS, and I use AI as a daily part of how I design, build and ship.",
-    "Currently CTO at Binary Digits, leading a six person engineering team. Before that I helped build mltiple products across SaaS, Fintech and E-commerce.",
+    "Currently CTO at Binary Digits, leading a six person engineering team. Before that I helped build multiple products across SaaS, Fintech and E-commerce.",
   ],
 } as const;
 
@@ -162,9 +159,7 @@ export const lost = {
   },
 };
 
-/* --------------------------------------------------------------- */
-/* The trek — every stop on the trail, left to right                */
-/* --------------------------------------------------------------- */
+// The trek: every stop on the trail, left to right
 
 export type Biome = "forest" | "meadow" | "rock" | "snow";
 export type Pose = "idle" | "wave" | "sit" | "read" | "celebrate" | "sleep";

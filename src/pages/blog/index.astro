@@ -1,15 +1,12 @@
 ---
-import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import JournalTop from "../../components/JournalTop.astro";
 import ReadingWorld from "../../components/blog/ReadingWorld.astro";
 import { site } from "../../data/content";
+import { publishedPosts } from "../../lib/posts";
 import { trailStats } from "../../lib/reading";
 
-const posts = (await getCollection("blog"))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .map((post) => ({ post, ...trailStats(post.body) }));
+const posts = (await publishedPosts()).map((post) => ({ post, ...trailStats(post.body) }));
 const totalMinutes = posts.reduce((n, p) => n + p.minutes, 0);
 const blogUrl = new URL("/blog", Astro.site ?? "http://localhost").href;
 const blog = {

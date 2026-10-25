@@ -98,7 +98,6 @@ import Yak from "../Yak.astro";
       queued = false;
       // progress runs to the end of the article, so Yakku summits when the post ends
       const p = progressAt();
-      // Kathmandu (1,400 m) to the summit, so reading is the climb
       alt.textContent = fmtAlt(p);
       fill.style.transform = `scaleX(${p})`;
       yakBox.style.transform = `translateX(${p * width}px)`;

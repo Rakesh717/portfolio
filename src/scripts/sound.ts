@@ -6,7 +6,7 @@
 
 export type Surface = "grass" | "rock" | "snow";
 
-export type SoundState = {
+type SoundState = {
   level: number; // 0 at basecamp → 1 at the summit
   gust: number; // 0..1
   fog: number; // 0..1
@@ -49,7 +49,7 @@ export function createSound() {
     master.gain.value = 0;
     master.connect(ctx.destination);
 
-    // two seconds of brown noise, looped — it sounds like wind on its own
+    // two seconds of brown noise, looped; on its own it already sounds like wind
     noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = noise.getChannelData(0);
     let last = 0;
