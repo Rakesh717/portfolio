@@ -2639,6 +2639,25 @@ mark.mk-teal {
   }
 }
 
+/* portrait tablets get the phone layout, but a full-width camp board there is
+   a long thin strip low on a tall screen; keep it the width it has on desktop
+   and stand it in the middle of the sky, on legs that reach the trail (they
+   start behind the paper, so they always meet it) */
+@media (orientation: portrait) and (min-width: 560px) and (max-width: 1023px) {
+  .trek-on .logbook {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: min(100%, 34rem);
+    margin: 0 auto;
+  }
+  .trek-on .log-leg {
+    top: 50%;
+    height: auto;
+  }
+}
+
 /* portrait tablets: the phone strip is too wide for a tablet — keep the
    compact engine but lay the notice board out like desktop, as one board
    standing on its plateau instead of a three-screen wall */

@@ -28,7 +28,7 @@ const flag = stops.find((s) => s.id === id)?.color ?? "#EF476F";
         </div>
       )
     }
-    <div class="plant tent" style={`--x:36%;--xm:44%;--w:min(13vw,190px);--wm:120px`}>
+    <div class="plant tent" style={`--x:36%;--xm:44%;--w:calc(var(--yak-w) * 1);--wm:120px`}>
       <svg viewBox="0 0 170 120">
         <path d="M2 118 L 18 100 M168 118 L 152 100" stroke={ink} stroke-width="2" stroke-dasharray="3 4"></path>
         <path d="M14 116 L 85 8 L 156 116 Z" fill={tent} stroke={ink} stroke-width="3" stroke-linejoin="round"></path>
@@ -39,7 +39,7 @@ const flag = stops.find((s) => s.id === id)?.color ?? "#EF476F";
         <path d="M40 80 L 52 64 M128 80 L 116 64" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity=".5"></path>
       </svg>
     </div>
-    <div class="plant camp-pole" style={`--x:94%;--xm:90%;--w:clamp(30px,3vw,44px);--wm:30px;color:${flag}`}>
+    <div class="plant camp-pole" style={`--x:94%;--xm:90%;--w:calc(var(--yak-w) * 0.23);--wm:30px;color:${flag}`}>
       <svg viewBox="0 0 60 230">
         <path d="M10 230 V 6" stroke={ink} stroke-width="4" stroke-linecap="round"></path>
         <circle cx="10" cy="6" r="4" fill="#FFC53D" stroke={ink} stroke-width="2"></circle>
