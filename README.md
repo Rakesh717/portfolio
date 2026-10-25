@@ -55,6 +55,14 @@ npm run build      # static build in dist/
   trail to night camp, with no reading stops and no quips. Any key or scroll stops it.
 - **Foreground:** blurred grass, branches, rocks and snow drifts pass in front
   of the camera for depth.
+- **Basecamp clearing:** on the first screen nothing tall grows behind the
+  name and intro. `measureClearing()` in `trek.ts` measures the words, and the
+  trees, hills and clouds are laid out around them: the hills part into a misty
+  valley with low scrub and terraces on the slopes, and the big peaks stand
+  low and grow steadily with the altitude.
+- **Landmark peaks:** among the generated range, Machhapuchhre (Fishtail)
+  stands just past the intro, and Everest between Nuptse and Lhotse rises for
+  the high camps. Their outlines are in `FISHTAIL` and `EVEREST` in `trek.ts`.
 - **Cloud bank:** the long climb before High Camp walks you through a whiteout.
 - **Hoofprints:** once the trail is snowy, Yakku leaves prints that stay put.
 - **Summit:** confetti, then the camera pulls back and a trail map unfolds,

@@ -8,7 +8,7 @@ const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
 
 <Stop id="hikers" label="Fireside — words from fellow hikers" class="s-fire">
   <Fragment slot="scene">
-    <div class="plant campfire" style="--x:28%;--xm:46%;--w:min(10vw,150px);--wm:96px">
+    <div class="plant campfire" style="--x:28%;--xm:46%;--w:calc(var(--yak-w) * 0.77);--wm:96px">
       <span class="fire-glow"></span>
       <svg viewBox="0 0 150 130">
         <g class="flames">
@@ -36,7 +36,7 @@ const tilts = [-3, 2.5, -1.5, 3.5, -2.5];
         }
       </svg>
     </div>
-    <div class="plant log-seat" style="--x:42%;--xm:-20%;--w:min(9vw,130px);--wm:90px">
+    <div class="plant log-seat" style="--x:42%;--xm:-20%;--w:calc(var(--yak-w) * 0.7);--wm:90px">
       <svg viewBox="0 0 130 46">
         <ellipse cx="64" cy="42.5" rx="58" ry="3" fill={ink} fill-opacity=".14"></ellipse>
         <path d="M71 12 L72 4.5 Q75.5 2 79 4.5 L80 12" fill="#7C4F2E" stroke={ink} stroke-width="2.5" stroke-linejoin="round"></path>

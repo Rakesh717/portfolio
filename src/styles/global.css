@@ -1480,18 +1480,21 @@ h3 {
 /* Scenery pieces                                                     */
 /* ------------------------------------------------------------------ */
 
+/* sized from Yakku, like the other props, so the sign keeps its scale next
+   to him on every screen (0.82rem beside a 187px yak at 1440 wide) */
 .signpost {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: calc(var(--yak-w, 187px) * 0.07);
 }
 .plank {
   position: relative;
   z-index: 1;
   display: block;
-  padding: 0.4rem 0.9rem;
-  margin-bottom: 6px;
-  font: 800 0.82rem/1 var(--font-body);
+  padding: 0.5em 1.1em;
+  margin-bottom: 0.45em;
+  font: 800 1em/1 var(--font-body);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1505,14 +1508,14 @@ h3 {
 }
 .plank-r {
   rotate: -4deg;
-  translate: 18px 0;
+  translate: 1.4em 0;
 }
 .plank-r::after {
   content: " →";
 }
 .plank-l {
   rotate: 3deg;
-  translate: -16px 0;
+  translate: -1.25em 0;
   background-color: var(--color-wood-dark);
 }
 .plank-l::before {
@@ -1520,16 +1523,20 @@ h3 {
 }
 .plank-sub {
   rotate: 2deg;
-  font: 600 1.2rem/1 var(--font-hand);
+  font: 600 1.46em/1 var(--font-hand);
   letter-spacing: 0;
   text-transform: none;
   background-color: var(--color-wood-dark);
 }
 .signpost .post {
   display: block;
-  width: 14px;
-  height: clamp(60px, 9vh, 110px);
-  margin-top: -6px;
+  width: 1.1em;
+  height: calc(var(--yak-w, 187px) * 0.45);
+  margin-top: -0.45em;
+}
+/* at Basecamp the post never lifts the planks into the words above */
+.s-base .signpost .post {
+  height: max(30px, min(calc(var(--yak-w, 187px) * 0.45), calc(var(--sign-room, 999px) - 5.4em - 18px)));
   background: var(--color-wood-dark);
   border: 2.5px solid var(--ink);
   border-radius: 3px 3px 0 0;
@@ -1694,17 +1701,20 @@ h3 {
 /* ------------------------------------------------------------------ */
 
 .base {
+  --name-fs: clamp(3.6rem, min(max(11.5vw, calc(7vw + 64px)), 20vh), 14.5rem);
   margin: auto 0;
   padding-bottom: 6vh;
   max-width: 62rem;
 }
+/* the calc() terms fill out mid-width screens (around 945px), where plain vw
+   left the intro small; from 1440 up the vw terms take over again */
 .base-hello {
-  font-size: clamp(1.6rem, 2.4vw, 2.6rem);
+  font-size: clamp(1.6rem, max(2.4vw, calc(1.2vw + 1.08rem)), 2.6rem);
   rotate: -3deg;
   margin-bottom: 0.4rem;
 }
 .base-name {
-  font-size: clamp(3.6rem, min(11.5vw, 20vh), 14.5rem);
+  font-size: var(--name-fs);
   line-height: 0.84;
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -1741,8 +1751,9 @@ h3 {
 }
 .base-lede {
   margin-top: 1.4rem;
-  max-width: 36rem;
-  font-size: clamp(1.1rem, 1.6vw, 1.7rem);
+  /* never wider than the name above it (about 3.2 of its em) */
+  max-width: min(36rem, calc(var(--name-fs) * 3.2));
+  font-size: clamp(1.1rem, max(1.6vw, calc(0.8vw + 0.72rem)), 1.7rem);
   line-height: 1.45;
 }
 mark {
@@ -2513,8 +2524,22 @@ mark.mk-teal {
   .base-name {
     font-size: min(21vw, 12vh);
   }
+  .base-lede {
+    max-width: 36rem;
+  }
   .signpost-climb {
     display: none;
+  }
+  /* smaller than on desktop, and tall enough that both planks clear
+     Yakku's speech bubble */
+  .signpost {
+    font-size: 0.7rem;
+  }
+  .signpost .post {
+    height: calc(var(--yak-w, 112px) * 1.05);
+  }
+  .s-base .signpost .post {
+    height: max(30px, min(calc(var(--yak-w, 112px) * 1.05), calc(var(--sign-room, 999px) - 5.4em - 18px)));
   }
   .clothes-head {
     flex-direction: column;

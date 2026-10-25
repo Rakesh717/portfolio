@@ -294,6 +294,7 @@ function boot() {
   const trailmapSvg = $("#trailmap-svg") as unknown as SVGSVGElement;
   const soundBtn = $("#hud-sound");
   const clouds = $("#layer-clouds");
+  const mist = $("#layer-mist");
   const tint = $("#night-tint");
   const canvas = $<HTMLCanvasElement>("#weather");
   const ctx = canvas.getContext("2d")!;
@@ -330,6 +331,16 @@ function boot() {
   let frontBuckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
   let fogA = 0;
   let fogB = 0;
+  // Basecamp's clearing, in screen x at the start (which is also x in every
+  // parallax layer there): nothing tall grows behind the name and intro
+  let clearA = 0;
+  let clearB = 0;
+  // the words' bottom edge: on phones, trees that stay below it can stay (the
+  // words end well above the ground there); on wider screens the clearing runs
+  // all the way down
+  let clearY = 0;
+  let nameR = 0;
+  const inClearing = (x: number, top: number) => x > clearA && x < clearB && top < clearY;
   let dpr = 1;
 
   /* ---------------- geometry ---------------- */
@@ -447,6 +458,7 @@ function boot() {
     canvas.height = Math.round(VH * dpr);
     buildFog();
 
+    measureClearing();
     buildChunks();
     buildBackdrop();
     buildMap();
@@ -455,8 +467,10 @@ function boot() {
 
   /* ---------------- ground + forest ---------------- */
 
+  let treeTop = 0; // the top of the last tree drawn, in its parent's coordinates
   function tree(sym: string, x: number, y: number, h: number, ratio: number, color: string, r: () => number, cls = "tree") {
     const w = h * ratio;
+    treeTop = y - h;
     const dur = (3.2 + r() * 2.6).toFixed(2);
     const delay = (-r() * 5).toFixed(2);
     return `<svg class="${cls}" viewBox="0 0 ${ratio * 150} 150" style="left:${(x - w / 2).toFixed(1)}px;top:${(y - h).toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;color:${color};animation-duration:${dur}s;animation-delay:${delay}s" preserveAspectRatio="none"><use href="#${sym}"/></svg>`;
@@ -478,6 +492,59 @@ function boot() {
       out += `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${ang.toFixed(1)})"><rect class="lf" style="animation-delay:${(-i * 0.37).toFixed(2)}s" x="${-size / 2}" y="0" width="${size}" height="${size * 1.15}" rx="1.5" fill="${LUNGTA[i % 5]}" stroke="#40302A" stroke-width="1.8"/></g>`;
     }
     return out;
+  }
+
+  // the ink box of the intro's words: the text itself and the hint's arrow,
+  // since block elements run wider than what's in them. Returns true when it
+  // moved enough to rebuild the scenery around it.
+  function measureClearing() {
+    const s = L.find((l) => l.d.id === "basecamp");
+    const box = s?.el.querySelector<HTMLElement>(".base");
+    if (!s || !box) {
+      clearA = clearB = nameR = 0;
+      return false;
+    }
+    // measure the words where they'll settle, not where the entrance
+    // animation starts them (lifted and tilted until the stop is seen)
+    box.style.transition = "none";
+    box.style.transform = "none";
+    const sr = s.el.getBoundingClientRect();
+    const o = sr.left - s.x0;
+    // at the start the world isn't shifted vertically, so this is screen y there
+    const oy = sr.top + s.level;
+    const name = box.querySelector(".base-name");
+    const range = document.createRange();
+    const walk = document.createTreeWalker(box, NodeFilter.SHOW_TEXT);
+    const rects: [DOMRect, boolean][] = [...box.querySelectorAll("svg")].map((el) => [el.getBoundingClientRect(), false]);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      if (!n.textContent?.trim()) continue;
+      range.selectNodeContents(n);
+      for (const r of range.getClientRects()) rects.push([r, !!name?.contains(n)]);
+    }
+    let a = Infinity;
+    let b = -Infinity;
+    let y = 0;
+    let nr = 0;
+    for (const [r, inName] of rects) {
+      if (!r.width) continue;
+      a = Math.min(a, r.left - o);
+      b = Math.max(b, r.right - o);
+      y = Math.max(y, r.bottom - oy);
+      if (inName) nr = Math.max(nr, r.right - o);
+    }
+    box.style.transform = "";
+    box.getBoundingClientRect(); // settle the transform before transitions come back
+    box.style.transition = "";
+    if (a > b) return false;
+    const moved =
+      Math.abs(a - 40 - clearA) > 16 || Math.abs(b + 40 - clearB) > 16 || (mobile && Math.abs(y + 24 - clearY) > 16);
+    clearA = a - 40;
+    clearB = b + 40;
+    clearY = mobile ? y + 24 : Infinity;
+    nameR = nr;
+    // how much height the Basecamp signpost has under the words
+    root.style.setProperty("--sign-room", `${Math.round(ground - y)}px`);
+    return moved;
   }
 
   function buildChunks() {
@@ -521,6 +588,7 @@ function boot() {
         const b = biomeAt(x, r());
         const y = gy(x) + 6;
         const lvl = elev(x) / maxLevel;
+        const t0 = trees.length;
         if (open && (!inStop || r() < 0.85)) {
           const pick = r();
           if (b === "forest") {
@@ -541,6 +609,7 @@ function boot() {
             else if (pick < 0.85) trees += tree("s-rock-snow", x, y + 4, (34 + r() * 40) * scale, 1.6, "#9A8F84", r, "tree still");
           }
         }
+        if (trees.length > t0 && inClearing(x, yTop + treeTop)) trees = trees.slice(0, t0);
         // grass at the trail edge
         if ((b === "forest" || b === "meadow") && r() < 0.55) {
           const gc = b === "forest" ? "#3F7F5A" : "#6E8C4A";
@@ -593,6 +662,77 @@ function boot() {
 
   /* ---------------- distant mountains, ridges, clouds ---------------- */
 
+  // Peaks you'd know, drawn from their outlines (x across, height up, as
+  // fractions of a box): Machhapuchhre's split fishtail summit just past the
+  // words at Basecamp, and Everest between Nuptse and Lhotse for the high
+  // camps. Everything else in the range is generated.
+  const FISHTAIL: [number, number][] = [
+    [0, 0], [0.12, 0.16], [0.24, 0.34], [0.34, 0.6], [0.42, 0.84], [0.47, 1], [0.51, 0.9], [0.55, 0.95],
+    [0.62, 0.72], [0.7, 0.5], [0.8, 0.3], [0.9, 0.14], [1, 0],
+  ];
+  // back to front: Lhotse, Everest, then Nuptse's long wall
+  const EVEREST: [number, number][][] = [
+    [[0.46, 0], [0.6, 0.48], [0.68, 0.76], [0.73, 0.86], [0.77, 0.78], [0.87, 0.44], [1, 0]],
+    [[0.14, 0], [0.3, 0.46], [0.4, 0.78], [0.47, 1], [0.53, 0.88], [0.61, 0.66], [0.76, 0]],
+    [[-0.02, 0], [0.08, 0.34], [0.15, 0.52], [0.2, 0.6], [0.245, 0.56], [0.29, 0.62], [0.34, 0.55], [0.44, 0.44], [0.54, 0.24], [0.62, 0]],
+  ];
+
+  // a snow cap on everything above `line`, with a ragged lower edge
+  function snowCaps(P: [number, number][], line: number, jag: number) {
+    const caps: string[] = [];
+    let seg: [number, number][] = [];
+    const close = () => {
+      const a = seg[0];
+      const b = seg[seg.length - 1];
+      const n = Math.max(2, Math.round((b[0] - a[0]) / 14));
+      for (let k = 1; k < n; k++) seg.push([lerp(b[0], a[0], k / n), line + (k % 2 ? jag : -jag * 0.7)]);
+      caps.push(seg.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ") + " Z");
+      seg = [];
+    };
+    for (let i = 1; i < P.length; i++) {
+      const [ax, ay] = P[i - 1];
+      const [bx, by] = P[i];
+      if (ay < line !== by < line) {
+        const c: [number, number] = [ax + ((bx - ax) * (line - ay)) / (by - ay), line];
+        if (by < line) seg = [c];
+        else {
+          seg.push(c);
+          close();
+        }
+      }
+      if (by < line) seg.push([bx, by]);
+    }
+    return caps.join(" ");
+  }
+
+  function landmarks(unit: number, base: number, fw: number) {
+    const ink = `stroke="#40302A" stroke-opacity=".35" stroke-linejoin="round"`;
+    const mountain = (shape: [number, number][], x0: number, w: number, h: number, snow: number) => {
+      const P = shape.map(([fx, fy]) => [x0 + fx * w, base - fy * h] as [number, number]);
+      const d = P.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ") + " Z";
+      return (
+        `<path d="${d}" fill="#D3DEEC" stroke-width="2.2" ${ink}/>` +
+        `<path d="${snowCaps(P, base - snow * h, Math.max(5, h * 0.018))}" fill="#FFFFFF" stroke-width="2" ${ink}/>`
+      );
+    };
+    let out = "";
+
+    // Fishtail: right of the words, under the sun; on narrow screens it waits
+    // just off to the right and drifts in as you walk
+    const fh = unit * (mobile ? 0.46 : 0.56);
+    const fwid = fh * 1.45;
+    const fx0 = Math.max(clearB, VW * 0.4) + 90 - fwid * 0.47;
+    out += mountain(FISHTAIL, fx0, fwid, fh, 0.6);
+
+    // Everest group: for the high camps, two thirds of the way up
+    const eh = unit * 0.64;
+    const ew = eh * 2;
+    const ex0 = Math.min(Math.max(maxCam * 0.1 * 0.65 + VW * 0.6 - ew / 2, fx0 + fwid * 0.8), fw - ew - 40);
+    const snows = [0.6, 0.62, 0.42];
+    EVEREST.forEach((shape, i) => (out += mountain(shape, ex0, ew, eh, snows[i])));
+    return out;
+  }
+
   function buildBackdrop() {
     const r = rng(42);
     const base = ground - VH * 0.04;
@@ -633,36 +773,118 @@ function boot() {
       const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(0)} ${p[1].toFixed(0)}`).join(" ") + " Z";
       farSvg += `<path d="${d}" fill="${fill}" stroke="#40302A" stroke-opacity=".35" stroke-width="2.2" stroke-linejoin="round"/>`;
       farSvg += `<path d="${caps.join(" ")}" fill="#FFFFFF" stroke="#40302A" stroke-opacity=".35" stroke-width="2" stroke-linejoin="round"/>`;
+      // the peaks you'd know stand between the two rows
+      if (row === 0) farSvg += landmarks(unit, base, fw);
     }
     far.style.width = `${fw}px`;
     far.innerHTML = `<svg width="${fw}" height="${VH}" viewBox="0 0 ${fw} ${VH}">${farSvg}</svg>`;
 
-    // mid: forested ridges with pine silhouettes
+    // mid: two rows of forested hills, the back row paler with distance. At
+    // Basecamp they part into a valley behind the words, so the name sits on
+    // open sky and the hills frame it instead of crowding it.
     const mw = Math.ceil(VW + maxCam * 0.3 + 300);
-    const ridge = (x: number) =>
-      base + VH * 0.05 - VH * (0.08 + 0.05 * Math.sin(x / 260) + 0.04 * Math.sin(x / 97 + 2) + 0.03 * Math.sin(x / 530 + 1));
-    let d = `M0 ${VH}`;
-    for (let x = 0; x <= mw; x += 20) d += ` L${x} ${ridge(x).toFixed(1)}`;
-    d += ` L${mw} ${VH} Z`;
-    let pines = "";
-    for (let x = 6; x < mw; x += 9 + r() * 14) {
-      const y = ridge(x) + 3;
-      const h = 14 + r() * 16;
-      pines += `M${(x - h * 0.3).toFixed(1)} ${y.toFixed(1)} L${x.toFixed(1)} ${(y - h).toFixed(1)} L${(x + h * 0.3).toFixed(1)} ${y.toFixed(1)} Z `;
-    }
+    const vc = (clearA + clearB) / 2;
+    const vw = Math.max((clearB - clearA) * 0.28, VW * 0.14);
+    const valley = (x: number) => (clearB > clearA ? Math.exp(-(((x - vc) / vw) ** 2) * 1.6) : 0);
+    const backRidge = (x: number) =>
+      base + VH * 0.05 - VH * (0.14 + 0.035 * Math.sin(x / 310 + 4) + 0.025 * Math.sin(x / 123 + 1)) * (1 - 0.45 * valley(x));
+    const frontRidge = (x: number) =>
+      base + VH * 0.05 - VH * (0.08 + 0.05 * Math.sin(x / 260) + 0.04 * Math.sin(x / 97 + 2) + 0.03 * Math.sin(x / 530 + 1)) * (1 - 0.75 * valley(x));
+    const hill = (ridge: (x: number) => number) => {
+      let d = `M0 ${VH}`;
+      for (let x = 0; x <= mw; x += 20) d += ` L${x} ${ridge(x).toFixed(1)}`;
+      return `${d} L${mw} ${VH} Z`;
+    };
+    // pines grow in groves with clearings between, tallest mid-grove
+    const grove = (ridge: (x: number) => number, hMin: number, hVar: number, phase: number) => {
+      let d = "";
+      for (let x = 6; x < mw; x += 7 + r() * 12) {
+        const g = Math.sin(x / 90 + phase) + 0.6 * Math.sin(x / 37 + phase * 3);
+        const k = smooth(clamp((g + 0.2) / 0.9, 0, 1)) * (1 - valley(x));
+        if (r() > k) continue;
+        const y = ridge(x) + 3;
+        const h = (hMin + r() * hVar) * (0.55 + 0.45 * k);
+        const w = h * 0.3;
+        // two tiers, so they read as spruce rather than sawtooth
+        d += `M${(x - w).toFixed(1)} ${y.toFixed(1)} L${(x - w * 0.45).toFixed(1)} ${(y - h * 0.45).toFixed(1)} L${(x - w * 0.7).toFixed(1)} ${(y - h * 0.45).toFixed(1)} L${x.toFixed(1)} ${(y - h).toFixed(1)} L${(x + w * 0.7).toFixed(1)} ${(y - h * 0.45).toFixed(1)} L${(x + w * 0.45).toFixed(1)} ${(y - h * 0.45).toFixed(1)} L${(x + w).toFixed(1)} ${y.toFixed(1)} Z `;
+      }
+      return d;
+    };
+    // terraced fields stepped into the slopes down in the valley, where people
+    // farm; they give out a couple of screens up the trail
+    const terraces = (ridge: (x: number) => number, gap: number, rows: number, phase: number) => {
+      let d = "";
+      const end = VW * 2.2;
+      for (let i = 1; i <= rows; i++) {
+        let on = false;
+        for (let x = 0; x <= Math.min(mw, end); x += 12) {
+          const patch = Math.sin(x / 70 + phase + i * 1.7) + 0.5 * Math.sin(x / 29 + i) > 0.15 - (1 - x / end) * 0.4;
+          const top = ridge(x);
+          const y = top + gap * i * (0.8 + 0.2 * Math.sin(x / 150 + i));
+          if (patch && y < base + VH * 0.04 && valley(x) < 0.6) {
+            d += `${on ? "L" : "M"}${x} ${y.toFixed(1)} `;
+            on = true;
+          } else on = false;
+        }
+      }
+      return d;
+    };
+    const tGap = clamp(VH * 0.024, 12, 22);
+    // low scrub on the slopes: small clumps of rounded shrubs in the hill's own
+    // green, a shade darker, so they read as part of the hill
+    const scrub = (ridge: (x: number) => number, size: number) => {
+      let d = "";
+      for (let x = 20 + r() * 40; x < mw; x += 26 + r() * 70) {
+        if (r() > 0.75 * (1 - valley(x))) continue;
+        const y0 = ridge(x) + size * (0.4 + r() * 2.2);
+        if (y0 > base + VH * 0.035) continue;
+        for (let n = 2 + Math.floor(r() * 3), bx = x; n > 0; n--) {
+          const w = size * (0.6 + r() * 0.7);
+          const h = w * (0.45 + r() * 0.15);
+          const y = y0 + (r() - 0.5) * 2;
+          d += `M${(bx - w / 2).toFixed(1)} ${y.toFixed(1)} Q ${(bx - w / 2).toFixed(1)} ${(y - h).toFixed(1)} ${bx.toFixed(1)} ${(y - h).toFixed(1)} Q ${(bx + w / 2).toFixed(1)} ${(y - h).toFixed(1)} ${(bx + w / 2).toFixed(1)} ${y.toFixed(1)} Z `;
+          bx += w * (0.45 + r() * 0.2);
+        }
+      }
+      return d;
+    };
+    const scrubSize = mobile ? 9 : clamp(VH * 0.014, 9, 15);
     mid.style.width = `${mw}px`;
-    mid.innerHTML = `<svg width="${mw}" height="${VH}" viewBox="0 0 ${mw} ${VH}">
-      <path d="${pines}" fill="#5F9978" stroke="#40302A" stroke-opacity=".3" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="${d}" fill="#7DB08F" stroke="#40302A" stroke-opacity=".35" stroke-width="2"/>
+    mid.innerHTML = `<svg width="${mw}" height="${VH}" viewBox="0 0 ${mw} ${VH}" stroke-linejoin="round" stroke-linecap="round">
+      <path d="${grove(backRidge, 12, 12, 2.1)}" fill="#8CB89B" stroke="#40302A" stroke-opacity=".2" stroke-width="1.2"/>
+      <path d="${hill(backRidge)}" fill="#A6C8AF" stroke="#40302A" stroke-opacity=".22" stroke-width="2"/>
+      <path d="${terraces(backRidge, tGap * 0.8, 3, 1.1)}" fill="none" stroke="#40302A" stroke-opacity=".15" stroke-width="1.4"/>
+      <path d="${scrub(backRidge, scrubSize * 0.7)}" fill="#97BEA2" stroke="#40302A" stroke-opacity=".12" stroke-width="1.2"/>
+      <path d="${grove(frontRidge, 18, 20, 0.4)}" fill="#5F9978" stroke="#40302A" stroke-opacity=".3" stroke-width="1.5"/>
+      <path d="${hill(frontRidge)}" fill="#7DB08F" stroke="#40302A" stroke-opacity=".35" stroke-width="2"/>
+      <path d="${terraces(frontRidge, tGap, 4, 3.4)}" fill="none" stroke="#40302A" stroke-opacity=".2" stroke-width="1.6"/>
+      <path d="${scrub(frontRidge, scrubSize)}" fill="#6FA584" stroke="#40302A" stroke-opacity=".18" stroke-width="1.4"/>
     </svg>`;
+
+    // morning mist lying in the valley at Basecamp; frame() thins it as the trail climbs
+    if (clearB > clearA) {
+      const blobs = [0.06, 0.27, 0.5, 0.72, 0.93]
+        .map((x, i) => `radial-gradient(ellipse ${20 + (i % 2) * 5}% ${55 + (i % 3) * 5}% at ${x * 100}% ${55 + ((i * 7) % 3) * 6}%, #fff 40%, transparent 72%)`)
+        .join(", ");
+      mist.style.cssText = `width:${Math.round(VW * 1.3)}px;height:${Math.round(VH * 0.15)}px;top:${Math.round(base - VH * 0.26)}px;left:${Math.round(-VW * 0.15)}px;background:${blobs}`;
+    } else mist.style.cssText = "display:none";
 
     // clouds
     const cw = Math.ceil(VW + maxCam * 0.18 + 400);
     const skyScale = clamp(VW / 1500, 1, 1.7);
-    let cl = "";
-    for (let x = 40; x < cw; x += 320 + r() * 520) {
+    const cloud = (x: number, y: number, w: number) =>
+      `<svg class="cloud" viewBox="0 0 160 70" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;width:${w.toFixed(0)}px;animation-duration:${(10 + r() * 10).toFixed(1)}s;animation-delay:${(-r() * 10).toFixed(1)}s"><use href="#s-cloud"/></svg>`;
+    // the first screen's clouds are placed so none drifts behind the name:
+    // one high on the left, one under the sun, a small one far right
+    // (on phones, just one by the sun)
+    let cl = mobile
+      ? cloud(VW * 0.58, VH * 0.15, 90)
+      : cloud(VW * 0.05, VH * 0.13, 150 * skyScale) +
+        cloud(Math.min(Math.max(nameR + 80, VW * 0.68), VW - 170 * skyScale), VH * 0.23, 190 * skyScale) +
+        cloud(VW * 0.87, VH * 0.1, 105 * skyScale);
+    for (let x = VW * 1.15; x < cw; x += 320 + r() * 520) {
       const w = ((mobile ? 90 : 120) + r() * 110) * skyScale;
-      cl += `<svg class="cloud" viewBox="0 0 160 70" style="left:${x.toFixed(0)}px;top:${(VH * (0.06 + r() * 0.26)).toFixed(0)}px;width:${w.toFixed(0)}px;animation-duration:${(10 + r() * 10).toFixed(1)}s;animation-delay:${(-r() * 10).toFixed(1)}s"><use href="#s-cloud"/></svg>`;
+      cl += cloud(x, VH * (0.06 + r() * 0.26), w);
     }
     clouds.style.width = `${cw}px`;
     clouds.innerHTML = cl;
@@ -686,6 +908,7 @@ function boot() {
         if (r() > chance) continue;
         const y = ground + 10;
         const lx = x - b0;
+        const h0 = html.length;
         if (b === "forest" || (b === "meadow" && r() < 0.55)) {
           const greens = ["#5AA884", "#4E9B78", "#66B38E", "#468F6E"];
           if (r() < 0.82) html += tree("s-pine", lx, y, (80 + r() * 110) * scale, 0.53, greens[Math.floor(r() * 4)], r);
@@ -698,6 +921,7 @@ function boot() {
           else html += tree("s-pine-snow", lx, y, (60 + r() * 60) * scale, 0.53, "#4E8F72", r);
         } else if (lvl < 0.8 && r() < 0.6) html += tree("s-pine-snow", lx, y, (70 + r() * 70) * scale, 0.53, "#4E8F72", r);
         else html += tree("s-rock-snow", lx, y - 4, (30 + r() * 46) * scale, 1.6, "#A39584", r, "tree still");
+        if (html.length > h0 && inClearing(x, treeTop)) html = html.slice(0, h0);
       }
       const el = document.createElement("div");
       el.className = "near-bucket";
@@ -1784,7 +2008,19 @@ function boot() {
 
     const farS = 1 - reveal * 0.18;
     far.style.transformOrigin = `${VW / 2 + cam * 0.1}px ${ground}px`;
-    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0) scale(${farS})`;
+    // the big peaks stand low and far at Basecamp and rise steadily with the
+    // altitude, reaching full height around High Camp
+    const rise = lerp(0.62, 1, clamp(e / (maxLevel * 0.8), 0, 1));
+    far.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0) scale(${farS}, ${(farS * rise).toFixed(4)})`;
+    // the valley mist burns off by the Trailhead
+    const near0 = smooth(clamp(cam / (L[1]?.x0 || VW), 0, 1));
+    // on a phone the band sits right under the words, so it stays lighter there
+    const mistOp = ((1 - near0) * (mobile ? 0.55 : 1)).toFixed(3);
+    if (mist.style.opacity !== mistOp) {
+      mist.style.opacity = mistOp;
+      mist.style.visibility = near0 >= 1 ? "hidden" : "";
+    }
+    if (near0 < 1) mist.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0)`;
     clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
     mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
     near.style.transform = `translate3d(${-cam * 0.6}px, 0px, 0)`;
@@ -2034,6 +2270,22 @@ function boot() {
     }, 160);
   });
   document.fonts?.ready.then(() => buildSummitFlags());
+  // the clearing is measured from the words, which change size when the web
+  // fonts swap in (fonts.ready can settle before they're even requested)
+  const intro = document.querySelector(".s-base .base");
+  if (intro && "ResizeObserver" in window) {
+    let pending = 0;
+    new ResizeObserver(() => {
+      cancelAnimationFrame(pending);
+      pending = requestAnimationFrame(() => {
+        const moved = measureClearing();
+        if (moved) {
+          buildChunks();
+          buildBackdrop();
+        }
+      });
+    }).observe(intro);
+  }
 
   // deep links: /#notes, /?at=summit, /?x=1200 (QA)
   const sp = new URLSearchParams(location.search);
