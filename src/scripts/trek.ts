@@ -2023,10 +2023,12 @@ function boot() {
     if (near0 < 1) mist.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0)`;
     clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
     mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
-    // the near tree line sits at Yakku's level; where the trail ahead drops
-    // below him (down from the summit) it drops too, so nothing floats
+    // the near tree line sits at Yakku's level; wherever the trail on screen
+    // is lower than him (behind him on a climb, ahead on the way down) it
+    // drops to that ground, so nothing floats. Over higher ground the hill
+    // just hides the trunks.
     let drop = 0;
-    for (let f = 0.35; f <= 1; f += 0.325) drop = Math.max(drop, e - elev(cam + VW * f));
+    for (let f = 0; f <= 1; f += 0.125) drop = Math.max(drop, e - elev(cam + VW * f));
     near.style.transform = `translate3d(${-cam * 0.6}px, ${drop.toFixed(1)}px, 0)`;
     front.style.transform = `translate3d(${-cam * 1.4}px, 0px, 0)`;
     const layerFade = String(1 - reveal);
