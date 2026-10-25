@@ -959,6 +959,11 @@ h3 {
   top: 0;
   height: 100%;
 }
+.near-ground {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
 .cloud {
   position: absolute;
@@ -1531,15 +1536,16 @@ h3 {
 .signpost .post {
   display: block;
   width: 1.1em;
-  height: calc(var(--yak-w, 187px) * 0.45);
-  margin-top: -0.45em;
-}
-/* at Basecamp the post never lifts the planks into the words above */
-.s-base .signpost .post {
-  height: max(30px, min(calc(var(--yak-w, 187px) * 0.45), calc(var(--sign-room, 999px) - 5.4em - 18px)));
+  /* the top 1.5em tucks up behind the lowest plank, so the two always join */
+  height: calc(var(--yak-w, 187px) * 0.45 + 1.05em);
+  margin-top: -1.5em;
   background: var(--color-wood-dark);
   border: 2.5px solid var(--ink);
   border-radius: 3px 3px 0 0;
+}
+/* at Basecamp the post never lifts the planks into the words above */
+.s-base .signpost .post {
+  height: calc(max(30px, min(var(--yak-w, 187px) * 0.45, var(--sign-room, 999px) - 5.4em - 18px)) + 1.05em);
 }
 
 .smoke circle {
@@ -2536,10 +2542,10 @@ mark.mk-teal {
     font-size: 0.7rem;
   }
   .signpost .post {
-    height: calc(var(--yak-w, 112px) * 1.05);
+    height: calc(var(--yak-w, 112px) * 1.05 + 1.05em);
   }
   .s-base .signpost .post {
-    height: max(30px, min(calc(var(--yak-w, 112px) * 1.05), calc(var(--sign-room, 999px) - 5.4em - 18px)));
+    height: calc(max(30px, min(var(--yak-w, 112px) * 1.05, var(--sign-room, 999px) - 5.4em - 18px)) + 1.05em);
   }
   .clothes-head {
     flex-direction: column;

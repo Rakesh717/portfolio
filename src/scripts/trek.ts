@@ -267,8 +267,9 @@ const LUNGTA = ["#4CC9F0", "#FFFDF6", "#EF476F", "#06D6A0", "#FFD166"];
 function mix(a: string, b: string, t: number) {
   const pa = parseInt(a.slice(1), 16);
   const pb = parseInt(b.slice(1), 16);
-  const ch = (shift: number) => Math.round(lerp((pa >> shift) & 255, (pb >> shift) & 255, t));
-  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+  const ch = (shift: number) => Math.round(lerp((pa >> shift) & 255, (pb >> shift) & 255, t)) << shift;
+  // hex, so a mix can be mixed again
+  return `#${(ch(16) | ch(8) | ch(0)).toString(16).padStart(6, "0")}`;
 }
 
 function boot() {
@@ -325,6 +326,9 @@ function boot() {
   let maxLevel = 1;
   let yakFrac = 0.16;
   let yakW = 180;
+  // trees, rocks and flags are sized like props, from Yakku's width (1 at a
+  // 1440px desktop), so they keep their size next to him on any screen
+  let scenery = 1;
   let L: Laid[] = [];
   let chunks: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
   let buckets: { el: HTMLElement; x0: number; x1: number; shown: boolean }[] = [];
@@ -342,6 +346,8 @@ function boot() {
   let nameR = 0;
   const inClearing = (x: number, top: number) => x > clearA && x < clearB && top < clearY;
   let dpr = 1;
+  // how fast the near tree line moves against the trail, across and up
+  const NEAR = 0.6;
 
   /* ---------------- geometry ---------------- */
 
@@ -394,6 +400,20 @@ function boot() {
     return L[L.length - 1].d.biome;
   }
 
+  /** the ground colour at x, blending across the climb between two biomes */
+  function bodyAt(x: number) {
+    for (let i = 0; i < L.length; i++) {
+      const s = L[i];
+      if (x <= s.x0 + s.w) {
+        if (x >= s.x0 || i === 0) return PALETTE[s.d.biome].body;
+        const p = L[i - 1];
+        const t = smooth(clamp((x - (p.x0 + p.w)) / (s.x0 - (p.x0 + p.w)), 0, 1));
+        return mix(PALETTE[p.d.biome].body, PALETTE[s.d.biome].body, t);
+      }
+    }
+    return PALETTE[L[L.length - 1].d.biome].body;
+  }
+
   const stopAt = (x: number) => L.find((s) => x >= s.x0 && x <= s.x0 + s.w) ?? null;
 
   /* ---------------- layout ---------------- */
@@ -408,6 +428,7 @@ function boot() {
     gapW = Math.round(VW * (mobile ? 0.6 : 0.4));
     yakFrac = mobile ? 0.2 : 0.15;
     yakW = mobile ? 112 : clamp(VW * 0.13, 150, 280);
+    scenery = yakW / 187;
     const totalRise = VH * (mobile ? 0.8 : 0.95);
     const altMin = data[0].altitude;
     const altMax = Math.max(...data.map((d) => d.altitude));
@@ -550,7 +571,7 @@ function boot() {
   function buildChunks() {
     chunksEl.innerHTML = "";
     chunks = [];
-    const scale = mobile ? 0.62 : clamp(VH / 900, 0.75, 1.3);
+    const scale = scenery;
     const bottom = VH * 3.5; // deep enough for the summit zoom-out
 
     L.forEach((s, i) => {
@@ -889,26 +910,47 @@ function boot() {
     clouds.style.width = `${cw}px`;
     clouds.innerHTML = cl;
 
-    // near tree line: a breezy forest that thins out as the trail climbs
-    const NEAR = 0.6;
+    // near: the mountainside just behind the trail, with a breezy forest that
+    // thins out as the trail climbs. It is the trail's own terrain seen from
+    // further back, shrunk by NEAR toward Yakku's spot, across and up, and it
+    // has its own hazy ground that runs on below the screen. frame() lifts it
+    // by NEAR x his elevation, so under him it lines up with the trail; where
+    // the trail in front is higher the hill hides its foot, and where it is
+    // lower (behind him on a climb, ahead on the way down) you see the
+    // hillside the trees stand on, never the bottom of a trunk.
     const nw = Math.ceil(VW + maxCam * NEAR + 300);
-    const scale = mobile ? 0.6 : clamp(VH / 900, 0.75, 1.25);
+    const yakSx = VW * yakFrac;
+    // where on the trail a point of the layer is seen, and the layer's ground there
+    const nearX = (x: number) => clamp((x - yakSx) / NEAR + yakSx, 0, worldW);
+    const nearY = (x: number) => ground + 9 + 3 * Math.sin(x / 140 + 1) - NEAR * elev(nearX(x));
+    const deep = ground + VH;
     near.style.width = `${nw}px`;
     near.innerHTML = "";
     buckets = [];
     const bw = Math.max(VW, 600);
-    for (let b0 = 0; b0 < nw; b0 += bw) {
-      let html = "";
-      for (let x = b0 + r() * 12; x < Math.min(b0 + bw, nw); x += 14 + r() * 22) {
-        // where on the trail this patch of forest is seen
-        const worldX = clamp((x - VW / 2) / NEAR + VW / 2, 0, worldW);
+    for (let b0 = 0, n = 0; b0 < nw; b0 += bw, n++) {
+      const b1 = Math.min(b0 + bw, nw);
+      // the hillside, tinted to the biome it is seen at and hazed with distance
+      let edge = "";
+      for (let x = b0; x <= b1 + 12; x += 12) edge += `${edge ? "L" : "M"}${(Math.min(x, b1) - b0).toFixed(0)} ${nearY(Math.min(x, b1)).toFixed(1)} `;
+      let stops = "";
+      for (let x = b0; x <= b1; x += 60) stops += `<stop offset="${((x - b0) / (b1 - b0)).toFixed(3)}" stop-color="${mix(bodyAt(nearX(x)), "#DCEBEF", 0.32)}"/>`;
+      let html = `<svg class="near-ground" width="${b1 - b0}" height="${deep}" viewBox="0 0 ${b1 - b0} ${deep}">
+        <linearGradient id="nb${n}" x1="0" x2="${b1 - b0}" y1="0" y2="0" gradientUnits="userSpaceOnUse">${stops}</linearGradient>
+        <path d="${edge} L ${b1 - b0} ${deep} L 0 ${deep} Z" fill="url(#nb${n})"/>
+        <path d="${edge}" fill="none" stroke="#40302A" stroke-opacity=".28" stroke-width="2" stroke-linejoin="round"/>
+      </svg>`;
+      for (let x = b0 + r() * 12; x < b1; x += 14 + r() * 22) {
+        const worldX = nearX(x);
         const b = biomeAt(worldX, r());
         const lvl = elev(worldX) / maxLevel;
         const chance = b === "forest" ? 0.95 : b === "meadow" ? 0.6 : b === "rock" ? 0.4 : lvl < 0.8 ? 0.3 : 0.12;
         if (r() > chance) continue;
-        const y = ground + 10;
+        // feet a little into the ground, so slopes never show a gap under them
+        const y = nearY(x) + 4;
         const lx = x - b0;
         const h0 = html.length;
+        const scale = scenery;
         if (b === "forest" || (b === "meadow" && r() < 0.55)) {
           const greens = ["#5AA884", "#4E9B78", "#66B38E", "#468F6E"];
           if (r() < 0.82) html += tree("s-pine", lx, y, (80 + r() * 110) * scale, 0.53, greens[Math.floor(r() * 4)], r);
@@ -916,19 +958,19 @@ function boot() {
         } else if (b === "meadow") html += tree("s-rhodo", lx, y, (50 + r() * 40) * scale, 1, "#77B283", r);
         else if (b === "rock") {
           const k = r();
-          if (k < 0.5) html += tree("s-rock", lx, y - 4, (30 + r() * 40) * scale, 1.6, k < 0.25 ? "#B5A898" : "#A39584", r, "tree still");
-          else if (k < 0.7) html += tree("s-cairn", lx, y - 4, (36 + r() * 24) * scale, 0.63, "", r, "tree still");
+          if (k < 0.5) html += tree("s-rock", lx, y, (30 + r() * 40) * scale, 1.6, k < 0.25 ? "#B5A898" : "#A39584", r, "tree still");
+          else if (k < 0.7) html += tree("s-cairn", lx, y, (36 + r() * 24) * scale, 0.63, "", r, "tree still");
           else html += tree("s-pine-snow", lx, y, (60 + r() * 60) * scale, 0.53, "#4E8F72", r);
         } else if (lvl < 0.8 && r() < 0.6) html += tree("s-pine-snow", lx, y, (70 + r() * 70) * scale, 0.53, "#4E8F72", r);
-        else html += tree("s-rock-snow", lx, y - 4, (30 + r() * 46) * scale, 1.6, "#A39584", r, "tree still");
+        else html += tree("s-rock-snow", lx, y, (30 + r() * 46) * scale, 1.6, "#A39584", r, "tree still");
         if (html.length > h0 && inClearing(x, treeTop)) html = html.slice(0, h0);
       }
       const el = document.createElement("div");
       el.className = "near-bucket";
-      el.style.cssText = `left:${b0}px;width:${bw}px`;
+      el.style.cssText = `left:${b0}px;width:${b1 - b0}px`;
       el.innerHTML = html;
       near.appendChild(el);
-      buckets.push({ el, x0: b0, x1: b0 + bw, shown: true });
+      buckets.push({ el, x0: b0, x1: b1, shown: true });
     }
 
     // stars
@@ -2023,13 +2065,10 @@ function boot() {
     if (near0 < 1) mist.style.transform = `translate3d(${-cam * 0.1}px, ${e * 0.3}px, 0)`;
     clouds.style.transform = `translate3d(${-cam * 0.18}px, ${e * 0.4}px, 0)`;
     mid.style.transform = `translate3d(${-cam * 0.3}px, ${e * 0.6}px, 0)`;
-    // the near tree line sits at Yakku's level; wherever the trail on screen
-    // is lower than him (behind him on a climb, ahead on the way down) it
-    // drops to that ground, so nothing floats. Over higher ground the hill
-    // just hides the trunks.
-    let drop = 0;
-    for (let f = 0; f <= 1; f += 0.125) drop = Math.max(drop, e - elev(cam + VW * f));
-    near.style.transform = `translate3d(${-cam * 0.6}px, ${drop.toFixed(1)}px, 0)`;
+    // the near hillside carries the trail's terrain at its own depth (see
+    // buildBackdrop), so it moves NEAR as far as the trail in both directions
+    // and meets it under Yakku's feet
+    near.style.transform = `translate3d(${-cam * NEAR}px, ${e * NEAR}px, 0)`;
     front.style.transform = `translate3d(${-cam * 1.4}px, 0px, 0)`;
     const layerFade = String(1 - reveal);
     mid.style.opacity = layerFade;
@@ -2039,7 +2078,7 @@ function boot() {
     if (trailmap.classList.contains("show") && (!shot || shot.kind !== "reveal" || shot.cancelAt !== undefined)) hideTrailmap();
 
     for (const b of buckets) {
-      const show = b.x1 > cam * 0.6 - 200 && b.x0 < cam * 0.6 + VW + 200;
+      const show = b.x1 > cam * NEAR - 200 && b.x0 < cam * NEAR + VW + 200;
       if (show !== b.shown) {
         b.shown = show;
         b.el.style.display = show ? "" : "none";

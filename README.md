@@ -53,6 +53,13 @@ npm run build      # static build in dist/
   and pauses it, Esc stops it.
 - **Quick walk:** W takes Yakku back to the trailhead and walks him the whole
   trail to night camp, with no reading stops and no quips. Any key or scroll stops it.
+- **Depth:** behind the trail, the near tree line stands on its own hazy
+  hillside, which is the trail's terrain seen from further back (shrunk
+  toward Yakku's spot by the layer's parallax, across and up), so on climbs
+  and descents the trees always have ground under them. The ridges and peaks
+  further back are filled silhouettes that sink as you climb above them.
+  Trees, rocks and flags are sized from Yakku's width, like the props on the
+  stops.
 - **Foreground:** blurred grass, branches, rocks and snow drifts pass in front
   of the camera for depth.
 - **Basecamp clearing:** on the first screen nothing tall grows behind the
