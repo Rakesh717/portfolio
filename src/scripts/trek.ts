@@ -287,9 +287,8 @@ function boot() {
   const mid = $("#layer-mid");
   const near = $("#layer-near");
   const front = $("#layer-front");
-  const fog = $("#fog");
-  const fogBank = $("#fog-bank");
-  const fogWisps = [...fogBank.querySelectorAll<HTMLElement>("i")];
+  const fog = $<HTMLCanvasElement>("#fog");
+  const fogCtx = fog.getContext("2d")!;
   const prints = $("#prints") as unknown as SVGSVGElement;
   const trailmap = $("#trailmap");
   const trailmapSvg = $("#trailmap-svg") as unknown as SVGSVGElement;
@@ -311,6 +310,12 @@ function boot() {
 
   let VW = 0;
   let VH = 0;
+  // the scroll position, kept from scroll events: reading window.scrollY in the
+  // frame loop forces a style and layout pass (the yak's SVG legs animate on the
+  // main thread, so style is always dirty there), and the frame's own writes then
+  // cost a second one before paint
+  let scrollPos = window.scrollY;
+  window.addEventListener("scroll", () => (scrollPos = window.scrollY), { passive: true });
   let mobile = false;
   let ground = 0;
   let gapW = 0;
@@ -440,6 +445,7 @@ function boot() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(VW * dpr);
     canvas.height = Math.round(VH * dpr);
+    buildFog();
 
     buildChunks();
     buildBackdrop();
@@ -760,6 +766,157 @@ function boot() {
       li.style.left = `${(x / worldW) * 100}%`;
       li.style.top = `${((27 - (s.level / maxLevel) * 23) / 30) * 100}%`;
     });
+  }
+
+  /* ---------------- cloud bank ---------------- */
+
+  // A bank three viewports wide: billowy leading edge, a solid core the width
+  // of the screen, billowy trailing edge, with wisps streaming through it. It
+  // is all soft gradients, so it's painted once per layout into small bitmaps
+  // and composited on a low-res canvas each frame that the browser scales up.
+  // Repainting a masked, three-viewport layer every frame lagged on phones.
+  type Wisp = { alpha: number; dur: number; rev: boolean; blobs: [number, number, number, number, string][] };
+  // [radius x, radius y, centre x, centre y] as fractions of a one-viewport tile
+  const WISPS: Wisp[] = [
+    {
+      alpha: 1,
+      dur: 11,
+      rev: false,
+      blobs: [
+        [0.28, 0.2, 0.18, 0.2, "255,255,255,0.9"],
+        [0.32, 0.24, 0.62, 0.48, "255,255,255,0.85"],
+        [0.26, 0.2, 0.3, 0.85, "255,255,255,0.9"],
+        [0.22, 0.16, 0.88, 0.82, "255,255,255,0.85"],
+      ],
+    },
+    {
+      alpha: 0.75,
+      dur: 15,
+      rev: true,
+      blobs: [
+        [0.36, 0.14, 0.4, 0.14, "232,238,245,0.9"],
+        [0.3, 0.18, 0.08, 0.58, "240,244,249,0.85"],
+        [0.34, 0.16, 0.75, 0.72, "236,241,247,0.9"],
+      ],
+    },
+    {
+      // low, dense foreground scud that rushes past
+      alpha: 0.9,
+      dur: 7,
+      rev: false,
+      blobs: [
+        [0.3, 0.22, 0.2, 0.96, "255,255,255,0.95"],
+        [0.24, 0.18, 0.7, 1, "255,255,255,0.95"],
+        [0.14, 0.3, 0.96, 0.4, "255,255,255,0.7"],
+      ],
+    },
+  ];
+  // billows on the bank's edges: [x, y, w, h] as in CSS background-position / size
+  const BILLOWS = [
+    [0.17, 0.22, 0.16, 0.38],
+    [0.21, 0.62, 0.14, 0.34],
+    [0.13, 0.92, 0.18, 0.4],
+    [0.81, 0.18, 0.15, 0.36],
+    [0.85, 0.56, 0.17, 0.4],
+    [0.79, 0.9, 0.14, 0.34],
+  ];
+  let fogS = 1; // canvas px per css px
+  let fogMask: HTMLCanvasElement | null = null;
+  let fogPats: CanvasPattern[] = [];
+  let fogTileW = 1; // css px per wisp tile, after rounding to whole canvas px
+
+  function softEllipse(c: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, rgba: string, from = 0) {
+    c.save();
+    c.translate(x, y);
+    c.scale(rx, ry);
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, 1);
+    const [r, gg, b, a] = rgba.split(",");
+    g.addColorStop(from, `rgba(${r},${gg},${b},${a})`);
+    g.addColorStop(1, `rgba(${r},${gg},${b},0)`);
+    c.fillStyle = g;
+    c.fillRect(-1, -1, 2, 2);
+    c.restore();
+  }
+
+  function buildFog() {
+    fogS = Math.min(0.5, 480 / VW);
+    fog.width = Math.max(1, Math.round(VW * fogS));
+    fog.height = Math.max(1, Math.round(VH * fogS));
+    const tw = Math.max(1, Math.round(VW * fogS));
+    const th = Math.max(1, Math.round(VH * 1.24 * fogS));
+    fogTileW = tw / fogS;
+
+    // the bank's shape: faded ends plus billows, as an alpha mask
+    const m = document.createElement("canvas");
+    m.width = tw * 3;
+    m.height = th;
+    const mc = m.getContext("2d")!;
+    const lg = mc.createLinearGradient(0, 0, m.width, 0);
+    lg.addColorStop(0.04, "rgba(0,0,0,0)");
+    lg.addColorStop(0.29, "#000");
+    lg.addColorStop(0.71, "#000");
+    lg.addColorStop(0.96, "rgba(0,0,0,0)");
+    mc.fillStyle = lg;
+    mc.fillRect(0, 0, m.width, m.height);
+    for (const [px, py, sw, sh] of BILLOWS) {
+      const w = sw * m.width;
+      const h = sh * m.height;
+      softEllipse(mc, (m.width - w) * px + w / 2, (m.height - h) * py + h / 2, w / 2, h / 2, "0,0,0,1", 0.4);
+    }
+    fogMask = m;
+
+    // wisp tiles, painted wrapped around the edges so they repeat without seams
+    fogPats = WISPS.map((wisp) => {
+      const t = document.createElement("canvas");
+      t.width = tw;
+      t.height = th;
+      const tc = t.getContext("2d")!;
+      for (const [rx, ry, cx, cy, col] of [...wisp.blobs].reverse()) {
+        for (const k of [-1, 0, 1]) softEllipse(tc, (cx + k) * tw, cy * th, rx * tw, ry * th, col);
+      }
+      return fogCtx.createPattern(t, "repeat-x")!;
+    });
+  }
+
+  function drawFog(bankX: number, now: number) {
+    if (!fogMask) return;
+    const c = fogCtx;
+    const s = fogS;
+    const x0 = bankX * s;
+    const y0 = -0.12 * VH * s;
+    const w = fogMask.width;
+    const h = fogMask.height;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalCompositeOperation = "source-over";
+    c.globalAlpha = 1;
+    c.clearRect(0, 0, fog.width, fog.height);
+    c.save();
+    c.beginPath();
+    c.rect(x0, y0, w, h);
+    c.clip();
+    const bg = c.createLinearGradient(0, y0, 0, y0 + h);
+    bg.addColorStop(0, "rgba(238,243,248,0.82)");
+    bg.addColorStop(0.65, "rgba(250,251,252,0.97)");
+    c.fillStyle = bg;
+    c.fillRect(0, 0, fog.width, fog.height);
+    // wisps stream past faster than the bank, nearer layers faster still,
+    // and bob a little on their own
+    WISPS.forEach((wisp, i) => {
+      const off = (cam * (0.25 + i * 0.35)) % fogTileW;
+      const ph = (now / 1000 / wisp.dur) % 2;
+      let p = ph < 1 ? ph : 2 - ph;
+      if (wisp.rev) p = 1 - p;
+      const ty = y0 - 0.03 * h * smooth(p);
+      fogPats[i].setTransform(new DOMMatrix([1, 0, 0, 1, x0 - off * s, ty]));
+      c.globalAlpha = wisp.alpha;
+      c.fillStyle = fogPats[i];
+      c.fillRect(0, ty, fog.width, h);
+    });
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = "destination-in";
+    c.drawImage(fogMask, x0, y0);
+    c.restore();
+    c.globalCompositeOperation = "source-over";
   }
 
   /* ---------------- weather ---------------- */
@@ -1250,11 +1407,11 @@ function boot() {
     if (t.phase === "walk") {
       if (tween) return;
       // something cut the walk short (a stray key, a tap): carry on walking
-      if (Math.abs(window.scrollY - t.to) > 3) return tourWalk(t);
+      if (Math.abs(scrollPos - t.to) > 3) return tourWalk(t);
       tourRead(t);
     }
     // they scrolled off on their own: hand them the controls
-    if (Math.abs(window.scrollY - t.to) > 40) return pauseTour();
+    if (Math.abs(scrollPos - t.to) > 40) return pauseTour();
     const before = t.t;
     t.t += dt * 1000;
     for (const c of t.cues) if (c.at >= before && c.at < t.t) speak(c.text, c.ms);
@@ -1295,7 +1452,7 @@ function boot() {
   function resumeTour() {
     if (!tour) return startTour();
     // still on the page we paused on: finish reading it; wandered off: carry on from there
-    if (tour.phase === "read" && Math.abs(window.scrollY - tour.to) <= 40) {
+    if (tour.phase === "read" && Math.abs(scrollPos - tour.to) <= 40) {
       tourPaused = false;
       setTourUi();
     } else startTour();
@@ -1588,12 +1745,13 @@ function boot() {
 
     if (tween) {
       const p = clamp((now - tween.t0) / tween.dur, 0, 1);
-      window.scrollTo(0, lerp(tween.from, tween.to, (tween.ease ?? easeInOut)(p)));
+      scrollPos = clamp(lerp(tween.from, tween.to, (tween.ease ?? easeInOut)(p)), 0, maxCam);
+      window.scrollTo(0, scrollPos);
       if (p >= 1) tween = null;
     }
     tourTick(tourDt);
 
-    const target = clamp(window.scrollY, 0, maxCam);
+    const target = clamp(scrollPos, 0, maxCam);
     const prev = cam;
     cam += (target - cam) * (1 - Math.exp(-7 * dt));
     if (Math.abs(target - cam) < 0.3) cam = target;
@@ -1727,7 +1885,7 @@ function boot() {
           confetti();
           sound.chime();
           window.setTimeout(() => {
-            if (revealDue() && stopAt(cam + VW * yakFrac)?.d.id === "summit" && Math.abs(window.scrollY - cam) < 4) startReveal();
+            if (revealDue() && stopAt(cam + VW * yakFrac)?.d.id === "summit" && Math.abs(scrollPos - cam) < 4) startReveal();
           }, 1700);
         }
       }
@@ -1773,14 +1931,9 @@ function boot() {
     const fogOn = fogK > 0.001;
     if (fogOn) {
       const slide = Math.sign(fogP) * smooth(clamp((Math.abs(fogP) - 0.3) / 0.7, 0, 1));
-      fogBank.style.transform = `translate3d(${(-VW * (1 + 2 * slide)).toFixed(1)}px, 0, 0)`;
-      // wisps stream past faster than the bank, nearer layers faster still;
-      // they're one tile (VW) wider than the bank so the wrap is seamless
-      fogWisps.forEach((w, i) => {
-        const off = (cam * (0.25 + i * 0.35)) % VW;
-        w.style.translate = `${(VW - off).toFixed(1)}px 0`;
-      });
-      fog.style.opacity = (0.94 * (1 - reveal)).toFixed(3);
+      drawFog(-VW * (1 + 2 * slide), now);
+      const op = (0.94 * (1 - reveal)).toFixed(3);
+      if (fog.style.opacity !== op) fog.style.opacity = op;
     }
     if (fogOn !== fogShown) {
       fogShown = fogOn;
