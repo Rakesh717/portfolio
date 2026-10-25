@@ -2610,13 +2610,6 @@ mark.mk-teal {
     --rope: 96px;
     margin: 0;
   }
-  .clothes::before {
-    display: none;
-  }
-  .rope {
-    left: -40px;
-    width: calc(100% + 33px);
-  }
   .postcards {
     left: 2rem;
     right: 2rem;
@@ -2684,14 +2677,6 @@ mark.mk-teal {
   .postcards {
     justify-content: flex-start;
     gap: 1.6rem;
-  }
-  /* the line hangs between two poles here, as on desktop */
-  .clothes::before {
-    display: block;
-  }
-  .rope {
-    left: 7px;
-    width: calc(100% - 14px);
   }
   /* two postcards fit across the screen when Yakku arrives, the third comes
      into view as he walks on */
